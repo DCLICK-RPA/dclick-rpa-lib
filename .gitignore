@@ -1,0 +1,23 @@
+# python cache
+**/__pycache__
+
+# log / configfile / sqlite
+**.log
+/logs
+**.ini
+**.sqlite
+
+# pyinstaller / build
+/build
+/dist
+**.egg-info
+
+# uv
+uv.lock
+.python-version
+
+# venv
+*venv
+
+# teste
+teste.py

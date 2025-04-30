@@ -1,0 +1,1 @@
+## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
