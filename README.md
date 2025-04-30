@@ -33,7 +33,7 @@ Exemplo:
 
 > **Manual**  
 Utilizar o comando `uv build --wheel`.  
-Irá ser criado no diretório `./build` o arquivo **.whl** com a versão atual.  
+Irá ser criado no diretório `./dist` o arquivo **.whl** com a versão atual.  
 Abrir a página `releases` do github e realizar o upload do arquivo no release correto para a versão atual
 
 > **Automático**  
