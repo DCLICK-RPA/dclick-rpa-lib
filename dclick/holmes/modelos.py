@@ -5,6 +5,7 @@ from typing import Any, Callable, Literal
 # externo
 from bot.util import normalizar
 from bot.sistema import Caminho
+from bot.tipagem import SupportsBool
 
 class DocTaskV2:
     id: str
@@ -24,7 +25,7 @@ class DocTaskV2:
     def __hash__ (self) -> int:
         return hash(self.id)
 
-    def obter_prop (self, filtro: Callable[[dict[str, Any]], bool]) -> dict[str, Any] | None:
+    def obter_prop (self, filtro: Callable[[dict[str, Any]], bool | SupportsBool]) -> dict[str, Any] | None:
         """Obter o prop da `DoctTask` se estiver de acordo com o `filtro`
         - `None` caso não encontre"""
         for prop in (self.props or []):
@@ -82,7 +83,7 @@ class Tarefa:
             for nome in nomes
         )
 
-    def obter_acao (self, filtro: Callable[[Action], bool]) -> Action:
+    def obter_acao (self, filtro: Callable[[Action], bool | SupportsBool]) -> Action:
         """Obter a ação da `tarefa` se estiver de acordo com o `filtro`
         - `Exception` caso não encontre
         - Utilizar `possui_acoes()` para validação"""
@@ -92,7 +93,7 @@ class Tarefa:
             except: pass
         raise Exception("Nenhuma ação encontrada para o filtro informado")
 
-    def obter_propriedade (self, filtro: Callable[[Property], bool]) -> Property | None:
+    def obter_propriedade (self, filtro: Callable[[Property], bool | SupportsBool]) -> Property | None:
         """Obter a propriedade da `tarefa` se estiver de acordo com o `filtro`
         - `None` caso não encontre"""
         for propriedade in self.properties:
@@ -100,7 +101,7 @@ class Tarefa:
                 if filtro(propriedade): return propriedade
             except: pass
 
-    def obter_documento (self, filtro: Callable[[Document], bool]) -> Document | None:
+    def obter_documento (self, filtro: Callable[[Document], bool | SupportsBool]) -> Document | None:
         """Obter o documento da `tarefa` se estiver de acordo com o `filtro`
         - `None` caso não encontre"""
         for document in self.documents:
@@ -108,7 +109,7 @@ class Tarefa:
                 if filtro(document): return document
             except: pass
 
-    def obter_tabela (self, filtro: Callable[[Table], bool]) -> Table | None:
+    def obter_tabela (self, filtro: Callable[[Table], bool | SupportsBool]) -> Table | None:
         """Obter a tabela da `tarefa` se estiver de acordo com o `filtro`
         - `None` caso não encontre"""
         for table in self.tables:

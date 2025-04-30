@@ -89,7 +89,7 @@ class QueryTaskV2:
 
     def paginar_query (
             self,
-            filtro: Callable[[modelos.DocTaskV2], bool] | None = None,
+            filtro: Callable[[modelos.DocTaskV2], bool | bot.tipagem.SupportsBool] | None = None,
             limite = 50,
         ) -> Generator[modelos.DocTaskV2, None, None]:
         """Realizar a consulta da query com paginação até a quantidade `limite`
@@ -115,7 +115,7 @@ class QueryTaskV2:
 
     def paginar_tarefas_query (
             self,
-            filtro: Callable[[modelos.Tarefa], bool] | None = None,
+            filtro: Callable[[modelos.Tarefa], bool | bot.tipagem.SupportsBool] | None = None,
             limite = 50,
         ) -> Generator[modelos.Tarefa, None, None]:
         """Realizar a consulta das tarefas da query com paginação até a quantidade `limite`
