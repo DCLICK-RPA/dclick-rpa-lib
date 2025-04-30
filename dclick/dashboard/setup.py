@@ -29,7 +29,6 @@ def gravar_transacao (
     )
 
     assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
-    bot.logger.informar(f"Transação gravada com sucesso")
 
 __all__ = [
     "gravar_transacao"
