@@ -41,3 +41,56 @@ Pendente
 
 ## Descrição breve dos pacotes com algumas funcionalidades
 Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e classes disponíveis para um melhor contexto
+
+### `dashboard`
+Pacote destinado ao dashboard da DClick
+```python
+# Gravar transação na dashboard com os dados para a automação `codigo_automacao`
+# `codigo_automacao` obtido do arquivo .ini
+gravar_transacao (
+    chave: str,
+    identificador: str,
+    mensagem: str = "",
+    data_hora: Datetime | None = None
+) -> None
+```
+
+### `email`
+Pacote destinado ao envio de e-mail
+```python
+# Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - tipo`
+notificar_email_simples (
+    nome_bot: str,
+    tipo: Literal["sucesso", "erro"],
+    *mensagem: str,
+    anexar_log: bool = True,
+    anexos: list[bot.sistema.Caminho] | None = None,
+    destinatarios: list[bot.tipagem.email] | None = None,
+) -> None:
+```
+
+### `holmes`
+Pacote destinado a API do Holmes  
+Retorna classes com propriedades esperadas do endpoint
+```python
+# Classe para realizar a construção da Query das tasks e iteração sobre os resultados obtidos
+# Customizável via arquivo .ini
+QueryTaskV2()
+    # Consultar a query e obter o resultado
+    .consultar() -> modelos.QueryRaizTaskV2
+    # Realizar a consulta da query com paginação até a quantidade `limite`
+    # Filtro para se obter apenas as tarefas desejadas
+    .paginar_query(
+        filtro = lambda item: bool,
+        limite = 50
+    ) -> Generator[modelos.DocTaskV2]
+    # Realizar a consulta das tarefas da query com paginação até a quantidade `limite`
+    # Filtro para se obter apenas as tarefas desejadas
+    .paginar_tarefas_query(
+        filtro = lambda tarefa: bool,
+        limite = 50
+    ) -> Generator[modelos.Tarefa]
+
+# Consultar a tarefa `id_tarefa`
+consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
+```
