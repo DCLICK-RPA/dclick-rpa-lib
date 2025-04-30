@@ -124,7 +124,7 @@ class QueryTaskV2:
         def filtro_query (doc: modelos.DocTaskV2) -> bool:
             nonlocal tarefa, filtro
             tarefa = consultar_tarefa(doc.id)
-            try: return filtro(tarefa) if filtro else True
+            try: return bool(filtro(tarefa) if filtro else True)
             except: return False
 
         for _ in self.paginar_query(filtro_query, limite):
