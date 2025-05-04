@@ -21,7 +21,7 @@ class QueryTaskV2:
     """Classe para realizar a construção da Query das tasks e iteração sobre os resultados obtidos
     - Versão `v2` do `/search`
     - Variáveis utilizadas `[holmes] -> "host", "token"`
-    - Variáveis dinâmicas para aplicação dos termos conforme seção `[holmes.QueryTask.termos]`
+    - Variáveis dinâmicas para aplicação dos termos conforme seção `[holmes.QueryTaskV2.termos]`
         - `{ "field": "nome_opção", "type": "is", "value": "valor_opção"` }"""
 
     _from: int = 0
@@ -31,7 +31,7 @@ class QueryTaskV2:
     terms: list[dict[str, str]]
 
     def __init__ (self) -> None:
-        secao = "holmes.QueryTask.termos"
+        secao = "holmes.QueryTaskV2.termos"
         opcoes = bot.configfile.opcoes_secao(secao) if bot.configfile.possui_secao(secao) else []
         self.terms = [
             {
@@ -71,17 +71,13 @@ class QueryTaskV2:
         self.terms.append(kwargs)
         return self
 
-    def adicionar_termo_status (self, value="opened") -> Self:
-        """Adicionar o termo de filtro `status=value`"""
-        return self.adicionar_termo(field="status", type="is", value=value)
-
-    def consultar (self) -> modelos.QueryRaizTaskV2:
+    def consultar (self) -> modelos.RaizQueryTaskV2:
         """Realizar a consulta da query conforme `query_body`"""
         bot.logger.informar("Procurando por tarefas no Holmes")
         response = client_singleton().post("/v2/search", json=self.query_body)
 
         assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
-        raiz, erro = bot.formatos.Unmarshaller(modelos.QueryRaizTaskV2).parse(response.json())
+        raiz, erro = bot.formatos.Unmarshaller(modelos.RaizQueryTaskV2).parse(response.json())
         assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
 
         bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' tarefa(s) de um total de '{raiz.total}'")
@@ -89,9 +85,9 @@ class QueryTaskV2:
 
     def paginar_query (
             self,
-            filtro: Callable[[modelos.DocTaskV2], bool | bot.tipagem.SupportsBool] | None = None,
+            filtro: Callable[[modelos.DocQueryTaskV2], bool | bot.tipagem.SupportsBool] | None = None,
             limite = 50,
-        ) -> Generator[modelos.DocTaskV2, None, None]:
+        ) -> Generator[modelos.DocQueryTaskV2, None, None]:
         """Realizar a consulta da query com paginação até a quantidade `limite`
         - `filtro` para obter apenas tarefas que satisfaçam a condição informada"""
         assert limite >= 1, f"Limite '{limite}' inválido"
@@ -121,7 +117,7 @@ class QueryTaskV2:
         """Realizar a consulta das tarefas da query com paginação até a quantidade `limite`
         - `filtro` para obter apenas tarefas que satisfaçam a condição informada"""
         tarefa = modelos.Tarefa()
-        def filtro_query (doc: modelos.DocTaskV2) -> bool:
+        def filtro_query (doc: modelos.DocQueryTaskV2) -> bool:
             nonlocal tarefa, filtro
             tarefa = consultar_tarefa(doc.id)
             try: return bool(filtro(tarefa) if filtro else True)
@@ -129,6 +125,108 @@ class QueryTaskV2:
 
         for _ in self.paginar_query(filtro_query, limite):
             yield tarefa
+
+class QueryDocumentV2:
+    """Classe para realizar a construção da Query dos documents e iteração sobre os resultados obtidos
+    - Versão `v2` do `/search`
+    - Variáveis utilizadas `[holmes] -> "host", "token"`
+    - Variáveis dinâmicas para aplicação dos termos conforme seção `[holmes.QueryDocumentV2.termos]`
+        - `{ "field": "nome_opção", "type": "is", "value": "valor_opção"` }"""
+
+    _from: int = 0
+    size: int = 50
+    sort: str = "updated_at"
+    order: Literal["asc", "desc"] = "desc"
+    terms: list[dict[str, str]]
+
+    def __init__ (self) -> None:
+        secao = "holmes.QueryDocumentV2.termos"
+        opcoes = bot.configfile.opcoes_secao(secao) if bot.configfile.possui_secao(secao) else []
+        self.terms = [
+            {
+                "field": opcao,
+                "type": "is",
+                "value": bot.configfile.obter_opcao_ou(secao, opcao)
+            }
+            for opcao in opcoes
+        ]
+
+    @property
+    def query_body (self) -> dict:
+        """Body de requisição. Alterar as propriedades abaixo no `self` para alteração
+        - `_from, size` início e fim da janela de quantidade de itens máximos no retorno
+        - `sort` campo que será feito o sort
+        - `order` ordem que será feito o sort
+        - `terms` termos de filtro do resultado"""
+        return {
+            "query": {
+                "context": "document",
+                "from": self._from,
+                "size": self.size,
+                "sort": self.sort,
+                "order": self.order,
+                "groups": [
+                    {
+                        "terms": self.terms
+                    }
+                ]
+            }
+        }
+
+    def adicionar_termo (self, **kwargs: str) -> Self:
+        """Adicionar termo de filtro no `terms`
+        - Informar no `kwargs` os campos e seus valores
+        - Exemplo: `adicionar_termo(field="status", type="is", value="opened")`"""
+        self.terms.append(kwargs)
+        return self
+
+    def consultar (self) -> modelos.RaizQueryDocumentV2:
+        """Realizar a consulta da query conforme `query_body`"""
+        bot.logger.informar("Procurando por documentos no Holmes")
+        response = client_singleton().post("/v2/search", json=self.query_body)
+
+        assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
+        raiz, erro = bot.formatos.Unmarshaller(modelos.RaizQueryDocumentV2).parse(response.json())
+        assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+
+        bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' documento(s) de um total de '{raiz.total}'")
+        return raiz
+
+    def paginar_query (
+            self,
+            filtro: Callable[[modelos.DocQueryDocumentV2], bool | bot.tipagem.SupportsBool] | None = None,
+            limite = 50,
+        ) -> Generator[modelos.DocQueryDocumentV2, None, None]:
+        """Realizar a consulta da query com paginação até a quantidade `limite`
+        - `filtro` para obter apenas documentos que satisfaçam a condição informada"""
+        assert limite >= 1, f"Limite '{limite}' inválido"
+
+        filtro = filtro or (lambda t: True)
+        while limite > 0:
+            docs = self.consultar().docs
+            quantidade = len(docs)
+            self._from += quantidade
+
+            for doc in docs:
+                if limite <= 0: break
+                try:
+                    if filtro(doc):
+                        limite -= 1
+                        yield doc
+                except: pass
+
+            # não há mais páginação
+            if quantidade < self.size: break
+
+    def paginar_documentos_query (
+            self,
+            filtro: Callable[[modelos.DocQueryDocumentV2], bool | bot.tipagem.SupportsBool] | None = None,
+            limite = 50,
+        ) -> Generator[modelos.Documento, None, None]:
+        """Realizar a consulta dos documentos da query com paginação até a quantidade `limite`
+        - `filtro` para obter apenas documentos que satisfaçam a condição informada"""
+        for doc in self.paginar_query(filtro, limite):
+            yield consultar_documento(doc.document_id)
 
 def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     """Consultar a tarefa `id_tarefa`
@@ -142,7 +240,7 @@ def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
 
     return tarefa
 
-def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.DocumentoTarefa:
+def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento` da tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
     bot.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
@@ -150,7 +248,17 @@ def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Do
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
     assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
 
-    return modelos.DocumentoTarefa(response.content, dict(response.headers))
+    return modelos.Documento(response.content, dict(response.headers))
+
+def consultar_documento (id_documento: str) -> modelos.Documento:
+    """Consultar o documento `id_documento`
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Consultando documento({id_documento}) no Holmes")
+
+    response = client_singleton().get(f"/v1/documents/{id_documento}/download")
+    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+
+    return modelos.Documento(response.content, dict(response.headers))
 
 def consultar_processo (id_processo: str) -> modelos.Processo:
     """Consultar o processo `id_processo`
@@ -240,9 +348,11 @@ def assumir_tarefa (id_tarefa: str) -> None:
 __all__ = [
     "QueryTaskV2",
     "assumir_tarefa",
+    "QueryDocumentV2",
     "consultar_tarefa",
     "tomar_acao_tarefa",
     "consultar_processo",
+    "consultar_documento",
     "consultar_documento_tarefa",
     "consultar_detalhes_processo",
     "consultar_itens_tabela_tarefa",
