@@ -7,7 +7,7 @@ from bot.util import normalizar
 from bot.sistema import Caminho
 from bot.tipagem import SupportsBool
 
-class DocTaskV2:
+class DocQueryTaskV2:
     id: str
     name: str
     type: Literal["task"]
@@ -33,10 +33,39 @@ class DocTaskV2:
                 if filtro(prop): return prop
             except: pass
 
-class QueryRaizTaskV2:
+class RaizQueryTaskV2:
     total: int
     type: Literal["task"]
-    docs: list[DocTaskV2]
+    docs: list[DocQueryTaskV2]
+
+class DocQueryDocumentV2:
+    document_id: str
+    type: Literal["document"]
+    nature_id: str
+    nature_name: str
+    file_name: str
+    ext: str
+    name: str
+    props: list[dict[str, Any]] | None
+
+    def __eq__ (self, other: object) -> bool:
+        return isinstance(other, type(self)) and self.document_id == other.document_id
+
+    def __hash__ (self) -> int:
+        return hash(self.document_id)
+
+    def obter_prop (self, filtro: Callable[[dict[str, Any]], bool | SupportsBool]) -> dict[str, Any] | None:
+        """Obter o prop da `DoctTask` se estiver de acordo com o `filtro`
+        - `None` caso não encontre"""
+        for prop in (self.props or []):
+            try:
+                if filtro(prop): return prop
+            except: pass
+
+class RaizQueryDocumentV2:
+    total: int
+    type: Literal["document"]
+    docs: list[DocQueryDocumentV2]
 
 class Action:
     id: str
@@ -117,7 +146,7 @@ class Tarefa:
                 if filtro(table): return table
             except: pass
 
-class DocumentoTarefa:
+class Documento:
 
     conteudo: bytes
     """Conteúdo do documento em bytes"""
