@@ -77,13 +77,13 @@ Retorna classes com propriedades esperadas do endpoint
 # Customizável via arquivo .ini
 QueryTaskV2()
     # Consultar a query e obter o resultado
-    .consultar() -> modelos.QueryRaizTaskV2
+    .consultar() -> modelos.RaizQueryTaskV2
     # Realizar a consulta da query com paginação até a quantidade `limite`
     # Filtro para se obter apenas as tarefas desejadas
     .paginar_query(
         filtro = lambda item: bool,
         limite = 50
-    ) -> Generator[modelos.DocTaskV2]
+    ) -> Generator[modelos.DocQueryTaskV2]
     # Realizar a consulta das tarefas da query com paginação até a quantidade `limite`
     # Filtro para se obter apenas as tarefas desejadas
     .paginar_tarefas_query(
