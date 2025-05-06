@@ -104,7 +104,7 @@ class QueryTaskV2:
                     if filtro(doc):
                         limite -= 1
                         yield doc
-                except: pass
+                except Exception: pass
 
             # não há mais páginação
             if quantidade < self.size: break
@@ -121,7 +121,7 @@ class QueryTaskV2:
             nonlocal tarefa, filtro
             tarefa = consultar_tarefa(doc.id)
             try: return bool(filtro(tarefa) if filtro else True)
-            except: return False
+            except Exception: return False
 
         for _ in self.paginar_query(filtro_query, limite):
             yield tarefa
@@ -213,7 +213,7 @@ class QueryDocumentV2:
                     if filtro(doc):
                         limite -= 1
                         yield doc
-                except: pass
+                except Exception: pass
 
             # não há mais páginação
             if quantidade < self.size: break

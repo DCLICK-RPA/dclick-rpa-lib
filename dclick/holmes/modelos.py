@@ -31,7 +31,7 @@ class DocQueryTaskV2:
         for prop in (self.props or []):
             try:
                 if filtro(prop): return prop
-            except: pass
+            except Exception: pass
 
 class RaizQueryTaskV2:
     total: int
@@ -60,7 +60,7 @@ class DocQueryDocumentV2:
         for prop in (self.props or []):
             try:
                 if filtro(prop): return prop
-            except: pass
+            except Exception: pass
 
 class RaizQueryDocumentV2:
     total: int
@@ -119,7 +119,7 @@ class Tarefa:
         for action in self.actions:
             try: 
                 if filtro(action): return action
-            except: pass
+            except Exception: pass
         raise Exception("Nenhuma ação encontrada para o filtro informado")
 
     def obter_propriedade (self, filtro: Callable[[Property], bool | SupportsBool]) -> Property | None:
@@ -128,7 +128,7 @@ class Tarefa:
         for propriedade in self.properties:
             try:
                 if filtro(propriedade): return propriedade
-            except: pass
+            except Exception: pass
 
     def obter_documento (self, filtro: Callable[[Document], bool | SupportsBool]) -> Document | None:
         """Obter o documento da `tarefa` se estiver de acordo com o `filtro`
@@ -136,7 +136,7 @@ class Tarefa:
         for document in self.documents:
             try:
                 if filtro(document): return document
-            except: pass
+            except Exception: pass
 
     def obter_tabela (self, filtro: Callable[[Table], bool | SupportsBool]) -> Table | None:
         """Obter a tabela da `tarefa` se estiver de acordo com o `filtro`
@@ -144,7 +144,7 @@ class Tarefa:
         for table in self.tables:
             try:
                 if filtro(table): return table
-            except: pass
+            except Exception: pass
 
 class Documento:
 
