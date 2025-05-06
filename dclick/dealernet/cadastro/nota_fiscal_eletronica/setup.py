@@ -1,6 +1,7 @@
 # std
 from __future__ import annotations
 import typing
+from datetime import date as Date
 # interno
 import dclick
 # externo
@@ -41,11 +42,12 @@ class TabelaRegistro:
 
     navegador: bot.navegador.Edge
 
-    TABELA_FILTRO_REGISTROS = "#TABLESEARCH"
-    INPUT_FILTRO_NUMERO_NF  = "#vNOTAFISCALELETRONICA_NRONOTA"
-    BOTAO_FILTRO_CONSULTAR  = "#IMGATUALIZAR"
+    TABELA_FILTRO_REGISTROS         = "#TABLESEARCH"
+    INPUT_FILTRO_NUMERO_NF          = "#vNOTAFISCALELETRONICA_NRONOTA"
+    INPUT_FILTRO_PERIODO_INICIAL    = "#vNOTAFISCALELETRONICA_DATAEMISSAOINI"
+    BOTAO_FILTRO_CONSULTAR          = "#IMGATUALIZAR"
 
-    TABELA_REGISTROS        = "#GridContainerTbl"
+    TABELA_REGISTROS                = "#GridContainerTbl"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
@@ -59,15 +61,17 @@ class TabelaRegistro:
     def filtrar (
             self,
             numero_nf: str | None = None,
+            periodo_inicial: Date | None = None
         ) -> typing.Self:
         """Aplicar o filtro na tabela dos registros"""
         with self.navegador.encontrar(self.TABELA_REGISTROS).aguardar_staleness():
             tabela_filtro = self.navegador.encontrar(self.TABELA_FILTRO_REGISTROS)
+            itens = [(numero_nf, self.INPUT_FILTRO_NUMERO_NF),
+                     (periodo_inicial.strftime("%d/%m/%Y") if periodo_inicial else None, self.INPUT_FILTRO_PERIODO_INICIAL)]
 
-            for texto, localizador in [(numero_nf, self.INPUT_FILTRO_NUMERO_NF)]:
+            for texto, localizador in itens:
                 if texto == None: continue
                 tabela_filtro.encontrar(localizador).limpar().digitar(texto)
-
             self.navegador.encontrar(self.BOTAO_FILTRO_CONSULTAR).clicar()
 
         return self
