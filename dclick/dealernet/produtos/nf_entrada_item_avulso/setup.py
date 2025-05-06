@@ -75,7 +75,7 @@ class TabelaRegistro:
     def obter (self, filtro: typing.Callable[[DadosRegistro], bool | bot.tipagem.SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
-        - `Exception` caso não encontre"""
+        - `ValueError` caso não encontre"""
         tabela_registros = self.navegador.encontrar(self.TABELA_REGISTROS)\
                                          .aguardar_visibilidade()
 
@@ -102,7 +102,7 @@ class TabelaRegistro:
                 if filtro(registro): return registro
             except Exception: pass
 
-        raise Exception("Registro de item avulso não encontrado para o filtro informado")
+        raise ValueError("Registro de item avulso não encontrado para o filtro informado")
 
 class ModificarDadosRegistro:
     """Classe para tratar a modificação dos dados de um registro
