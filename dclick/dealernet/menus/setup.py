@@ -10,6 +10,7 @@ class Localizadores (Enum):
 
     EMPRESA    = """(//tr[contains(@class, "x-toolbar-right")])[2]/td/table//button"""
     PRODUTOS   = """//button[contains(text(), "Produtos")]"""
+    CADASTRO   = """//button[contains(text(), "Cadastro")]"""
     INTEGRACAO = """//button[contains(text(), "Integração")]"""
     FINANCEIRO = """//button[contains(text(), "Financeiro")]"""
 
