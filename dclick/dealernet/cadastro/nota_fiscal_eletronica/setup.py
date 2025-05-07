@@ -48,6 +48,7 @@ class TabelaRegistro:
     BOTAO_FILTRO_CONSULTAR          = "#IMGATUALIZAR"
 
     TABELA_REGISTROS                = "#GridContainerTbl"
+    TABELA_REFRESH_AUTOMATICO       = "#vREFRESHAUTOMATICO"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
@@ -57,6 +58,12 @@ class TabelaRegistro:
             dclick.dealernet.menus.Localizadores.CADASTRO,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+
+    def desativar_refresh_automatico (self) -> typing.Self:
+        """Clicar no botão para dsativar o refresh automático"""
+        elemento = self.navegador.encontrar(self.TABELA_REFRESH_AUTOMATICO)
+        if elemento.selecionado: elemento.clicar()
+        return self
 
     def filtrar (
             self,
@@ -71,7 +78,7 @@ class TabelaRegistro:
 
             for texto, localizador in itens:
                 if texto == None: continue
-                tabela_filtro.encontrar(localizador).limpar().digitar(texto)
+                tabela_filtro.encontrar(localizador).limpar().clicar().digitar(bot.navegador.Teclas.BACKSPACE, texto)
             self.navegador.encontrar(self.BOTAO_FILTRO_CONSULTAR).clicar()
 
         return self
