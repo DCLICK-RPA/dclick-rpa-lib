@@ -73,40 +73,39 @@ def selecionar_opcao_menu (
     """Clicar no localizador do `menu` e navegar pelas `opcoes` clicando em cada opção do menu de acordo com o texto
     - Checado se o `menu` já se encontra selecionado
     - Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Localizadores.PRODUTOS)`"""
-    opcoes = [bot.util.normalizar(opcao) for opcao in opcoes]
     assert opcoes, "Nenhuma opção informada"
-    bot.logger.informar(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
-
+    opcoes = [bot.util.normalizar(opcao) for opcao in opcoes]
     elemento_menu = navegador.alterar_frame().encontrar(menu)
 
     # checar se já se encontra selecionado
     if menu is Localizadores.EMPRESA and opcoes[-1] == bot.util.normalizar(elemento_menu.texto):
-        return bot.logger.informar("Opção da Empresa já se encontrava selecionada")
+        return
     if bot.estruturas.Resultado(acessar_iframe_janela_menu, navegador, opcoes[-1]):
         navegador.alterar_frame()
-        return bot.logger.informar("Opção do Menu já se encontrava selecionada")
+        return
 
     # abrir menu
+    bot.logger.informar(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
     elemento_menu.clicar()
 
     # navegar nas opções
     id_ul_selecionados: list[str] = []
     for opcao in opcoes:
         # encontrar `/html/body/div/ul` que está visivel e ainda não foi selecionado
-        ul, *_ = [
+        ul = next((
             e for e in navegador.procurar("html > body> div[style *= 'visible' i] > ul")
             if e.atributos.get("id", "") not in id_ul_selecionados
-        ] or [None]
+        ), None)
         assert ul, f"Nenhum novo elemento <ul> ficou visível | Opção: '{opcao}'"
 
         id_ul = ul.atributos.get("id", "")
         id_ul_selecionados.append(id_ul)
 
         # encontrar `/ul/a` onde o texto seja igual a `opção` desejada
-        opcao_ul, *_ = [
+        opcao_ul = next((
             e for e in ul.procurar("li > a")
             if opcao == bot.util.normalizar(e.texto)
-        ] or [None]
+        ), None)
         assert opcao_ul, f"Nenhuma das opções do <ul> possui o texto da opção '{opcao}'"
 
         # realizar ação na opção
