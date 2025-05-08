@@ -17,6 +17,44 @@ class Localizadores:
     BOTAO_CONFIRMAR_UPLOAD  = "#TRN_ENTER"
     BOTAO_FECHAR_UPLOAD     = "#TRN_CANCEL"
     MENSAGEM_STATUS_UPLOAD  = "#TEXTBLOCKDOWNLOAD"
+    MENSAGEM_ERRO           = ".ErrorViewer"
+
+def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -> None:
+    """Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`"""
+    quantidade = len(nfe)
+    bot.logger.informar(f"Importando '{quantidade}' NFe(s) de item avulso")
+    assert quantidade >= 1, "Pelo menos 1 NFe deve ser informada"
+    assert all(n.existe() for n in nfe), f"Algum caminho da NFe não foi encontrado\n\t{nfe}"
+
+    dclick.dealernet.menus.selecionar_opcao_menu(
+        navegador,
+        ["XML - Importação", NOME_MENU],
+        dclick.dealernet.menus.Localizadores.INTEGRACAO,
+    )
+
+    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+    navegador.encontrar(Localizadores.BOTAO_IMPORTAR_NFE).clicar()
+    navegador.encontrar(Localizadores.BOTAO_PROCURAR_NFE).clicar()
+
+    with navegador.encontrar(Localizadores.IFRAME_UPLOAD).aguardar_invisibilidade() as iframe_upload:
+        caminhos = "\n".join(n.string for n in nfe)
+        navegador.alterar_frame(iframe_upload)\
+                 .encontrar(Localizadores.BOTAO_UPLOAD_ARQUIVOS)\
+                 .digitar(caminhos)
+
+    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+    navegador.encontrar(Localizadores.BOTAO_CONFIRMAR_UPLOAD).clicar()
+    status = navegador.encontrar(Localizadores.MENSAGEM_STATUS_UPLOAD)\
+                      .aguardar_visibilidade()
+
+    try: assert f"{quantidade} de {quantidade}" in status.texto.lower()
+    except Exception as e:
+        erro = " | ".join(e.texto for e in navegador.procurar(Localizadores.MENSAGEM_ERRO))
+        e.add_note(f"Mensagem de status do upload não está de acordo com o esperado\n\t{erro}")
+        raise
+
+    navegador.encontrar(Localizadores.BOTAO_FECHAR_UPLOAD).clicar()
+    bot.logger.informar(f"NFe(s) importada(s) com sucesso")
 
 class DadosRegistro:
 
@@ -117,48 +155,6 @@ class TabelaRegistro:
             except Exception: pass
 
         raise ValueError("Registro de item avulso não encontrado para o filtro informado")
-
-def importar_nfe (navegador: bot.navegador.Edge, nfe: bot.estruturas.Caminho) -> DadosRegistro:
-    """Importar a `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`
-    - Retorna o `DadosRegistro` que foi importado"""
-    bot.logger.informar("Importando NFe de item avulso")
-    assert nfe.existe(), f"Caminho da NFe não foi encontrado {nfe}"
-
-    dclick.dealernet.menus.selecionar_opcao_menu(
-        navegador,
-        ["XML - Importação", NOME_MENU],
-        dclick.dealernet.menus.Localizadores.INTEGRACAO,
-    )
-
-    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
-    navegador.encontrar(Localizadores.BOTAO_IMPORTAR_NFE).clicar()
-    navegador.encontrar(Localizadores.BOTAO_PROCURAR_NFE).clicar()
-
-    with navegador.encontrar(Localizadores.IFRAME_UPLOAD).aguardar_invisibilidade() as iframe_upload:
-        navegador.alterar_frame(iframe_upload)\
-                 .encontrar(Localizadores.BOTAO_UPLOAD_ARQUIVOS)\
-                 .digitar(nfe.string)
-
-    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
-    navegador.encontrar(Localizadores.BOTAO_CONFIRMAR_UPLOAD).clicar()
-
-    status = navegador.encontrar(Localizadores.MENSAGEM_STATUS_UPLOAD)
-    try: assert "1 de 1" in status.aguardar_visibilidade().texto.lower()
-    except Exception as e:
-        e.add_note("Mensagem de status do upload não está de acordo com o esperado")
-        raise
-
-    navegador.encontrar(Localizadores.BOTAO_FECHAR_UPLOAD).clicar()
-    bot.logger.informar(f"NFe importada")
-
-    # encontrar o registro onde o nome do arquivo seja o da `nfe`
-    nome_arquivo = bot.util.normalizar(nfe.path.stem)
-    registro = TabelaRegistro(navegador)\
-        .filtrar()\
-        .obter(lambda r: nome_arquivo in bot.util.normalizar(r.nome_arquivo))
-
-    bot.logger.informar(f"Registro para a NFe importada: {registro}")
-    return registro
 
 class AtualizarDadosRegistro:
     """Classe para tratar a atualização dos dados de um registro
