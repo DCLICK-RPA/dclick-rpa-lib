@@ -125,6 +125,7 @@ class ExtrairDadosRegistro:
     TABELA_DADOS_VISAO_GERAL    = "table.DataTable .Table"
     TD_DESCRICAO                = "td.DataDescriptionCell"
     TD_CONTEUDO                 = "td.DataContentCellView"
+    BOTAO_VOLTAR                = "table.TitleTable a"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
@@ -162,6 +163,11 @@ class ExtrairDadosRegistro:
 
         assert dados, "Nenhum dado encontrado na tabela da visão geral"
         return dados
+
+    def clicar_botao_voltar (self) -> None:
+        """Clicar no botão voltar para retornar a tela das tabelas de registros"""
+        with self.navegador.encontrar(self.BOTAO_VOLTAR).aguardar_staleness() as elemento:
+            elemento.clicar()
 
 __all__ = [
     "TabelaRegistro",
