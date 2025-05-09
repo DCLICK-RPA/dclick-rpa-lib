@@ -117,15 +117,15 @@ class TabelaRegistro:
 
 class ExtrairDadosRegistro:
     """Classe para extrair dados um registro
-    - `clicar_numero_registro(registro)` para abrir a tela da extração"""
+    - `clicar_primeiro_numero_registro()` para abrir a tela da extração"""
 
     navegador: bot.navegador.Edge
 
-    BOTAO_NUMERO_REGISTRO       = "#GridContainerTbl > tbody > tr span[id *= 'NRONOTA' i] > a"
-    TABELA_DADOS_VISAO_GERAL    = "table.DataTable .Table"
-    TD_DESCRICAO                = "td.DataDescriptionCell"
-    TD_CONTEUDO                 = "td.DataContentCellView"
-    BOTAO_VOLTAR                = "table.TitleTable a"
+    BOTAO_PRIMEIRO_NUMERO_REGISTRO  = "#GridContainerTbl > tbody > tr:nth-of-type(1) span[id *= 'NRONOTA' i] > a"
+    TABELA_DADOS_VISAO_GERAL        = "table.DataTable .Table"
+    TD_DESCRICAO                    = "td.DataDescriptionCell"
+    TD_CONTEUDO                     = "td.DataContentCellView"
+    BOTAO_VOLTAR                    = "table.TitleTable a"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
@@ -136,15 +136,10 @@ class ExtrairDadosRegistro:
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
-    def clicar_numero_registro (self, registro: DadosRegistro) -> typing.Self:
-        """Clicar no número do `registro`
-        - Abre a tela `Nota Fiscal Eletrônica` na aba `Visão Geral`
-        - Feito o filtro do registro automaticamente"""
-        TabelaRegistro(self.navegador).filtrar(registro.numero)
-        with self.navegador.encontrar(self.BOTAO_NUMERO_REGISTRO).aguardar_staleness() as elemento:
-            texto = elemento.texto
-            assert registro.numero in texto,\
-                f"Número do registro '{registro.numero}' não está de acordo com o número do botão '{texto}'"
+    def clicar_primeiro_numero_registro (self) -> typing.Self:
+        """Clicar no primeiro número da tabela dos registros
+        - Abre a tela `Nota Fiscal Eletrônica` na aba `Visão Geral`"""
+        with self.navegador.encontrar(self.BOTAO_PRIMEIRO_NUMERO_REGISTRO).aguardar_staleness() as elemento:
             elemento.clicar()
         return self
 
