@@ -145,16 +145,30 @@ class ExtrairDadosRegistro:
 
     def extrair_visao_geral (self) -> bot.estruturas.LowerDict[str]:
         """Extrair os dados da aba `Visão Geral`"""
+        # Mais rápido
+        dados = self.navegador.driver.execute_script(f"""\
+            let dados = {{}}
+            let trs = document.querySelector("{self.TABELA_DADOS_VISAO_GERAL}")
+                              .querySelectorAll("tr:has({self.TD_DESCRICAO})")
+            for (let tr of trs) {{
+                descricao = tr.querySelector("{self.TD_DESCRICAO}").innerText
+                conteudo = tr.querySelector("{self.TD_CONTEUDO}").innerText
+                dados[descricao] = conteudo
+            }}
+            return dados
+        """)
+        if dados and isinstance(dados, dict):
+            return bot.estruturas.LowerDict(dados)
+
+        # Tenta via selenium caso script não resulte em sucesso
         dados = bot.estruturas.LowerDict[str]()
         tabela = self.navegador.encontrar(self.TABELA_DADOS_VISAO_GERAL)\
                                .aguardar_visibilidade()
 
-        for tr in tabela.procurar("tr"):
-            try:
-                descricao = tr.encontrar(self.TD_DESCRICAO).texto
-                conteudo = tr.encontrar(self.TD_CONTEUDO).texto
-                dados[descricao] = conteudo
-            except Exception: pass
+        for tr in tabela.procurar(f"tr:has({self.TD_DESCRICAO})"):
+            descricao = tr.encontrar(self.TD_DESCRICAO).texto
+            conteudo = tr.encontrar(self.TD_CONTEUDO).texto
+            dados[descricao] = conteudo
 
         assert dados, "Nenhum dado encontrado na tabela da visão geral"
         return dados
