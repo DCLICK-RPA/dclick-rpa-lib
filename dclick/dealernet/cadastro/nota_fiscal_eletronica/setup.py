@@ -151,8 +151,8 @@ class ExtrairDadosRegistro:
             let trs = document.querySelector("{self.TABELA_DADOS_VISAO_GERAL}")
                               .querySelectorAll("tr:has({self.TD_DESCRICAO})")
             for (let tr of trs) {{
-                descricao = tr.querySelector("{self.TD_DESCRICAO}").innerText
-                conteudo = tr.querySelector("{self.TD_CONTEUDO}").innerText
+                descricao = tr.querySelector("{self.TD_DESCRICAO}").innerText.trim()
+                conteudo = tr.querySelector("{self.TD_CONTEUDO}").innerText.trim()
                 dados[descricao] = conteudo
             }}
             return dados
