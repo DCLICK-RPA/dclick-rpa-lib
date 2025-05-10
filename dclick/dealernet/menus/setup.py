@@ -5,6 +5,9 @@ from functools import cache
 # externo
 import bot
 
+Z_INDEX_FOCADO = 9999
+Z_INDEX_NAO_FOCADO = 9900
+
 class Localizadores (Enum):
     """Classe com os Localizadores dos menus suportados"""
 
@@ -14,7 +17,7 @@ class Localizadores (Enum):
     INTEGRACAO = """//button[contains(text(), "Integração")]"""
     FINANCEIRO = """//button[contains(text(), "Financeiro")]"""
 
-    JANELA_MENU = """html > body > div > div[id *= "W5Window"].W5Window"""
+    JANELA_MENU = """html > body > div.x-window-maximized-ct > div[id *= "W5Window"].W5Window"""
     FECHAR_JANELA_MENU = ".x-window-header .x-tool-close"
     TEXTO_JANELA_MENU = "span.x-window-header-text"
 
@@ -47,6 +50,23 @@ def fechar_janelas_menu_abertas (navegador: bot.navegador.Edge) -> None:
             janela.encontrar(Localizadores.FECHAR_JANELA_MENU).clicar()
         except Exception: pass
 
+def checar_iframe_janela_menu_no_topo (navegador: bot.navegador.Edge, nome_menu: str) -> bool:
+    """Checar se a janela do `nome_menu` já está no topo dos demais menus"""
+    try:
+        maior_nome = navegador.driver.execute_script("""\
+            let maior = 0, nome = ""
+            for (let janela of document.querySelectorAll(arguments[0])) {
+                let z = janela.style.zIndex
+                if (z > maior) {
+                    maior = z
+                    nome = janela.querySelector(arguments[1]).innerText
+                }
+            }
+            return nome
+        """, Localizadores.JANELA_MENU.value, Localizadores.TEXTO_JANELA_MENU.value)
+        return bot.util.normalizar(str(maior_nome)) == bot.util.normalizar(nome_menu)
+    except Exception: return False
+
 def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -> None:
     """Acessar o iframe do menu aberto com o `nome_menu`
     - `nome_menu` observado ser a última parte das opções em `selecionar_opcao_menu()`
@@ -57,12 +77,12 @@ def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -
     for janela in navegador.alterar_frame().procurar(Localizadores.JANELA_MENU):
         texto = janela.encontrar(Localizadores.TEXTO_JANELA_MENU).texto
         if bot.util.normalizar(texto) == nome_menu: janela_encontrada = janela
-        else: navegador.driver.execute_script("arguments[0].style.zIndex = 9900;", janela.elemento)
+        else: navegador.driver.execute_script("arguments[0].style.zIndex = arguments[1];", janela.elemento, Z_INDEX_NAO_FOCADO)
 
     if not janela_encontrada:
         raise Exception(f"Nenhum menu encontrado com nome '{nome_menu}'")
 
-    navegador.driver.execute_script("arguments[0].style.zIndex = 9999;", janela_encontrada.elemento)
+    navegador.driver.execute_script(f"arguments[0].style.zIndex = arguments[1];", janela_encontrada.elemento, Z_INDEX_FOCADO)
     navegador.alterar_frame(janela_encontrada.encontrar("iframe"))
 
 def selecionar_opcao_menu (
@@ -80,8 +100,7 @@ def selecionar_opcao_menu (
     # checar se já se encontra selecionado
     if menu is Localizadores.EMPRESA and opcoes[-1] == bot.util.normalizar(elemento_menu.texto):
         return
-    if bot.estruturas.Resultado(acessar_iframe_janela_menu, navegador, opcoes[-1]):
-        navegador.alterar_frame()
+    if menu is not Localizadores.EMPRESA and checar_iframe_janela_menu_no_topo(navegador, opcoes[-1]):
         return
 
     # abrir menu
