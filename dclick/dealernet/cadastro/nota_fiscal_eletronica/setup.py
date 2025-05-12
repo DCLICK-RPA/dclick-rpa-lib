@@ -145,22 +145,24 @@ class ExtrairDadosRegistro:
 
     def extrair_visao_geral (self) -> bot.estruturas.LowerDict[str]:
         """Extrair os dados da aba `Visão Geral`"""
-        # Mais rápido
-        dados = self.navegador.driver.execute_script(f"""\
-            let dados = {{}}
-            let trs = document.querySelector("{self.TABELA_DADOS_VISAO_GERAL}")
-                              .querySelectorAll("tr:has({self.TD_DESCRICAO})")
-            for (let tr of trs) {{
-                descricao = tr.querySelector("{self.TD_DESCRICAO}").innerText.trim()
-                conteudo = tr.querySelector("{self.TD_CONTEUDO}").innerText.trim()
-                dados[descricao] = conteudo
-            }}
-            return dados
-        """)
-        if dados and isinstance(dados, dict):
-            return bot.estruturas.LowerDict(dados)
+        # mais rápido via script
+        try:
+            dados = self.navegador.driver.execute_script(f"""\
+                let dados = {{}}
+                let trs = document.querySelector("{self.TABELA_DADOS_VISAO_GERAL}")
+                                .querySelectorAll("tr:has({self.TD_DESCRICAO})")
+                for (let tr of trs) {{
+                    descricao = tr.querySelector("{self.TD_DESCRICAO}").innerText.trim()
+                    conteudo = tr.querySelector("{self.TD_CONTEUDO}").innerText.trim()
+                    dados[descricao] = conteudo
+                }}
+                return dados
+            """)
+            if dados and isinstance(dados, dict):
+                return bot.estruturas.LowerDict(dados)
+        except Exception: pass
 
-        # Tenta via selenium caso script não resulte em sucesso
+        # tenta via selenium caso script não resulte em sucesso
         dados = bot.estruturas.LowerDict[str]()
         tabela = self.navegador.encontrar(self.TABELA_DADOS_VISAO_GERAL)\
                                .aguardar_visibilidade()
