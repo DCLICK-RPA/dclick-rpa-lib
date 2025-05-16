@@ -50,7 +50,7 @@ class TabelaRegistro:
         dclick.dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal", NOME_MENU],
-            dclick.dealernet.menus.Localizadores.PRODUTOS,
+            dclick.dealernet.menus.Menus.PRODUTOS,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 

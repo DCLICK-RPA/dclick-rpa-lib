@@ -55,7 +55,7 @@ class TabelaRegistro:
         dclick.dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal Eletronica", NOME_MENU],
-            dclick.dealernet.menus.Localizadores.CADASTRO,
+            dclick.dealernet.menus.Menus.CADASTRO,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
@@ -132,7 +132,7 @@ class ExtrairDadosRegistro:
         dclick.dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal Eletronica", NOME_MENU],
-            dclick.dealernet.menus.Localizadores.CADASTRO,
+            dclick.dealernet.menus.Menus.CADASTRO,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 

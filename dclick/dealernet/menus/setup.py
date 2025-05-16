@@ -8,7 +8,7 @@ import bot
 Z_INDEX_FOCADO = 9999
 Z_INDEX_NAO_FOCADO = 9900
 
-class Localizadores (Enum):
+class Menus (Enum):
     """Classe com os Localizadores dos menus suportados"""
 
     EMPRESA    = """(//tr[contains(@class, "x-toolbar-right")])[2]/td/table//button"""
@@ -17,6 +17,7 @@ class Localizadores (Enum):
     INTEGRACAO = """//button[contains(text(), "Integração")]"""
     FINANCEIRO = """//button[contains(text(), "Financeiro")]"""
 
+class Localizadores:
     JANELA_MENU = """html > body > div.x-window-maximized-ct > div[id *= "W5Window"].W5Window"""
     FECHAR_JANELA_MENU = ".x-window-header .x-tool-close"
     TEXTO_JANELA_MENU = "span.x-window-header-text"
@@ -63,7 +64,7 @@ def checar_iframe_janela_menu_no_topo (navegador: bot.navegador.Edge, nome_menu:
                 }
             }
             return nome
-        """, Localizadores.JANELA_MENU.value, Localizadores.TEXTO_JANELA_MENU.value)
+        """, Localizadores.JANELA_MENU, Localizadores.TEXTO_JANELA_MENU)
         return bot.util.normalizar(str(maior_nome)) == bot.util.normalizar(nome_menu)
     except Exception: return False
 
@@ -88,19 +89,19 @@ def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -
 def selecionar_opcao_menu (
         navegador: bot.navegador.Edge,
         opcoes: Iterable[str],
-        menu: Localizadores = Localizadores.EMPRESA,
+        menu: Menus = Menus.EMPRESA,
     ) -> None:
     """Clicar no localizador do `menu` e navegar pelas `opcoes` clicando em cada opção do menu de acordo com o texto
     - Checado se o `menu` já se encontra selecionado
-    - Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Localizadores.PRODUTOS)`"""
+    - Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Menus.PRODUTOS)`"""
     assert opcoes, "Nenhuma opção informada"
     opcoes = [bot.util.normalizar(opcao) for opcao in opcoes]
     elemento_menu = navegador.alterar_frame().encontrar(menu)
 
     # checar se já se encontra selecionado
-    if menu is Localizadores.EMPRESA and opcoes[-1] == bot.util.normalizar(elemento_menu.texto):
+    if menu is Menus.EMPRESA and opcoes[-1] == bot.util.normalizar(elemento_menu.texto):
         return
-    if menu is not Localizadores.EMPRESA and checar_iframe_janela_menu_no_topo(navegador, opcoes[-1]):
+    if menu is not Menus.EMPRESA and checar_iframe_janela_menu_no_topo(navegador, opcoes[-1]):
         return
 
     # abrir menu
@@ -137,7 +138,7 @@ def selecionar_opcao_menu (
     bot.logger.informar("Opções selecionadas com sucesso")
 
 __all__ = [
-    "Localizadores",
+    "Menus",
     "opcoes_empresa",
     "selecionar_opcao_menu",
     "acessar_iframe_janela_menu",

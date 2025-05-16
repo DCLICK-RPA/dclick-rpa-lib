@@ -29,7 +29,7 @@ def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -
     dclick.dealernet.menus.selecionar_opcao_menu(
         navegador,
         ["XML - Importação", NOME_MENU],
-        dclick.dealernet.menus.Localizadores.INTEGRACAO,
+        dclick.dealernet.menus.Menus.INTEGRACAO,
     )
 
     dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
@@ -94,7 +94,7 @@ class TabelaRegistro:
         dclick.dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["XML - Importação", NOME_MENU],
-            dclick.dealernet.menus.Localizadores.INTEGRACAO,
+            dclick.dealernet.menus.Menus.INTEGRACAO,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 

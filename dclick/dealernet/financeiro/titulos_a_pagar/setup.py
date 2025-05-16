@@ -54,7 +54,7 @@ class TabelaRegistro:
         dclick.dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Contas a pagar", NOME_MENU],
-            dclick.dealernet.menus.Localizadores.FINANCEIRO,
+            dclick.dealernet.menus.Menus.FINANCEIRO,
         )
         dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
