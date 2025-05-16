@@ -72,6 +72,7 @@ class TabelaRegistro:
 
         return self
 
+    @bot.util.decoradores.retry(tentativas=2)
     def obter (self, filtro: typing.Callable[[DadosRegistro], bool | bot.tipagem.SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
@@ -120,9 +121,11 @@ class ModificarDadosRegistro:
     BOTAO_CONFIRMAR                 = "#CONFIRMA"
     POPUP_STATUS                    = "div#DVELOP_CONFIRMPANELContainer_ConfirmPanel_c.DVelop-Simple-Dialog"
     BOTAO_OK_POPUP                  = ".Footer button"
+    BOTAO_EDITAR_PRIMEIRO_ITEM      = "table#GriditemContainerTbl > tbody > tr:nth-of-type(1) input[name *= 'vUPDATE' i]"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
+        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         bot.logger.informar("Iniciando modificação dos dados")
 
     def clicar_modificar_dados (self, registro: DadosRegistro) -> typing.Self:
@@ -131,7 +134,6 @@ class ModificarDadosRegistro:
         - Feito o filtro do registro automaticamente"""
         TabelaRegistro(self.navegador).filtrar(registro.codigo)
 
-        dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         with self.navegador.encontrar(TabelaRegistro.TABELA_REGISTROS).aguardar_staleness() as tabela_registros:
             tabela_registros.encontrar(self.BOTAO_MODIFICAR_DADOS_REGISTRO).clicar()
 
@@ -147,23 +149,16 @@ class ModificarDadosRegistro:
     def alterar_data_chegada (self, data: datetime.date) -> typing.Self:
         self.navegador.encontrar(self.INPUT_DATA_CHEGADA)\
             .limpar()\
-            .digitar(data.strftime("%d/%m/%Y"))
+            .clicar()\
+            .digitar(bot.navegador.Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
         return self
 
     def alterar_data_movimento (self, data: datetime.date) -> typing.Self:
         self.navegador.encontrar(self.INPUT_DATA_MOVIMENTO)\
             .limpar()\
-            .digitar(data.strftime("%d/%m/%Y"))
+            .clicar()\
+            .digitar(bot.navegador.Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
         return self
-
-    def clicar_botao_parcelas (self) -> ModificarParcelasRegistro:
-        """Clicar para modificar as parcelas
-        - Abre a tela de modificação das parcelas
-        - Retorna a classe para tratamento da modificação das parcelas
-        - Acessado iframe das parcelas"""
-        self.navegador.encontrar(self.BOTAO_PARCELAS).clicar()
-        iframe = self.navegador.encontrar(ModificarParcelasRegistro.IFRAME_PARCELAS)
-        return ModificarParcelasRegistro(self.navegador.alterar_frame(iframe))
 
     def clicar_botao_confirmar (self) -> typing.Self:
         """Clicar no botão Confirmar"""
@@ -182,9 +177,26 @@ class ModificarDadosRegistro:
         with self.navegador.encontrar(self.POPUP_STATUS).aguardar_invisibilidade() as popup:
             popup.encontrar(self.BOTAO_OK_POPUP).clicar()
 
+    def clicar_botao_parcelas (self) -> ModificarParcelasRegistro:
+        """Clicar para modificar as parcelas
+        - Abre a tela de modificação das parcelas
+        - Retorna a classe para tratamento da modificação das parcelas
+        - Acessado iframe das parcelas"""
+        self.navegador.encontrar(self.BOTAO_PARCELAS).clicar()
+        iframe = self.navegador.encontrar(ModificarParcelasRegistro.IFRAME_PARCELAS)
+        return ModificarParcelasRegistro(self.navegador.alterar_frame(iframe))
+
+    def clicar_botao_editar_primeiro_item (self) -> EditarItemRegistro:
+        """Clicar para editar o primeiro item
+        - Abre a tela de edição do item
+        - Retorna a classe para tratamento da edição do item"""
+        with self.navegador.encontrar(self.BOTAO_EDITAR_PRIMEIRO_ITEM).aguardar_staleness() as botao:
+            botao.clicar()
+        return EditarItemRegistro(self.navegador)
+
 class ModificarParcelasRegistro:
-    """Classe para tratar a modificação das parcelas do registro
-    - Esperado já estar no iframe `IFRAME_PARCELAS`
+    """Classe para tratar a modificação das parcelas dentro do registro
+    - Esperado estar na tela de modificação das parcelas
     - Obtido a partir do `ModificarDadosRegistro().clicar_botao_parcelas()` para iniciar a modificação"""
 
     navegador: bot.navegador.Edge
@@ -199,6 +211,7 @@ class ModificarParcelasRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
+        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         bot.logger.informar("Iniciando modificação das parcelas")
 
     def clicar_botao_inserir_parcela (self) -> typing.Self:
@@ -230,14 +243,49 @@ class ModificarParcelasRegistro:
         
         return self
 
-    def clicar_botao_confirmar (self) -> typing.Self:
+    def clicar_botao_confirmar (self) -> None:
         """Clicar no botão para confirmar
         - Esperado o botão ficar invisível
         - Retornado ao iframe do menu"""
         with self.navegador.encontrar(self.BOTAO_CONFIRMAR).aguardar_invisibilidade() as botao:
             botao.clicar()
         dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+
+class EditarItemRegistro:
+    """Classe para tratar a edição de um item dentro do registro
+    - Esperado estar na tela de edição do item
+    - Obtido a partir do `ModificarDadosRegistro().clicar_botao_editar_primeiro_item()` para iniciar a edição"""
+
+    navegador: bot.navegador.Edge
+
+    SELECAO_PROCEDENCIA = "select#vNOTAFISCALITEM_PROCEDENCIACOD"
+    INPUT_DESCRICAO     = "textarea#vNOTAFISCALITEM_OBSERVACAO"
+    BOTAO_CONFIRMAR     = "#CONFIRMAR"
+
+    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+        self.navegador = navegador
+        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        bot.logger.informar("Iniciando edição do item")
+
+    def alterar_descricao (self, texto: str) -> typing.Self:
+        """Alterar a descrição de acordo com o `texto`"""
+        self.navegador.encontrar(self.INPUT_DESCRICAO)\
+            .limpar()\
+            .digitar(texto)
         return self
+
+    def selecionar_procedencia (self, texto: str) -> typing.Self:
+        """Selecionar a procedência de acordo com o `texto`"""
+        self.navegador.encontrar(self.SELECAO_PROCEDENCIA)\
+            .select\
+            .select_by_visible_text(texto)
+        return self
+
+    def clicar_botao_confirmar (self) -> None:
+        """Clicar no botão para confirmar e retornar a tela anterior
+        - Esperado o botão ficar invisível"""
+        with self.navegador.encontrar(self.BOTAO_CONFIRMAR).aguardar_invisibilidade() as botao:
+            botao.clicar()
 
 __all__ = [
     "TabelaRegistro",
