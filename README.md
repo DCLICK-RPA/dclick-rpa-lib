@@ -94,3 +94,58 @@ QueryTaskV2()
 # Consultar a tarefa `id_tarefa`
 consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
 ```
+
+<br><br>
+
+### `dealernet`
+Pacote destinado ao **Sistema Web Dealer-Net**  
+```Python
+# Realizar o login no dealernet
+def login (navegador: bot.navegador.Edge) -> None:
+```
+
+#### Descrição sobre alguns pacotes internos
+
+> Existem mais pacotes internos especializados para uma tela do **Menu**
+
+`menus`  
+Pacote para tratar a seleção da opção desejada nos menus, como Empresa e Produto, presentes no rodapé e cabeçalho do sistema
+```Python
+# Classe com os Localizadores dos menus suportados
+class Menus (Enum): ...
+
+# Clicar no localizador do `menu` e navegar pelas `opcoes` clicando em cada opção do menu de acordo com o texto
+# Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Menus.PRODUTOS)`
+selecionar_opcao_menu(
+    navegador: bot.navegador.Edge,
+    opcoes: Iterable[str],
+    menu: Menus = Menus.EMPRESA,
+) -> None
+
+# Acessar o iframe do menu aberto com o `nome_menu`
+# `nome_menu` observado ser a última parte das opções em `selecionar_opcao_menu()`
+def acessar_iframe_janela_menu (
+    navegador: bot.navegador.Edge,
+    nome_menu: str
+) -> None:
+```
+
+`integracao.nota_fiscal_item_avulso`  
+Pacote para tratar o menu **Integração -> XML - Importação -> Nota Fiscal de Item Avulso**
+```Python
+# Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`
+def importar_nfe (
+    navegador: bot.navegador.Edge,
+    *nfe: bot.estruturas.Caminho
+) -> None:
+
+# Classe especializada para obter e filtrar os registros na tabela
+class TabelaRegistro: ...
+
+# Classe para tratar a atualização dos dados de um registro
+class AtualizarDadosRegistro: ...
+
+# Classe para tratar o processamento dos dados de um registro
+# Iniciado a partir do `AtualizarDadosRegistro`
+class AtualizarDadosItemAvulso: ...
+```
