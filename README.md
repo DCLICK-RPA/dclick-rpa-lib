@@ -37,7 +37,7 @@ Irá ser criado no diretório `./dist` o arquivo **.whl** com a versão atual.
 Abrir a página `releases` do github e realizar o upload do arquivo no release correto para a versão atual
 
 > **Automático**  
-Pendente
+Configurar a seção `github` e executar o script `build_upload.py`
 
 ## Descrição breve dos pacotes com algumas funcionalidades
 Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e classes disponíveis para um melhor contexto
