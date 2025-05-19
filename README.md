@@ -14,9 +14,11 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
 ## Importante
+> Utilizado o **uv** como package-manager  
+
 > Pacote criado de forma genérica visando reutilização.
 
-Não se deve ter um **fluxo** que realizar diversas tarefas, mas sim partes que realiza **1 ação** bem estabelecidas. Cabe ao desenvolvedor montar da forma que interessa.
+Não se deve ter um **fluxo** que realiza diversas tarefas, mas sim partes especializadas que realizam apenas **1 ação**. Cabe ao desenvolvedor encaixar as partes da melhor forma.
 
 Não utilizar valores fixos nas funções ou classes, mas sim possíveis de serem alterados por quem irá utilizar.  
 Exemplo:
