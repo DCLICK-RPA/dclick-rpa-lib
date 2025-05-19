@@ -107,8 +107,7 @@ class TabelaRegistro:
 
 class ModificarDadosRegistro:
     """Classe para tratar a modificação dos dados de um registro
-    - `clicar_modificar_dados(registro)` para iniciar a modificação
-    - `registro` proveniente do `importar_nfe` ou `obter_registro`"""
+    - `clicar_modificar_dados(registro)` para iniciar a modificação"""
 
     navegador: bot.navegador.Edge
 
@@ -117,10 +116,12 @@ class ModificarDadosRegistro:
     SELECAO_CONDICAO_PAGAMENTO      = "#vNOTAFISCAL_CONDICAOPAGAMENTOCOD"
     INPUT_DATA_CHEGADA              = "#vNOTAFISCAL_DATACHEGADA"
     INPUT_DATA_MOVIMENTO            = "#vNOTAFISCAL_DATAMOVIMENTO"
-    BOTAO_PARCELAS                  = "#PARCELA"
     BOTAO_CONFIRMAR                 = "#CONFIRMA"
     POPUP_STATUS                    = "div#DVELOP_CONFIRMPANELContainer_ConfirmPanel_c.DVelop-Simple-Dialog"
     BOTAO_OK_POPUP                  = ".Footer button"
+
+    BOTAO_PARCELAS                  = "#PARCELA"
+    BOTAO_RODAPE                    = "#RODAPE"
     BOTAO_EDITAR_PRIMEIRO_ITEM      = "table#GriditemContainerTbl > tbody > tr:nth-of-type(1) input[name *= 'vUPDATE' i]"
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
@@ -186,6 +187,14 @@ class ModificarDadosRegistro:
         iframe = self.navegador.encontrar(ModificarParcelasRegistro.IFRAME_PARCELAS)
         return ModificarParcelasRegistro(self.navegador.alterar_frame(iframe))
 
+    def clicar_botao_rodape (self) -> ModificarRodapeRegistro:
+        """Clicar para modificar o rodapé
+        - Abre a tela de modificação do rodapé
+        - Retorna a classe para tratamento da modificação do rodapé"""
+        with self.navegador.encontrar(self.BOTAO_RODAPE).aguardar_staleness() as botao:
+            botao.clicar()
+        return ModificarRodapeRegistro(self.navegador)
+
     def clicar_botao_editar_primeiro_item (self) -> EditarItemRegistro:
         """Clicar para editar o primeiro item
         - Abre a tela de edição do item
@@ -250,6 +259,47 @@ class ModificarParcelasRegistro:
         with self.navegador.encontrar(self.BOTAO_CONFIRMAR).aguardar_invisibilidade() as botao:
             botao.clicar()
         dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+
+class ModificarRodapeRegistro:
+    """Classe para tratar a modificação do rodapé dentro do registro
+    - Esperado estar na tela de modificação do rodapé
+    - Obtido a partir do `ModificarDadosRegistro().clicar_botao_rodape()` para iniciar a modificação"""
+
+    navegador: bot.navegador.Edge
+
+    SELECAO_TIPO_FRETE  = "select#vNOTAFISCAL_TIPOFRETE"
+    BOTAO_CONFIRMAR     = "#BTNCONFIRMA"
+    BOTAO_FECHAR        = "#TRN_CANCEL"
+
+    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+        self.navegador = navegador
+        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        bot.logger.informar("Iniciando modificação do rodapé")
+
+    def selecionar_tipo_frete (self, texto: str) -> typing.Self:
+        """Selecionar o tipo de frete de acordo com o `texto`"""
+        self.navegador.encontrar(self.SELECAO_TIPO_FRETE)\
+            .select\
+            .select_by_visible_text(texto)
+        return self
+
+    def clicar_confirmar_e_fechar (self) -> None:
+        """Clicar no botão para confirmar e fechar
+        - Pode ser que apenas o confirmar não feche a tela do rodapé e seja necessário clicar no fechar após
+        - Retornado para a tela anterior
+        - Esperado o botão ficar invisível"""
+        with self.navegador.encontrar(self.BOTAO_CONFIRMAR).aguardar_invisibilidade() as botao:
+            botao.clicar().sleep(1)
+
+        try:
+            # checar se continou na tela do rodapé
+            self.navegador.alterar_timeout(2).encontrar(self.SELECAO_TIPO_FRETE)
+            # fechar tela rodapé
+            with self.navegador.encontrar(self.BOTAO_FECHAR).aguardar_invisibilidade() as botao:
+                botao.clicar()
+        # tela rodapé fechada
+        except bot.navegador.ElementoNaoEncontrado: return
+        finally: self.navegador.alterar_timeout()
 
 class EditarItemRegistro:
     """Classe para tratar a edição de um item dentro do registro
