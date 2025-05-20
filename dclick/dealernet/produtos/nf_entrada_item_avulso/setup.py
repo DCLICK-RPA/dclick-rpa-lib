@@ -220,7 +220,6 @@ class ModificarParcelasRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         bot.logger.informar("Iniciando modificação das parcelas")
 
     def clicar_botao_inserir_parcela (self) -> typing.Self:
@@ -244,7 +243,8 @@ class ModificarParcelasRegistro:
             if texto == None: continue
             ultimo_registro.encontrar(localizador)\
                            .limpar()\
-                           .digitar(texto)
+                           .clicar()\
+                           .digitar(bot.navegador.Teclas.BACKSPACE, texto)
 
         if tipo_titulo: ultimo_registro.encontrar(self.SELECAO_TIPO_TITULO)\
                                        .select\
@@ -273,7 +273,6 @@ class ModificarRodapeRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         bot.logger.informar("Iniciando modificação do rodapé")
 
     def selecionar_tipo_frete (self, texto: str) -> typing.Self:
@@ -314,7 +313,6 @@ class EditarItemRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         bot.logger.informar("Iniciando edição do item")
 
     def alterar_descricao (self, texto: str) -> typing.Self:
