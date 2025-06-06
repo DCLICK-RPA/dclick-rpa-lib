@@ -292,9 +292,9 @@ class ProcessarDadosRegistro:
                           .limpar()\
                           .digitar(identificador)
 
-        with iframe.aguardar_invisibilidade():
-            localizador_botao = f"""./tbody/tr[contains(., "{identificador}")]//input"""
-            tabela.encontrar(localizador_botao).clicar()
+        with tabela.aguardar_invisibilidade():
+            botao = f"""./tbody/tr[contains(., "{identificador}")]//input"""
+            tabela.encontrar(botao).clicar()
 
         dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         return self
