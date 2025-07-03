@@ -72,7 +72,7 @@ class TabelaRegistro:
         return self
 
     @bot.util.decoradores.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bool | bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""
