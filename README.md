@@ -151,3 +151,13 @@ class AtualizarDadosRegistro: ...
 # Iniciado a partir do `AtualizarDadosRegistro`
 class ProcessarDadosRegistro: ...
 ```
+
+<br><br>
+
+### `nbs`
+Pacote destinado ao sistema NBSi
+> Necessário instalar a dependência adicional `dclick[ocr]` caso seja usado o `LeitorOCR` da biblioteca `bot`
+
+```Python
+...
+```
