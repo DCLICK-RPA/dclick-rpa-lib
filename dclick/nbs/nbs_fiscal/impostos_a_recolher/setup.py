@@ -267,7 +267,7 @@ class AbaCompromisso:
 
         bot.mouse.clicar_mouse(coordenada=coordenada)
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar na imagem do botão para gerar compromisso: '{mensagem}'")

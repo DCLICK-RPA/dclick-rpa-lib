@@ -46,12 +46,10 @@ class CalculoTributos:
                 elemento.parente.filhos(lambda e: e.class_name == "TOvcNumericField")
             )
             assert len(elementos) == 2, f"Esperado 2 elementos de input, encontrado '{len(elementos)}'"
-            elementos[-1]\
-                .digitar(str(imposto).replace(".", ","))\
-                .apertar("tab")\
-                .sleep(0.2)
+            elementos[-1].digitar(str(imposto).replace(".", ","))\
+                         .apertar("tab")
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.2):
             texto = dialogo.elemento.textos().lower()
             assert "divergente" in texto, f"Esperado diálogo de confirmação de valor divergente, encontrado: {texto}"
             assert dialogo.clicar("Sim"), "Falha ao fechar o diálogo de confirmação de valor divergente"
@@ -63,10 +61,9 @@ class CalculoTributos:
         - Erro caso apareça diálogo com mensagem ou a janela não feche corretamente"""
         self.janela.elemento\
             .encontrar(lambda e: e.class_name == "TBitBtn" and e.texto.lower() == "ok")\
-            .clicar()\
-            .sleep(0.5)
+            .clicar()
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha após clicar em 'OK' na janela 'Cácula de Tributos': '{mensagem}'")
@@ -114,10 +111,9 @@ class AbaCapa:
             .encontrar(lambda e: e.class_name == "TCPF_CGC")\
             .apertar("backspace")\
             .digitar(texto)\
-            .apertar("enter")\
-            .sleep(0.5)
+            .apertar("enter")
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao preencher o cnpj/cpf '{texto}': '{mensagem}'")
@@ -243,13 +239,11 @@ class AbaCapa:
         )
         assert len(elementos) >= 12, "Elemento não foi encontrado"
 
-        elementos[12]\
-            .apertar("backspace")\
-            .digitar(str(total).replace(".", ","))\
-            .apertar("enter")\
-            .sleep(0.5)
+        elementos[12].apertar("backspace")\
+                     .digitar(str(total).replace(".", ","))\
+                     .apertar("enter")
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao preencher o total nota '{total}': '{mensagem}'")
@@ -283,9 +277,9 @@ class AbaCapa:
         posicao = self.painel_valores_nota\
             .coordenada\
             .transformar(0.3, 0.06)
-        bot.mouse.clicar_mouse(coordenada=posicao, delay=0.5)
+        bot.mouse.clicar_mouse(coordenada=posicao)
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(mensagem)
@@ -349,9 +343,9 @@ class AbaContabilizacao:
         posicao_botao = self.painel_contabilizacao_padrao\
                             .coordenada\
                             .transformar(0.96, 0.65)
-        bot.mouse.clicar_mouse(coordenada=posicao_botao, delay=0.5)
+        bot.mouse.clicar_mouse(coordenada=posicao_botao)
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao confirmar a contabilização padrão: '{mensagem}'")
@@ -431,9 +425,9 @@ class AbaFaturamento:
         posicao_botao = self.painel_condicao_pagamento\
                             .coordenada\
                             .transformar(0.8, 0.4)
-        bot.mouse.clicar_mouse(coordenada=posicao_botao, delay=0.5)
+        bot.mouse.clicar_mouse(coordenada=posicao_botao)
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao confirmar a condição de pagamento: '{mensagem}'")
@@ -513,10 +507,9 @@ class AbaRetencoesPJ:
         self.janela_retencoes_pj\
             .elemento\
             .encontrar(lambda e: e.texto.lower() == "gravar" and e.class_name == "TNBSWButton")\
-            .clicar()\
-            .sleep(0.5)
+            .clicar()
 
-        if dialogo := self.janela.dialogo():
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.elemento.textos()
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar para gravar na aba 'Retenções PJ': '{mensagem}'")
