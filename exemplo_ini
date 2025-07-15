@@ -47,3 +47,8 @@ senha =
 [dashboard]
 codigo_automacao = ORI_FATDEALER
 host = https://rpa-admin.dclick.com.br
+
+[nbs]
+usuario = RPA
+senha = RPA
+executavel = C:\dclick\atalhos\nbs.lnk
