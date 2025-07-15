@@ -12,6 +12,11 @@ dependencies = [
     "uv>=0.6.16",
 ]
 
+[project.optional-dependencies]
+ocr = [
+    "bot[ocr]"
+]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel", "build"]
 build-backend = "setuptools.build_meta"
