@@ -9,7 +9,7 @@ janela_shortcut = lambda: bot.sistema.JanelaW32(
 )
 """Janela `NBS ShortCut` aberta após login"""
 
-@bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir o NBS ou ao realizar login")
+@bot.util.decoradores.prefixar_erro("Falha ao abrir o NBS ou ao realizar login")
 def abrir_e_login () -> bot.sistema.JanelaW32:
     """Abrir o NBS e realizar o login
     - Variáveis .ini `[nbs] -> usuario, senha, executavel`

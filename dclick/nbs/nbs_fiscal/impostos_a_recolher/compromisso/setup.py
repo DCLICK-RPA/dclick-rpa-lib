@@ -4,6 +4,7 @@ from typing import Self
 import bot
 from bot.sistema.janela import ElementoW32
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Documento' da janela 'Compromisso'")
 class AbaDocumento:
     """Representação da aba `Documento` na janela `Compromisso`"""
 
@@ -82,6 +83,7 @@ class AbaDocumento:
 
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Compromisso'")
 class Confirmar:
     """Representação do processo de Confirmação na janela 'Compromisso'"""
 

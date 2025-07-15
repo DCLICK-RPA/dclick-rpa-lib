@@ -10,7 +10,7 @@ class SelecaoEmpresaFilial:
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
         self.janela = janela
 
-    @bot.util.decoradores.adicionar_prefixo_erro("Erro ao confirmar a seleção da Empresa/Filial")
+    @bot.util.decoradores.prefixar_erro("Erro ao confirmar a seleção da Empresa/Filial")
     def confirmar (self) -> bot.sistema.JanelaW32:
         """Clicar no botão de confirmar
         - Fechado janela informativa que pode aparecer
@@ -29,7 +29,7 @@ class SelecaoEmpresaFilial:
         except Exception:
             raise Exception("Janela 'Sistema Fiscal' não foi encontrada")
 
-@bot.util.decoradores.adicionar_prefixo_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
+@bot.util.decoradores.prefixar_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
 def selecionar_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32) -> SelecaoEmpresaFilial:
     """Selecionar o menu do `Nbs Fiscal`
     - Retornado `SelecaoEmpresaFilial`"""

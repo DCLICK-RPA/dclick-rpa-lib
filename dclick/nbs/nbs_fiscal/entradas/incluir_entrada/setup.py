@@ -6,7 +6,7 @@ from typing import Self, Literal
 import bot
 from bot.sistema.janela import ElementoW32, ElementoUIA
 
-@bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir o menu 'Incluir Entrada'")
+@bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Incluir Entrada'")
 def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
     - Retornado a janela de `Entrada Diversas`"""
@@ -19,6 +19,7 @@ def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32) -> bot.si
 
     return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo, aguardar=10)
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
 class CalculoTributos:
     """Representação da janela `Cálculo de tributos` da aba `Capa`"""
 
@@ -27,7 +28,7 @@ class CalculoTributos:
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
         self.janela = janela
 
-    @bot.util.decoradores.adicionar_prefixo_erro(lambda args, _: f"Falha ao alterar o tributo '{args[0]}' na janela 'Cálculo de tributos'")
+    @bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao alterar o tributo '{args[0]}'")
     def alterar_tributo (self, nome_tributo: Literal["INSS", "PIS", "CSLL", "COFINS", "IRRF", "ISS Retido"],
                                selecionar: bool = True,
                                imposto: int | float | None = None) -> Self:
@@ -51,7 +52,7 @@ class CalculoTributos:
 
         if dialogo := self.janela.dialogo(aguardar=0.2):
             texto = dialogo.elemento.textos().lower()
-            assert "divergente" in texto, f"Esperado diálogo de confirmação de valor divergente, encontrado: {texto}"
+            assert "divergente" in texto, f"Esperado diálogo de confirmação 'valor divergente' | Encontrado: {texto}"
             assert dialogo.clicar("Sim"), "Falha ao fechar o diálogo de confirmação de valor divergente"
 
         return self
@@ -71,6 +72,7 @@ class CalculoTributos:
         assert bot.util.aguardar_condicao(lambda: self.janela.fechada, timeout=5),\
             "Janela 'Cácula de Tributos' não foi fechada corretamente"
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Capa' da janela 'Entrada Diversas'")
 class AbaCapa:
     """Representação da aba `Capa` na janela `Entrada Diversas`"""
 
@@ -269,7 +271,7 @@ class AbaCapa:
                      .apertar("tab")
         return self
 
-    @bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir a janela de 'Calculo de Tributos'")
+    @bot.util.decoradores.prefixar_erro("Falha ao abrir a janela de 'Calculo de Tributos'")
     def abrir_janela_calculo_tributos (self) -> CalculoTributos:
         """Clicar para abrir a janela 'Calculo de Tributos'
         - Retornado classe para tratar janela
@@ -304,6 +306,7 @@ class AbaCapa:
             .apertar("tab")
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Contabilização' da janela 'Entrada Diversas'")
 class AbaContabilizacao:
     """Representação da aba `Contabilização` na janela `Entrada Diversas`"""
 
@@ -352,6 +355,7 @@ class AbaContabilizacao:
 
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Faturamento' da janela 'Entrada Diversas'")
 class AbaFaturamento:
     """Representação da aba `Faturamento` na janela `Entrada Diversas`"""
 
@@ -444,6 +448,7 @@ class AbaFaturamento:
                     .apertar("tab")
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Retenções PJ' da janela 'Entrada Diversas'")
 class AbaRetencoesPJ:
     """Representação da aba `Retenções PJ` na janela `Entrada Diversas`"""
 
@@ -472,7 +477,7 @@ class AbaRetencoesPJ:
             .focar()\
             .to_uia()
 
-    @bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir a aba 'Retenções PJ'")
+    @bot.util.decoradores.prefixar_erro("Falha ao abrir a janela interna 'Retenções PJ'")
     def clicar_incluir (self) -> Self:
         """Clicar no botão verde `+` para incluir
         - Necessário para abrir a `janela_retencoes_pj`
@@ -516,6 +521,7 @@ class AbaRetencoesPJ:
 
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Entrada Diversas'")
 class Confirmar:
     """Representação do processo de Confirmação na janela 'Entrada Diversas'"""
 

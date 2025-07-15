@@ -1,7 +1,7 @@
 # externo
 import bot
 
-@bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir o menu 'Nota Fiscal - Entradas'")
+@bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Nota Fiscal - Entradas'")
 def abrir_menu_entradas (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir a `Nota Fiscal - Entradas`
     - Retorna a janela de `Entradas`"""

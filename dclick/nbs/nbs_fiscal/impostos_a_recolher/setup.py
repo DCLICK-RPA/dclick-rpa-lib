@@ -5,7 +5,7 @@ from typing import Self
 import bot
 from bot.sistema.janela import ElementoW32
 
-@bot.util.decoradores.adicionar_prefixo_erro("Falha ao abrir o menu 'Impostos a Recolher'")
+@bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Impostos a Recolher'")
 def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir `Impostos a Recolher`
     - Retorna a janela `Impostos a Recolher`"""
@@ -16,6 +16,7 @@ def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32
     return janela_sistema_fiscal\
         .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=10)
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Lista' da janela 'Impostos a Recolher'")
 class AbaLista:
     """Representação da aba `Lista` na janela `Impostos a Recolher`"""
 
@@ -195,6 +196,7 @@ class AbaLista:
 
         return self
 
+@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Compromisso' da janela 'Impostos a Recolher'")
 class AbaCompromisso:
     """Representação da aba `Compromisso` na janela `Impostos a Recolher`"""
 
