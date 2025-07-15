@@ -4,3 +4,4 @@ from . import dashboard
 from . import dealernet
 from . import email
 from . import holmes
+from . import nbs
