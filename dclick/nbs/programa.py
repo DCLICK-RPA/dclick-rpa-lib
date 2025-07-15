@@ -1,3 +1,5 @@
+# std
+from typing import Callable
 # externo
 import bot
 
@@ -36,17 +38,18 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
 
     return janela_shortcut().focar()
 
-def fechar_nbs () -> None:
-    """Fechar as janelas do NBS"""
-    for titulo in bot.sistema.JanelaW32.titulos_janelas_visiveis():
-        if "NBS" not in titulo: continue
-        try:
-            bot.sistema.JanelaW32(lambda j: j.titulo == titulo).encerrar()
-            bot.logger.informar(f"Fechando a janela '{titulo}'")
-        except: pass
+def fechar_janelas_nbs (filtro: Callable[[bot.sistema.JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
+    """Fechar as janelas do NBS de acordo com o `filtro`
+    - Default: Possui `NBS` no titulo"""
+    filtro = filtro or (lambda j: "NBS" in j.titulo)
+    try:
+        janela = bot.sistema.JanelaW32(filtro)
+        bot.logger.informar(f"Fechando a {janela!r}")
+        janela.encerrar(1)
+    except Exception: pass
 
 __all__ = [
-    "fechar_nbs",
     "abrir_e_login",
-    "janela_shortcut"
+    "janela_shortcut",
+    "fechar_janelas_nbs",
 ]
