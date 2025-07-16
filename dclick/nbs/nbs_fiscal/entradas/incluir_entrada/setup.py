@@ -273,7 +273,7 @@ class AbaCapa:
 
     @bot.util.decoradores.prefixar_erro("Falha ao abrir a janela de 'Calculo de Tributos'")
     def abrir_janela_calculo_tributos (self) -> CalculoTributos:
-        """Clicar para abrir a janela 'Calculo de Tributos'
+        """Clicar para abrir a janela `Calculo de Tributos`
         - Retornado classe para tratar janela
         - Fechar a janela após realizar alterações"""
         posicao = self.painel_valores_nota\
