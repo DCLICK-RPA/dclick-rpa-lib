@@ -52,6 +52,17 @@ def selecionar_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32) -> Sel
     except Exception:
         raise Exception("Janela de seleção 'Empresa/Filial' não abriu conforme o esperado")
 
+def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
+    """Fechar a janela nbs fiscal `titulo`
+    - Usado o `destruir` na janela para encerrar todas as janelas dependentes
+    - Ignorado caso não encontre
+    - `AssertionError` caso falhe ao encerrar"""
+    try: assert bot.sistema.JanelaW32(lambda j: j.titulo == titulo, aguardar=1)\
+                           .destruir(5),\
+            f"Falha ao encerrar a janela nbs fiscal '{titulo}'"
+    except AssertionError: raise
+    except Exception: return
+
 __all__ = [
     "SelecaoEmpresaFilial",
     "selecionar_modulo_nbs_fiscal"
