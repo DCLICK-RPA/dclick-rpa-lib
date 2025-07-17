@@ -85,7 +85,7 @@ class AbaDocumento:
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Compromisso'")
 class Confirmar:
-    """Representação do processo de Confirmação na janela 'Compromisso'"""
+    """Representação do processo de Confirmação na janela `Compromisso`"""
 
     full_hd: bool
     janela: bot.sistema.JanelaW32
@@ -117,12 +117,12 @@ class Confirmar:
         assert dialogo.clicar("Sim"), "Diálogo 'Ficha de Controle' não fechou conforme esperado"
         return self
 
-    def fechar_janela_ficha_controle (self) -> None:
+    def fechar_janela_ficha_controle_via_imagem (self) -> None:
         """Fechar a janela `Ficha de Controle de Pagamento`"""
         assert self.full_hd, "Esperado resolução '1920x1080' para encontrar a imagem do botão 'Cancelar'"
 
         titulo = 'Ficha de Controle de Pagamento'
-        try: janela = self.janela.janela_processo(lambda j: j.titulo == titulo).focar()
+        try: janela = self.janela.janela_processo(lambda j: j.titulo == titulo, aguardar=5).focar()
         except Exception:
             raise Exception(f"Janela '{titulo}' não foi encontrada")
 
