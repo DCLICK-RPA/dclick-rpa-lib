@@ -4,7 +4,7 @@ from typing import Callable
 import bot
 
 janela_shortcut = lambda: bot.sistema.JanelaW32(
-    lambda janela: janela.titulo.lower().startswith("nbs shortcut"),
+    lambda janela: janela.titulo.lower().startswith("nbs shortcut - nbsserver"),
     aguardar = 10
 )
 """Janela `NBS ShortCut` aberta após login"""
