@@ -58,7 +58,7 @@ class CalculoTributos:
         return self
 
     def clicar_ok (self) -> None:
-        """Clicar em OK para fechar a tela
+        """Clicar em `OK` para fechar a tela
         - Erro caso apareça diálogo com mensagem ou a janela não feche corretamente"""
         self.janela.elemento\
             .encontrar(lambda e: e.class_name == "TBitBtn" and e.texto.lower() == "ok")\
