@@ -1,22 +1,32 @@
 # interno
-import re as regex
 from datetime import date
 from typing import Self, Literal
 # externo
 import bot
 from bot.sistema.janela import ElementoW32, ElementoUIA
 
+IMAGEM_BOTAO_INCLUIR_ENTRADA = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABuSURBVEhL7ZFBCsAwCAT9/6cthVpiWbcG482BPelOhIg2MnLIyCEluYi8QaTkQfecPHqA4Som+YtbJrjpKmBxywQ+fUh4IGl5RPlDGfvyezko7FCW5y836TeEVjkDN5NSuzp3udEqP8TIISMHqF5RR2cYX0l7YAAAAABJRU5ErkJggg==")
+"""Imagem do botão `Incluir Entrada` na resolução `1920x1080`"""
+
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Incluir Entrada'")
-def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
+def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
+                                imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
+    - `imagem` para procurar via imagem
+    - `imagem=None` é feito o click em posição esperada
     - Retornado a janela de `Entrada Diversas`"""
     painel = janela_entrada.elemento\
         .sleep()\
         .encontrar(lambda e: e.class_name == "TPageControl")\
         .encontrar(lambda e: e.class_name == "TPanel")
-    posicao_botao = painel.coordenada.transformar(0.05, 0.5)
-    bot.mouse.clicar_mouse(coordenada=posicao_botao)
 
+    if imagem is None:
+        posicao_botao = painel.coordenada.transformar(0.05, 0.5)
+    else:
+        posicao_botao = imagem.procurar_imagem(regiao=painel.coordenada, segundos=3)
+        assert posicao_botao, "Imagem do botão não foi encontrada"
+
+    bot.mouse.clicar_mouse(coordenada=posicao_botao)
     return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo, aguardar=10)
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
@@ -570,19 +580,14 @@ class Confirmar:
         assert dialogo.clicar("Sim"), "Diálogo 'Data de Barreira' não fechou conforme esperado"
         return self
 
-    def dialogo_aviso_nfe (self) -> str:
-        """Diálogo `Aviso NF-e`, retornado o número de controle e clicado em `OK`"""
+    def dialogo_confirmacao (self) -> str:
+        """Diálogo de confirmação, clicado em `OK` e retornado a mensagem do diálogo"""
         dialogo = self.janela.dialogo(aguardar=5)
-        assert dialogo, "Diálogo 'Aviso NF-e' não encontrado"
+        assert dialogo, "Diálogo de confirmação não encontrado"
 
         texto = dialogo.elemento.textos().lower()
-        assert "controle" in texto, "Mensagem do diálogo 'Aviso NF-e' não está de acordo com o esperado"
-
-        match = regex.search(r"\d+", texto)
-        assert match, "Mensagem do diálogo 'Aviso NF-e' não está de acordo com o esperado"
-
-        assert dialogo.clicar("OK"), "Diálogo 'Aviso NF-e' não fechou conforme esperado"
-        return match.group()
+        assert dialogo.clicar("OK"), "Diálogo de confirmação não fechou conforme esperado"
+        return texto
 
     def fechar_janela_ficha_controle_pagamento_via_imagem (self) -> None:
         """Fechar a janela 'Ficha de Controle de Pagamento'"""
