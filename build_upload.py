@@ -22,9 +22,11 @@ def obter_descricao_release () -> str:
 
     nome: str = pyproject["project"]["name"]
     dependencias: list[str] = pyproject["project"]["dependencies"]
+    requer_python: str = pyproject["project"]["requires-python"]
     pacotes = [pacote.path.stem for pacote in bot.estruturas.Caminho(".", nome).procurar(lambda c: not c.nome.startswith("_"))]
 
     return "<br>".join((
+        f"**Python:** {requer_python!r}",
         f"**Pacotes:** {pacotes!r}",
         f"**Dependências:** {dependencias!r}",
     ))
@@ -51,7 +53,7 @@ def obter_releases () -> dict[str, int]:
     response = bot.http.request(
         "GET",
         f"{HOST}/repos/{USUARIO}/{REPOSITORIO}/releases",
-        headers={
+        headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {TOKEN}"
         }
