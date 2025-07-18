@@ -309,24 +309,20 @@ def consultar_itens_tabela_tarefa (
     return itens
 
 def tomar_acao_tarefa (
-        tarefa: modelos.Tarefa,
-        acao: modelos.Action,
+        id_tarefa: str,
+        id_acao: str,
         propriedades: list[dict[Literal["id", "value", "text"], str]] | None = None
     ) -> None:
     """Tomar `acao` na `tarefa`
     - `propriedades` caso seja necessário um adicional (motivo de pendência)
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
-    assert isinstance(tarefa, modelos.Tarefa), f"Tipo inesperado para a Tarefa: '{tarefa}'"
-    assert isinstance(acao, modelos.Action), f"Tipo inesperado para a Ação: '{acao}'"
-    assert isinstance(propriedades, (list, type(None))), f"Tipo inesperado para as Propriedades: '{propriedades}'"
-
-    bot.logger.informar(f"Tomando ação({acao.name}) na tarefa({tarefa.id}) do Holmes")
+    bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) do Holmes")
 
     response = client_singleton().post(
-        f"/v1/tasks/{tarefa.id}/action",
+        f"/v1/tasks/{id_tarefa}/action",
         json = {
             "task": { 
-                "action_id": acao.id,
+                "action_id": id_acao,
                 "confirm_action": True,
                 "property_values": propriedades or []
             }
