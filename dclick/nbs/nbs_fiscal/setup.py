@@ -28,7 +28,7 @@ class SelecaoEmpresaFilial:
                         .fechar()
         except Exception: pass
 
-        try: return self.janela.janela_processo(lambda j: j.titulo == "Sistema Fiscal", aguardar=2)
+        try: return self.janela.janela_processo(lambda j: j.titulo == "Sistema Fiscal", aguardar=5)
         except Exception:
             raise Exception("Janela 'Sistema Fiscal' não foi encontrada")
 
@@ -70,9 +70,10 @@ def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
     - Usado o `destruir` na janela para encerrar todas as janelas dependentes
     - Ignorado caso não encontre
     - `AssertionError` caso falhe ao encerrar"""
-    try: assert bot.sistema.JanelaW32(lambda j: j.titulo == titulo, aguardar=1)\
-                           .destruir(5),\
-            f"Falha ao encerrar a janela nbs fiscal '{titulo}'"
+    try:
+        janela = bot.sistema.JanelaW32(lambda j: j.titulo == titulo, aguardar=1)
+        assert janela.destruir(5), f"Falha ao encerrar a janela nbs fiscal '{titulo}'"
+        janela.sleep()
     except AssertionError: raise
     except Exception: return
 
