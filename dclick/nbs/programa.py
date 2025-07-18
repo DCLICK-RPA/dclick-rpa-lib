@@ -22,13 +22,13 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
         raise Exception("Janela de login não foi encontrada após abrir o programa")
 
     bot.logger.informar("Aberto o NBS")
-    filhos = janela_login.ordernar_elementos_coordenada(janela_login.elemento.filhos())
+    filhos = janela_login.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=5))
     input_usuario, input_senha = (filho for filho in filhos if filho.class_name == "TOvcPictureField")
     *_, input_confirmar = (filho for filho in filhos if filho.class_name == "TfcImageBtn")
 
     input_usuario.digitar(usuario)
     input_senha.digitar(senha)
-    input_confirmar.clicar()
+    input_confirmar.sleep(0.5).clicar()
 
     assert bot.util.aguardar_condicao(
         lambda: janela_login.fechada,
