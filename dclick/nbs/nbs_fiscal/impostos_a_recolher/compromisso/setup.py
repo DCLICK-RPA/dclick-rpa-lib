@@ -66,21 +66,17 @@ class AbaDocumento:
         assert valor.upper() == descricao.upper(), f"Falha ao preencher o campo naturaza | Esperado '{descricao}' | Encontrado '{valor}'"
         return self
 
-    def selecionar_tipo_doc_via_primeira_letra (self, primeira_letra: str) -> Self:
-        """Selecionar o campo `Doc./Tipo` apertando a `primeira_letra` e confirmando a primeira opção"""
-        # TODO não possível selecionar, via elemento, a opção exata
-        # Checado que é aberto o class_name 'TPopupDataList' mas nenhum elemento dentro
+    def selecionar_doc_tipo (self, texto: str) -> Self:
+        """Selecionar o campo `Doc./Tipo`
+        - Não possível confirmar se o `texto` foi selecionado corretamente"""
         elemento, *_ = self.janela.ordernar_elementos_coordenada(
             self.painel_inferior_aba
                 .to_uia()
                 .filhos(lambda e: e.class_name == "TDBLookupComboBox")
         ) or [None]
-        assert elemento, "Elemento select 'Doc./Tipo' não foi encontrado"
+        assert elemento, "Elemento ComboBox 'Doc./Tipo' não foi encontrado"
 
-        elemento.clicar().sleep(0.1)\
-                .apertar(primeira_letra[0], focar=False).sleep(0.1)\
-                .apertar("enter", focar=False)
-
+        elemento.digitar(texto, virtual=False)
         return self
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Compromisso'")
