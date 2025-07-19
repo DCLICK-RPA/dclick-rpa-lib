@@ -70,7 +70,7 @@ class AbaLista:
             .apertar("tab")
 
         if dialogo := self.janela.dialogo(aguardar=1):
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao preencher o campo fornecedor com '{texto}': '{mensagem}'")
 
@@ -134,7 +134,7 @@ class AbaLista:
         self.painel_grid.sleep(2).aguardar()
 
         if dialogo := self.janela.dialogo():
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar na imagem do óculos para procurar: '{mensagem}'")
 
@@ -168,7 +168,7 @@ class AbaLista:
         self.painel_grid.aguardar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar na imagem para enviar os registro selecionados para compromisso: '{mensagem}'")
 
@@ -190,7 +190,7 @@ class AbaLista:
         self.painel_grid.aguardar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar na imagem para enviar todos os registro para compromisso: '{mensagem}'")
 
@@ -270,7 +270,7 @@ class AbaCompromisso:
         bot.mouse.clicar_mouse(coordenada=coordenada)
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao clicar na imagem do botão para gerar compromisso: '{mensagem}'")
 

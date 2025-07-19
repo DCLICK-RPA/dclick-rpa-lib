@@ -42,7 +42,7 @@ class AbaDocumento:
             .apertar("tab")
 
         if dialogo := self.janela.dialogo(aguardar=1):
-            mensagem = dialogo.elemento.textos()
+            mensagem = dialogo.texto
             dialogo.clicar("OK")
             raise Exception(f"Falha ao preencher o campo fornecedor com '{texto}': '{mensagem}'")
 
@@ -106,7 +106,7 @@ class Confirmar:
         dialogo = self.janela.dialogo(aguardar=5)
         if not dialogo: return self
 
-        texto = dialogo.elemento.textos().lower()
+        texto = dialogo.texto.lower()
         assert "ficha de controle" in texto,\
             f"Texto do diálogo não está de acordo com o esperado: '{texto}'"
 
