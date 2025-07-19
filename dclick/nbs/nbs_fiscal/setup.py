@@ -21,6 +21,8 @@ class SelecaoEmpresaFilial:
         except Exception: raise Exception("Janela de seleção 'Empresa/Filial' não encontrada")
 
     def selecionar_empresa (self, empresa: str) -> Self:
+        """Selecionar a `empresa`
+        - Não possível confirmar se foi selecionado corretamente"""
         self.empresa = empresa
         self.janela.elemento\
             .encontrar(lambda e: e.texto == "Empresa")\
