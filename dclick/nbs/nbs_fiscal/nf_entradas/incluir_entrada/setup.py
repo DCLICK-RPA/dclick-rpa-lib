@@ -15,6 +15,7 @@ def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada
     - Retornado a janela de `Entrada Diversas`"""
+    bot.logger.informar(f"Abrindo o menu 'Incluir Entradas'")
     painel = janela_entrada.elemento\
         .sleep()\
         .encontrar(lambda e: e.class_name == "TPageControl")\
@@ -36,6 +37,7 @@ class CalculoTributos:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
         self.janela = janela
 
     @bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao alterar o tributo '{args[0]}'")
@@ -89,6 +91,7 @@ class AbaCapa:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -323,6 +326,7 @@ class AbaContabilizacao:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -372,6 +376,7 @@ class AbaFaturamento:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -465,6 +470,7 @@ class AbaRetencoesPJ:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
         self.janela = janela
         try: janela.to_uia()\
                    .elemento\
@@ -533,7 +539,7 @@ class AbaRetencoesPJ:
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Entrada Diversas'")
 class Confirmar:
-    """Representação do processo de Confirmação na janela 'Entrada Diversas'"""
+    """Representação do processo de Confirmação na janela `Entrada Diversas`"""
 
     full_hd: bool
     janela: bot.sistema.JanelaW32
@@ -544,6 +550,7 @@ class Confirmar:
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Confirmando na janela 'Entrada Diversas'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)

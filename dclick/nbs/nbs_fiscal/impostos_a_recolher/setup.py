@@ -9,6 +9,7 @@ from bot.sistema.janela import ElementoW32
 def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir `Impostos a Recolher`
     - Retorna a janela `Impostos a Recolher`"""
+    bot.logger.informar(f"Abrindo o menu 'Impostos a Recolher'")
     janela_sistema_fiscal\
         .to_uia()\
         .menu("Outros", "Impostos a Recolher")
@@ -31,6 +32,7 @@ class AbaLista:
     """Imagem do botão `Enviar todos para compromisso`, ícone de uma seta azul, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Lista' na janela 'Impostos a Recolher'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -207,6 +209,7 @@ class AbaCompromisso:
     """Imagem do botão `Procurar`, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Compromisso' na janela 'Impostos a Recolher'")
         self.janela = janela
         janela.to_uia()\
               .elemento\

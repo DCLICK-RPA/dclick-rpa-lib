@@ -11,6 +11,7 @@ class AbaDocumento:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Abrindo a aba 'Documento' na janela 'Compromisso'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -90,6 +91,7 @@ class Confirmar:
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+        bot.logger.informar("Confirmando na janela 'Compromisso'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)

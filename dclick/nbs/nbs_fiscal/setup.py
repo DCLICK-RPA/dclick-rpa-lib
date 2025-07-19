@@ -16,6 +16,7 @@ class SelecaoEmpresaFilial:
     filial: str
 
     def __init__ (self) -> None:
+        bot.logger.informar(f"Selecionando a empresa/filial")
         self.empresa = self.filial = ""
         try: self.janela = bot.sistema.JanelaW32(lambda j: "Empresa/Filial" in j.titulo, aguardar=10).focar()
         except Exception: raise Exception("Janela de seleção 'Empresa/Filial' não encontrada")
@@ -89,12 +90,13 @@ class SelecaoEmpresaFilial:
         return (empresa, filial)
 
 @bot.util.decoradores.prefixar_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
-def selecionar_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
+def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
                                   imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
-    """Selecionar o menu do `Nbs Fiscal`
+    """Abrir o módulo `Nbs Fiscal`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
     - Retornado `SelecaoEmpresaFilial`"""
+    bot.logger.informar(f"Abrindo o módulo 'NBS Fiscal'")
     abas = janela_shortcut.elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn",
         aguardar = 5
@@ -130,6 +132,6 @@ def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
 
 __all__ = [
     "SelecaoEmpresaFilial",
+    "abrir_modulo_nbs_fiscal",
     "fechar_janela_nbs_fiscal",
-    "selecionar_modulo_nbs_fiscal",
 ]
