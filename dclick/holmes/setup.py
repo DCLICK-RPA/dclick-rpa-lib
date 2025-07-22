@@ -1,4 +1,5 @@
 # std
+import mimetypes
 from functools import cache
 from typing import Callable, Generator, Literal, Self
 # interno
@@ -341,6 +342,27 @@ def assumir_tarefa (id_tarefa: str) -> None:
     )
     assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
 
+def anexar_documento_tarefa (id_tarefa: str,
+                             id_documento: str,
+                             documento: tuple[str, bytes],
+                             mime_type: str | None = None) -> None:
+    """Realizar upload do documento `id_documento` na tarefa `id_tarefa`
+    - `documento` sendo o `(nome_extensão, conteúdo)`
+    - `mime_type` para informar manualmente o tipo do conteúdo
+    - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
+
+    nome_extensao, conteudo = documento
+    mime = mime_type or mimetypes.guess_type(nome_extensao)[0]
+    response = client_singleton().post(
+        f"/v1/tasks/{id_tarefa}/documents/{id_documento}",
+        files = {
+            "file": (nome_extensao, conteudo, mime or "application/octet-stream")
+        }
+    )
+    assert response.status_code == 204, f"O status code '{response.status_code}' foi diferente do esperado"
+
 __all__ = [
     "QueryTaskV2",
     "assumir_tarefa",
@@ -349,6 +371,7 @@ __all__ = [
     "tomar_acao_tarefa",
     "consultar_processo",
     "consultar_documento",
+    "anexar_documento_tarefa",
     "consultar_documento_tarefa",
     "consultar_detalhes_processo",
     "consultar_itens_tabela_tarefa",
