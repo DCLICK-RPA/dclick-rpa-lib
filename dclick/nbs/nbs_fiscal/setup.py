@@ -76,12 +76,12 @@ class SelecaoEmpresaFilial:
     @bot.util.decoradores.prefixar_erro("Falha ao obter a empresa/filial selecionada na janela 'Sistema Fiscal'")
     def obter_empresa_filial_selecionada (self) -> tuple[str, str]:
         """Obter a `(empresa, filial)` selecionada na janela `Sistema Fiscal`"""
-        barra_status = bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=5)\
+        barra_status = bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=3)\
                                   .to_uia()\
                                   .elemento\
                                   .encontrar(lambda e: e.class_name == "TStatusBar", aguardar=3)
         empresa, filial = (
-            barra_status.encontrar(lambda e: e.texto.lower().startswith(texto))
+            barra_status.encontrar(lambda e: e.texto.lower().startswith(texto), aguardar=3)
                         .texto
                         .split(":")[-1]
                         .strip()
@@ -91,7 +91,7 @@ class SelecaoEmpresaFilial:
 
 @bot.util.decoradores.prefixar_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
 def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
-                                  imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
+                             imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
     """Abrir o módulo `Nbs Fiscal`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
