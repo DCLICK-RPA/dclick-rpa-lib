@@ -185,11 +185,16 @@ class Documento:
             writer.write(self.conteudo.decode(charset) if charset else self.conteudo)
         return destino
 
+class Assignee:
+    id: str
+    name: str
+
 class Activity:
     id: str
     name: str
     task_id: str
     status: str
+    assignee: Assignee
 
 class Processo:
     id: str
@@ -204,6 +209,14 @@ class Processo:
 
     def __hash__ (self) -> int:
         return hash(self.id)
+
+    def obter_atividade (self, filtro: Callable[[Activity], SupportsBool]) -> Activity | None:
+        """Obter a atividade do `processo` se estiver de acordo com o `filtro`
+        - `None` caso não encontre"""
+        for atividade in self.current_activities:
+            try:
+                if filtro(atividade): return atividade
+            except Exception: pass
 
 class PropertyRecursive (Property):
     property_values: list["PropertyRecursive"]
