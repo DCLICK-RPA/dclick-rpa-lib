@@ -194,7 +194,7 @@ class Activity:
     name: str
     task_id: str
     status: str
-    assignee: Assignee
+    assignee: Assignee | None
 
 class Processo:
     id: str
