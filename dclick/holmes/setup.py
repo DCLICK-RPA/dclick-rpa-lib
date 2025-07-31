@@ -1,5 +1,5 @@
 # std
-import mimetypes
+import certifi, mimetypes
 from functools import cache
 from typing import Callable, Generator, Literal, Self
 # interno
@@ -16,6 +16,7 @@ def client_singleton () -> bot.http.Client:
         base_url = host,
         headers  = { "api_token": token },
         timeout  = 120,
+        verify   = certifi.where(),
     )
 
 class QueryTaskV2:
