@@ -15,7 +15,7 @@ def separar_destinatarios (destinatarios: str) -> list[bot.tipagem.email]:
 
 def notificar_email_simples (
         nome_bot: str,
-        tipo: Literal["sucesso", "erro"],
+        tipo: Literal["sucesso", "parcial", "erro"],
         *mensagem: str,
         anexar_log: bool = True,
         anexos: list[bot.sistema.Caminho] | None = None,
@@ -27,11 +27,15 @@ def notificar_email_simples (
     - `anexos` caminhos para anexos adicionais
     - `destinatarios` especificar os destinatários da notificação
         - `destinatarios=None` Variáveis utilizadas `[email.destinatarios] -> "sucesso", "erro"`
+        - `destinatarios=None e tipo="parcial"` utiliza os destinatários do `erro`
     - Variáveis utilizadas `[email.enviar] -> user, password, host, [port: 587, ssl: False, ]`"""
     assunto = f"{nome_bot} - {tipo.capitalize()}"
     mensagem_email = "<br>".join(mensagem)
     destinatarios = destinatarios if destinatarios != None else separar_destinatarios(
-        bot.configfile.obter_opcoes_obrigatorias("email.destinatarios", tipo)[0]
+        bot.configfile.obter_opcoes_obrigatorias(
+            "email.destinatarios",
+            "sucesso" if tipo == "sucesso" else "erro"
+        )[0]
     )
 
     anexos = anexos.copy() if anexos else []
