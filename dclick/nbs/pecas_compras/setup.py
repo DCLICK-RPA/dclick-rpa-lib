@@ -1,3 +1,6 @@
+# std
+import re as regex
+from typing import Self
 # externo
 import bot
 
@@ -5,11 +8,15 @@ IMAGEM_MODULO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgo
 """Imagem do botão do módulo na resolução `1920x1080`"""
 
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o módulo 'Peças / Compras'")
-def abrir_modulo (janela_shortcut: bot.sistema.JanelaW32,
-                  imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> None:
+def abrir_modulo (
+        janela_shortcut: bot.sistema.JanelaW32,
+        imagem: bot.imagem.Imagem | None = IMAGEM_MODULO
+    ) -> bot.sistema.JanelaW32:
     """Abrir o módulo `Compras` na aba `Peças`
     - `imagem` para procurar via imagem
-    - `imagem=None` é feito o click em posição esperada na aba"""
+    - `imagem=None` é feito o click em posição esperada na aba
+    - Fechado possível janela informativa
+    - Retornado a janela `Compras`"""
     bot.logger.informar(f"Abrindo o módulo 'Peças / Compras'")
     abas = janela_shortcut.elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn",
@@ -29,10 +36,102 @@ def abrir_modulo (janela_shortcut: bot.sistema.JanelaW32,
     else:
         posicao = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=3)
         assert posicao, "Imagem do módulo não foi encontrada"
-
     bot.mouse.clicar_mouse(coordenada=posicao)
-    # return SelecaoEmpresaFilial()
+
+    # fechar janela informativa
+    def procurar_janela_informativa () -> bool:
+        foco = bot.sistema.JanelaW32.from_foco()
+        titulo = foco.titulo
+        if titulo == janela_shortcut.titulo: return False
+        if not titulo.startswith("Compras"): foco.fechar(3)
+        return True
+    bot.util.aguardar_condicao(procurar_janela_informativa, timeout=5, delay=0.5)
+
+    try: return bot.sistema.JanelaW32(
+        lambda j: j.titulo.startswith("Compras") and j.elemento.visivel,
+        aguardar = 10
+    )
+    except Exception: raise Exception("Janela 'Compras' não foi abriu conforme esperado")
+
+def fechar_janela_modulo (titulo: str = "Compras") -> None:
+    """Fechar a janela do módulo
+    - Usado o `destruir` na janela para encerrar todas as janelas dependentes
+    - Ignorado caso não encontre
+    - `AssertionError` caso falhe ao encerrar"""
+    try:
+        janela = bot.sistema.JanelaW32(lambda j: titulo in j.titulo, aguardar=1)
+        assert janela.destruir(5), f"Falha ao encerrar a janela do módulo '{titulo}'"
+        janela.sleep()
+    except AssertionError: raise
+    except Exception: return
+
+@bot.util.decoradores.prefixar_erro_classe("Falha ao selecionar a empresa/filial do módulo")
+class SelecaoEmpresaFilial:
+    """Classe para tratar a seleção da empresa e filial do módulo
+    - Necessário checar se a empresa já está selecionada pois a selecionada não aparece na seleção
+
+    ## Exemplo
+    ```
+    nome_empresa = "Artvel Mogi Mirim"
+    selecao = pecas_compras.SelecaoEmpresaFilial(janela_compras, nome_empresa)
+    if not selecao.checar_empresa_selecionada():
+        selecao.abrir_janela_via_atalho()\\
+            .preencher_nome_empresa()\\
+            .clicar_bota_ok()
+        assert selecao.checar_empresa_selecionada(), f"Falha ao selecionar a empresa '{nome_empresa}'"
+    ```
+    """
+
+    janela: bot.sistema.JanelaW32
+    janela_compras: bot.sistema.JanelaW32
+    nome_empresa: str
+
+    def __init__ (self, janela_compras: bot.sistema.JanelaW32, nome_empresa: str) -> None:
+        bot.logger.informar("Selecionando a empresa/filial")
+        self.nome_empresa = nome_empresa
+        self.janela_compras = janela_compras
+
+    def abrir_janela_via_atalho (self) -> Self:
+        """Abrir a janela de seleção via atalho"""
+        try:
+            self.janela_compras.focar().elemento.atalho("ctrl", "l")
+            self.janela = bot.sistema.JanelaW32(lambda j: j.class_name == "TFrmSelEmpresa")
+            return self
+        except Exception as erro: raise Exception(f"Janela da seleção não abriu conforme esperado; {erro}")
+
+    def preencher_nome_empresa (self) -> Self:
+        """Preencher o campo nome empresa"""
+        *_, elemento = self.janela.ordernar_elementos_coordenada(
+            self.janela.elemento.descendentes(lambda e: e.class_name == "TwwIncrementalSearch")
+        )
+        elemento.digitar(self.nome_empresa, virtual=False)\
+                .apertar("tab")
+        return self
+
+    def clicar_bota_ok (self) -> Self:
+        """Clicar no botão `OK` para alterar a empresa/filial"""
+        self.janela.to_uia()\
+            .elemento\
+            .encontrar(lambda e: e.botao and e.texto == "OK")\
+            .clicar()
+        return self
+
+    def checar_empresa_selecionada (self) -> bool:
+        """Checar se a empresa selecionado possui `self.nome_empresa`"""
+        empresa = self.obter_empresa_selecionada()
+        return bot.util.normalizar(self.nome_empresa) in bot.util.normalizar(empresa)
+
+    def obter_empresa_selecionada (self) -> str:
+        """Obter a `empresa` selecionada na janela"""
+        return self.janela_compras.aguardar().to_uia()\
+            .elemento\
+            .encontrar(lambda e: e.class_name == "TStatusBar", aguardar=3)\
+            .encontrar(lambda e: regex.search(r"empresa\s*:", e.texto.lower()), aguardar=3)\
+            .texto\
+            .split(":")[1].strip()
 
 __all__ = [
-    "abrir_modulo"
+    "abrir_modulo",
+    "fechar_janela_modulo",
+    "SelecaoEmpresaFilial",
 ]
