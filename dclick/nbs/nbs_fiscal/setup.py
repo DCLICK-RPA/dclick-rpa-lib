@@ -66,7 +66,7 @@ class SelecaoEmpresaFilial:
             raise Exception("Janela 'Sistema Fiscal' não foi encontrada")
 
     def checar_selecao (self) -> None:
-        """Checar se a selação da Empresa/Filial aconteceu com sucesso"""
+        """Checar se a seleção da Empresa/Filial aconteceu com sucesso"""
         empresa, filial = self.obter_empresa_filial_selecionada()
         assert normalizar(self.empresa) in normalizar(empresa),\
             f"Falha ao selecionar a empresa '{self.empresa}' | Encontrado '{empresa}'"
