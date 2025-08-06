@@ -40,12 +40,12 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
 
 def fechar_janelas_nbs (filtro: Callable[[bot.sistema.JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
-    - Default: Possui `NBS` no titulo"""
-    filtro = filtro or (lambda j: "NBS" in j.titulo)
+    - Default: Começar com `NBS` no titulo"""
+    filtro = filtro or (lambda j: j.titulo.lower().startswith("nbs"))
     try:
-        janela = bot.sistema.JanelaW32(filtro)
-        bot.logger.informar(f"Fechando a {janela!r}")
-        janela.encerrar(1)
+        while janela := bot.sistema.JanelaW32(filtro):
+            bot.logger.informar(f"Fechando a {janela!r}")
+            janela.encerrar(1)
     except Exception: pass
 
 __all__ = [
