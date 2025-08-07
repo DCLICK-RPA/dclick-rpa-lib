@@ -103,16 +103,19 @@ class Confirmar:
             .clicar()
         return self
 
-    def confirmar_dialogo_ficha_controle (self) -> Self:
-        """Clicar em `Sim` no diálogo `Ficha de Controle`"""
-        dialogo = self.janela.dialogo(aguardar=5)
-        if not dialogo: return self
+    def confirmar_dialogos (self) -> Self:
+        """Realizar ação de confirmação nos diálogos que aparecem"""
+        aguardar = 3
+        for _ in range(5):
+            dialogo = self.janela.dialogo(aguardar=aguardar)
+            if not dialogo: break
+            aguardar /= 2
 
-        texto = dialogo.texto.lower()
-        assert "ficha de controle" in texto,\
-            f"Texto do diálogo não está de acordo com o esperado: '{texto}'"
+            texto = dialogo.texto
+            try: dialogo.confirmar()
+            except Exception as erro:
+                raise Exception(f"Falha ao confirmar o diálogo '{texto}'; {erro}")
 
-        assert dialogo.clicar("Sim"), "Diálogo 'Ficha de Controle' não fechou conforme esperado"
         return self
 
     def fechar_janela_ficha_controle_via_imagem (self) -> None:
