@@ -121,11 +121,12 @@ class AbaCapa:
     def preencher_cnpj_cpf_fornecedor (self, texto: str) -> Self:
         """Preencher o campo `CNPJ/CPF` e apertado `TAB` para confirmar
         - Erro caso apareça diálogo com mensagem"""
+        digitos = "".join(char for char in texto if char.isdigit())
         self.painel_aba\
             .encontrar(lambda e: e.texto == "Fornecedor")\
             .encontrar(lambda e: e.class_name == "TCPF_CGC")\
             .apertar("backspace")\
-            .digitar(texto)\
+            .digitar(digitos)\
             .apertar("enter")
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
