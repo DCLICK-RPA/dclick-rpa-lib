@@ -15,7 +15,7 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
     - Variáveis .ini `[nbs] -> usuario, senha, executavel`
     - Retorna a janela `NBS ShortCut`"""
     usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
-    bot.sistema.abrir_programa(executavel, shell=True)
+    bot.sistema.abrir_processo(executavel, shell=True)
 
     try: janela_login = bot.sistema.JanelaW32(lambda janela: janela.class_name == "TForm_SenhaLogin", aguardar=10)
     except Exception:
