@@ -8,7 +8,7 @@ authors = [
   { name = "Alex Lanes Angelo", email = "alex.angelo@dclick.com.br" }
 ]
 dependencies = [
-    "bot @ https://github.com/DCLICK-RPA/dclick-rpa-python-bot-lib/releases/download/v3.1/bot-3.1-py3-none-any.whl",
+    "bot @ https://github.com/DCLICK-RPA/dclick-rpa-python-bot-lib/releases/download/v3.2/bot-3.2-py3-none-any.whl",
     "uv>=0.6.16",
 ]
 
