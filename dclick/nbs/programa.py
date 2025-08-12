@@ -17,7 +17,7 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
     usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
     bot.sistema.abrir_processo(executavel, shell=True)
 
-    try: janela_login = bot.sistema.JanelaW32(lambda janela: janela.class_name == "TForm_SenhaLogin", aguardar=10)
+    try: janela_login = bot.sistema.JanelaW32(lambda janela: janela.class_name == "TForm_SenhaLogin", aguardar=15).focar()
     except Exception:
         raise Exception("Janela de login não foi encontrada após abrir o programa")
 
