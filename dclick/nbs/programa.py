@@ -11,15 +11,6 @@ janela_shortcut = lambda: JanelaW32(
 )
 """Janela `NBS ShortCut` aberta após login"""
 
-def clicar_para_focar (janela: JanelaW32) -> JanelaW32:
-    """Clicar na janela para dar foco
-    - Por algum motivo, o `focar()` estava indo até o timeout aguardando
-    - Apenas a janela de login e shortcut podem aparesentar o problema"""
-    bot.util.aguardar_condicao(lambda: janela.elemento.visivel, timeout=10)
-    topo_janela = janela.coordenada.transformar(yOffset=0.05)
-    bot.mouse.clicar_mouse(coordenada=topo_janela)
-    return janela
-
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o NBS ou ao realizar login")
 def abrir_e_login () -> JanelaW32:
     """Abrir o NBS e realizar o login
@@ -28,13 +19,11 @@ def abrir_e_login () -> JanelaW32:
     usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
     bot.sistema.abrir_processo(executavel, shell=True)
 
-    try:
-        janela_login = JanelaW32(
+    try: janela_login = JanelaW32(
             lambda janela: janela.class_name == "TForm_SenhaLogin"
                            and janela.elemento.visivel,
             aguardar = 15
-        )
-        clicar_para_focar(janela_login).focar()
+        ).focar()
     except Exception:
         raise Exception("Janela de login não foi encontrada após abrir o programa")
 
@@ -53,8 +42,7 @@ def abrir_e_login () -> JanelaW32:
     ), "Janela de login não fechou corretamente"
     bot.logger.informar("Login realizado")
 
-    janela = janela_shortcut()
-    return clicar_para_focar(janela).focar()
+    return janela_shortcut().focar()
 
 def fechar_janelas_nbs (filtro: Callable[[JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
