@@ -4,7 +4,8 @@ from typing import Callable
 import bot
 
 janela_shortcut = lambda: bot.sistema.JanelaW32(
-    lambda janela: janela.titulo.lower().startswith("nbs shortcut - nbsserver"),
+    lambda janela: janela.titulo.lower().startswith("nbs shortcut - nbsserver")
+                   and janela.elemento.visivel,
     aguardar = 10
 )
 """Janela `NBS ShortCut` aberta após login"""
@@ -36,7 +37,12 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
     ), "Janela de login não fechou corretamente"
     bot.logger.informar("Login realizado")
 
-    return janela_shortcut().focar()
+    # Clicando na janela para dar foco
+    # Isso acelerou pois o .focar() estava indo até o timeout aguardando
+    janela = janela_shortcut()
+    topo_janela = janela.coordenada.transformar(yOffset=0.05)
+    bot.mouse.clicar_mouse(coordenada=topo_janela)
+    return janela.focar()
 
 def fechar_janelas_nbs (filtro: Callable[[bot.sistema.JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
