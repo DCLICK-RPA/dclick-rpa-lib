@@ -2,23 +2,39 @@
 from typing import Callable
 # externo
 import bot
+from bot.sistema import JanelaW32
 
-janela_shortcut = lambda: bot.sistema.JanelaW32(
+janela_shortcut = lambda: JanelaW32(
     lambda janela: janela.titulo.lower().startswith("nbs shortcut - nbsserver")
                    and janela.elemento.visivel,
     aguardar = 10
 )
 """Janela `NBS ShortCut` aberta após login"""
 
+def clicar_para_focar (janela: JanelaW32) -> JanelaW32:
+    """Clicar na janela para dar foco
+    - Por algum motivo, o `focar()` estava indo até o timeout aguardando
+    - Apenas a janela de login e shortcut podem aparesentar o problema"""
+    bot.util.aguardar_condicao(lambda: janela.elemento.visivel, timeout=10)
+    topo_janela = janela.coordenada.transformar(yOffset=0.05)
+    bot.mouse.clicar_mouse(coordenada=topo_janela)
+    return janela
+
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o NBS ou ao realizar login")
-def abrir_e_login () -> bot.sistema.JanelaW32:
+def abrir_e_login () -> JanelaW32:
     """Abrir o NBS e realizar o login
     - Variáveis .ini `[nbs] -> usuario, senha, executavel`
     - Retorna a janela `NBS ShortCut`"""
     usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
     bot.sistema.abrir_processo(executavel, shell=True)
 
-    try: janela_login = bot.sistema.JanelaW32(lambda janela: janela.class_name == "TForm_SenhaLogin", aguardar=15).focar()
+    try:
+        janela_login = JanelaW32(
+            lambda janela: janela.class_name == "TForm_SenhaLogin"
+                           and janela.elemento.visivel,
+            aguardar = 15
+        )
+        clicar_para_focar(janela_login).focar()
     except Exception:
         raise Exception("Janela de login não foi encontrada após abrir o programa")
 
@@ -37,19 +53,15 @@ def abrir_e_login () -> bot.sistema.JanelaW32:
     ), "Janela de login não fechou corretamente"
     bot.logger.informar("Login realizado")
 
-    # Clicando na janela para dar foco
-    # Isso acelerou pois o .focar() estava indo até o timeout aguardando
     janela = janela_shortcut()
-    topo_janela = janela.coordenada.transformar(yOffset=0.05)
-    bot.mouse.clicar_mouse(coordenada=topo_janela)
-    return janela.focar()
+    return clicar_para_focar(janela).focar()
 
-def fechar_janelas_nbs (filtro: Callable[[bot.sistema.JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
+def fechar_janelas_nbs (filtro: Callable[[JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
     - Default: Começar com `NBS` no titulo"""
     filtro = filtro or (lambda j: j.titulo.lower().startswith("nbs"))
     try:
-        while janela := bot.sistema.JanelaW32(filtro, aguardar=0.5):
+        while janela := JanelaW32(filtro, aguardar=0.5):
             bot.logger.informar(f"Fechando a {janela!r}")
             janela.encerrar(1)
     except Exception: pass
