@@ -60,10 +60,10 @@ gravar_transacao (
 ### `email`
 Pacote destinado ao envio de e-mail
 ```python
-# Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - tipo`
+# Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - status`
 notificar_email_simples (
     nome_bot: str,
-    tipo: Literal["sucesso", "erro"],
+    status: Literal["sucesso", "parcial", "erro"],
     *mensagem: str,
     anexar_log: bool = True,
     anexos: list[bot.sistema.Caminho] | None = None,
