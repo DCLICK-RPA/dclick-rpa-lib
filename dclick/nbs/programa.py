@@ -43,7 +43,7 @@ def fechar_janelas_nbs (filtro: Callable[[bot.sistema.JanelaW32], bot.tipagem.Su
     - Default: Começar com `NBS` no titulo"""
     filtro = filtro or (lambda j: j.titulo.lower().startswith("nbs"))
     try:
-        while janela := bot.sistema.JanelaW32(filtro):
+        while janela := bot.sistema.JanelaW32(filtro, aguardar=0.5):
             bot.logger.informar(f"Fechando a {janela!r}")
             janela.encerrar(1)
     except Exception: pass
