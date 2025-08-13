@@ -6,6 +6,7 @@ import bot
 from bot.sistema.janela import ElementoW32
 
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Impostos a Recolher'")
+@bot.util.decoradores.retry()
 def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir `Impostos a Recolher`
     - Retorna a janela `Impostos a Recolher`"""
