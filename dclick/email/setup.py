@@ -15,13 +15,13 @@ def separar_destinatarios (destinatarios: str) -> list[bot.tipagem.email]:
 
 def notificar_email_simples (
         nome_bot: str,
-        tipo: Literal["sucesso", "parcial", "erro"],
+        status: Literal["sucesso", "parcial", "erro"],
         *mensagem: str,
         anexar_log: bool = True,
         anexos: list[bot.sistema.Caminho] | None = None,
         destinatarios: list[bot.tipagem.email] | None = None,
     ) -> None:
-    """Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - tipo`
+    """Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - status`
     - `mensagem` será concatenada com `<br>`
     - `anexar_log` para anexar o log raiz
     - `anexos` caminhos para anexos adicionais
@@ -29,12 +29,12 @@ def notificar_email_simples (
         - `destinatarios=None` Variáveis utilizadas `[email.destinatarios] -> "sucesso", "erro"`
         - `destinatarios=None e tipo="parcial"` utiliza os destinatários do `erro`
     - Variáveis utilizadas `[email.enviar] -> user, password, host, [port: 587, ssl: False, ]`"""
-    assunto = f"{nome_bot} - {tipo.capitalize()}"
+    assunto = f"{nome_bot} - {status.capitalize()}"
     mensagem_email = "<br>".join(mensagem)
     destinatarios = destinatarios if destinatarios != None else separar_destinatarios(
         bot.configfile.obter_opcoes_obrigatorias(
             "email.destinatarios",
-            "sucesso" if tipo == "sucesso" else "erro"
+            "sucesso" if status == "sucesso" else "erro"
         )[0]
     )
 
