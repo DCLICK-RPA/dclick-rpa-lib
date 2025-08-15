@@ -40,9 +40,19 @@ def abrir_e_login () -> JanelaW32:
         lambda: janela_login.fechada,
         timeout = 10
     ), "Janela de login não fechou corretamente"
-    bot.logger.informar("Login realizado")
 
-    return janela_shortcut().focar()
+    try:
+        janela = janela_shortcut().focar()
+        bot.logger.informar("Login realizado")
+        return janela
+    except Exception: pass
+
+    try:
+        dialogo = JanelaW32(lambda j: j.dialogo()).dialogo()
+        assert dialogo
+        raise AssertionError(f"Diálogo de erro encontrado após login: '{dialogo.texto}'")
+    except AssertionError: raise
+    except Exception: raise Exception("Janela Shortcut não aberta após login")
 
 def fechar_janelas_nbs (filtro: Callable[[JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
