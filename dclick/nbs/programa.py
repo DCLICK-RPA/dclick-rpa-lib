@@ -5,7 +5,7 @@ import bot
 from bot.sistema import JanelaW32
 
 janela_shortcut = lambda: JanelaW32(
-    lambda janela: janela.titulo.lower().startswith("nbs shortcut - nbsserver")
+    lambda janela: janela.titulo.lower().startswith("nbs shortcut")
                    and janela.elemento.visivel,
     aguardar = 10
 )
@@ -43,7 +43,7 @@ def abrir_e_login () -> JanelaW32:
 
     try:
         janela = janela_shortcut().focar()
-        bot.logger.informar("Login realizado")
+        bot.logger.informar(f"Login realizado | Aberto {janela}")
         return janela
     except Exception: pass
 
