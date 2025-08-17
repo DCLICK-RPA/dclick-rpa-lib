@@ -1,17 +1,43 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==3.2</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==4.0</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.1/dclick-1.1-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.1/dclick-1.1-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.2/dclick-1.2-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.2/dclick-1.2-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.1/dclick-1.1-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.1-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.2/dclick-1.2-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.2-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
+
+
+## Changelog 🔧
+
+<details>
+<summary>v1.2</summary>
+
+- Refatorado `email.notificar_email_simples()` mas mantido funcionalidade
+- Utilizado nova versão do `bot` e alterado pacotes dependentes onde houveram alterações
+
+</details>
+<details>
+<summary>v1.1</summary>
+
+- Utilizado nova versão do `bot`
+- Renomeado argumento `status` em `email.notificar_email_simples()` e adicionado opção para `parcial`
+- Aplicado melhorias no pacote `nbs`
+
+</details>
+<details>
+<summary>v1.0</summary>
+
+- Criação dos pacotes `dashboard, dealernet, email, holmes, nbs`
+
+</details>
+
 
 ## Importante
 > Utilizado o **uv** como package-manager  
