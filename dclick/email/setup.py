@@ -41,13 +41,14 @@ def notificar_email_simples (
     anexos = anexos.copy() if anexos else []
     if anexar_log:
         mensagem_email += "<br>Todos os detalhes do processamento estão no log em anexo."
-        anexos.append(bot.logger.caminho_log_raiz())
+        anexos.append(bot.logger.CAMINHO_LOG_RAIZ)
 
-    with open(CAMINHO_EMAIL_SIMPLES.string, encoding="utf-8") as arquivo:
-        # ler corpo do html e formatar as variáveis
-        html = arquivo.read().replace("{0}", assunto) \
-                             .replace("{1}", mensagem_email) \
-                             .replace("{2}", nome_bot)
+    # ler corpo do html e formatar as variáveis
+    html = CAMINHO_EMAIL_SIMPLES.path.read_text(encoding="utf-8")
+    for template, substituto in (("{nome_bot}", nome_bot),
+                                 ("{assunto}",  assunto),
+                                 ("{mensagem}", mensagem_email)):
+        html = html.replace(template, substituto)
 
     bot.email.enviar_email(destinatarios, assunto, html, anexos)
 

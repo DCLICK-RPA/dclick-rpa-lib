@@ -73,14 +73,15 @@ class QueryTaskV2:
         self.terms.append(kwargs)
         return self
 
+    @bot.util.decoradores.prefixar_erro("Falha ao consultar tarefas no Holmes")
     def consultar (self) -> modelos.RaizQueryTaskV2:
         """Realizar a consulta da query conforme `query_body`"""
         bot.logger.informar("Procurando por tarefas no Holmes")
-        response = client_singleton().post("/v2/search", json=self.query_body)
 
+        response = client_singleton().post("/v2/search", json=self.query_body)
         assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
-        raiz, erro = bot.formatos.Unmarshaller(modelos.RaizQueryTaskV2).parse(response.json())
-        assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+        raiz = bot.formatos.Unmarshaller(modelos.RaizQueryTaskV2)\
+                           .parse(response.json())
 
         bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' tarefa(s) de um total de '{raiz.total}'")
         return raiz
@@ -182,14 +183,15 @@ class QueryDocumentV2:
         self.terms.append(kwargs)
         return self
 
+    @bot.util.decoradores.prefixar_erro("Falha ao consultar documentos no Holmes")
     def consultar (self) -> modelos.RaizQueryDocumentV2:
         """Realizar a consulta da query conforme `query_body`"""
         bot.logger.informar("Procurando por documentos no Holmes")
-        response = client_singleton().post("/v2/search", json=self.query_body)
 
+        response = client_singleton().post("/v2/search", json=self.query_body)
         assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
-        raiz, erro = bot.formatos.Unmarshaller(modelos.RaizQueryDocumentV2).parse(response.json())
-        assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+        raiz = bot.formatos.Unmarshaller(modelos.RaizQueryDocumentV2)\
+                           .parse(response.json())
 
         bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' documento(s) de um total de '{raiz.total}'")
         return raiz
@@ -230,6 +232,7 @@ class QueryDocumentV2:
         for doc in self.paginar_query(filtro, limite):
             yield consultar_documento(doc.document_id)
 
+@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar a tarefa({args[0]}) no Holmes")
 def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     """Consultar a tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
@@ -237,8 +240,8 @@ def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}")
     assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-    tarefa, erro = bot.formatos.Unmarshaller(modelos.Tarefa).parse(response.json())
-    assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+    tarefa = bot.formatos.Unmarshaller(modelos.Tarefa)\
+                         .parse(response.json())
 
     return tarefa
 
@@ -262,6 +265,7 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
 
     return modelos.Documento(response.content, dict(response.headers))
 
+@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar o processo({args[0]}) no Holmes")
 def consultar_processo (id_processo: str) -> modelos.Processo:
     """Consultar o processo `id_processo`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
@@ -269,26 +273,25 @@ def consultar_processo (id_processo: str) -> modelos.Processo:
 
     response = client_singleton().get(f"/v1/processes/{id_processo}")
     assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-    processo, erro = bot.formatos.Unmarshaller(modelos.Processo).parse(response.json())
-    assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+    return bot.formatos.Unmarshaller(modelos.Processo)\
+                       .parse(response.json())
 
-    return processo
-
+@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar detalhes do processo({args[0]}) no Holmes")
 def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     """Consultar os detalhes do processo `id_processo`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
     bot.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}/details")
+    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+
     body = response.json()
     body = body.get("instance", {}) if isinstance(body, dict) else {}
     body["property_values"] = [body["property_values"].pop(0)]
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-    detalhes, erro = bot.formatos.Unmarshaller(modelos.DetalhesProcesso).parse(body)
-    assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
+    return bot.formatos.Unmarshaller(modelos.DetalhesProcesso)\
+                       .parse(body)
 
-    return detalhes
-
+@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar itens de tabela da tarefa({args[0]}) no Holmes")
 def consultar_itens_tabela_tarefa (
         id_tarefa: str,
         id_tabela: str,
@@ -305,10 +308,8 @@ def consultar_itens_tabela_tarefa (
         params = { "page": page, "per_page": per_page }
     )
     assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-    itens, erro = bot.formatos.Unmarshaller(modelos.ItensTabelaTarefa).parse(response.json())
-    assert not erro, f"O conteúdo da resposta não está de acordo com o esperado\n\t{erro}"
-
-    return itens
+    return bot.formatos.Unmarshaller(modelos.ItensTabelaTarefa)\
+                       .parse(response.json())
 
 def tomar_acao_tarefa (
         id_tarefa: str,

@@ -27,7 +27,7 @@ def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
         posicao_botao = imagem.procurar_imagem(regiao=painel.coordenada, segundos=3)
         assert posicao_botao, "Imagem do botão não foi encontrada"
 
-    bot.mouse.clicar_mouse(coordenada=posicao_botao)
+    bot.mouse.mover(posicao_botao).clicar()
     return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo, aguardar=10)
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
@@ -293,7 +293,7 @@ class AbaCapa:
         posicao = self.painel_valores_nota\
             .coordenada\
             .transformar(0.3, 0.06)
-        bot.mouse.clicar_mouse(coordenada=posicao)
+        bot.mouse.mover(posicao).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -361,7 +361,7 @@ class AbaContabilizacao:
         posicao_botao = self.painel_contabilizacao_padrao\
                             .coordenada\
                             .transformar(0.96, 0.65)
-        bot.mouse.clicar_mouse(coordenada=posicao_botao)
+        bot.mouse.mover(posicao_botao).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -445,7 +445,7 @@ class AbaFaturamento:
         posicao_botao = self.painel_condicao_pagamento\
                             .coordenada\
                             .transformar(0.8, 0.4)
-        bot.mouse.clicar_mouse(coordenada=posicao_botao)
+        bot.mouse.mover(posicao_botao).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -503,7 +503,7 @@ class AbaRetencoesPJ:
             .encontrar(lambda e: e.texto == "pnlBtnAcoesPJGeral")\
             .coordenada\
             .transformar(yOffset=0.09)
-        bot.mouse.clicar_mouse(coordenada=posicao)
+        bot.mouse.mover(posicao).clicar()
 
         self.janela_retencoes_pj
         return self
@@ -573,8 +573,7 @@ class Confirmar:
             segundos = 5
         )
         assert coordenada, "Imagem do botão 'Confirmar' não foi encontrada"
-        bot.mouse.clicar_mouse(coordenada=coordenada)
-
+        bot.mouse.mover(coordenada).clicar()
         return self
 
     def confirmar_dialogo_data_barreira (self) -> Self:
@@ -612,7 +611,7 @@ class Confirmar:
         )
         assert coordenada, f"Coordenada do botão 'Cancelar' não encontrado na janela '{titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
         assert bot.util.aguardar_condicao(lambda: janela.fechada, timeout=5),\
             f"Janela '{titulo}' não foi fechada corretamente"
 

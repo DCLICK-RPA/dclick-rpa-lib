@@ -1,6 +1,6 @@
 [project]
 name = "dclick"
-version = "1.1"
+version = "1.2"
 description = "Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick"
 requires-python = ">=3.12"
 urls = { Homepage = "https://github.com/DCLICK-RPA/dclick-rpa-lib" }
@@ -8,8 +8,8 @@ authors = [
   { name = "Alex Lanes Angelo", email = "alex.angelo@dclick.com.br" }
 ]
 dependencies = [
-    "bot @ https://github.com/DCLICK-RPA/dclick-rpa-python-bot-lib/releases/download/v3.2/bot-3.2-py3-none-any.whl",
-    "uv>=0.6.16",
+    "bot @ https://github.com/DCLICK-RPA/dclick-rpa-python-bot-lib/releases/download/v4.0/bot-4.0-py3-none-any.whl",
+    "uv>=0.8.11",
 ]
 
 [project.optional-dependencies]
@@ -18,18 +18,8 @@ ocr = [
 ]
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "build"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["dclick"]
-
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.package-data]
-dclick = ["**/*"]
-
-[tool.setuptools.exclude-package-data]
-dclick = ["**/__pycache__/*", "**/*.pyc"]
+[tool.uv.build-backend]
+module-root = ""

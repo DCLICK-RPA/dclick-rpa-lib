@@ -7,7 +7,6 @@ token =
 [logger]
 # True ou False
 flag_debug = False
-flag_persistencia = True
 # int
 dias_persistencia = 14
 

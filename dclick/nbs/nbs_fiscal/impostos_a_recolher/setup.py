@@ -91,7 +91,7 @@ class AbaLista:
         dia, mes, ano = data_formatada.split("/")
 
         posicao_dia = elemento.coordenada.transformar(0.25)
-        bot.mouse.clicar_mouse(coordenada=posicao_dia)
+        bot.mouse.mover(posicao_dia).clicar()
         elemento.digitar(dia, virtual=False, focar=False)\
             .apertar("right").digitar(mes, virtual=False, focar=False)\
             .apertar("right").digitar(ano, virtual=False, focar=False)
@@ -113,7 +113,7 @@ class AbaLista:
         dia, mes, ano = data_formatada.split("/")
 
         posicao_dia = elemento.coordenada.transformar(0.25)
-        bot.mouse.clicar_mouse(coordenada=posicao_dia)
+        bot.mouse.mover(posicao_dia).clicar()
         elemento.digitar(dia, virtual=False, focar=False)\
             .apertar("right").digitar(mes, virtual=False, focar=False)\
             .apertar("right").digitar(ano, virtual=False, focar=False)
@@ -133,7 +133,7 @@ class AbaLista:
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
         self.painel_grid.sleep(2).aguardar()
 
         if dialogo := self.janela.dialogo():
@@ -167,7 +167,7 @@ class AbaLista:
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
         self.painel_grid.aguardar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
@@ -189,7 +189,7 @@ class AbaLista:
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
         self.painel_grid.aguardar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
@@ -250,7 +250,7 @@ class AbaCompromisso:
         dia, mes, ano = data_formatada.split("/")
 
         posicao_dia = elemento.coordenada.transformar(0.1)
-        bot.mouse.clicar_mouse(coordenada=posicao_dia)
+        bot.mouse.mover(posicao_dia).clicar()
         elemento.digitar(dia, virtual=False, focar=False)\
             .apertar("right").digitar(mes, virtual=False, focar=False)\
             .apertar("right").digitar(ano, virtual=False, focar=False)
@@ -271,7 +271,7 @@ class AbaCompromisso:
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto

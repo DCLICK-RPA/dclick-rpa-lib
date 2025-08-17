@@ -115,7 +115,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
         posicao_nbs_fiscal = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=3)
         assert posicao_nbs_fiscal, "Imagem do módulo não foi encontrada"
 
-    bot.mouse.clicar_mouse(coordenada=posicao_nbs_fiscal)
+    bot.mouse.mover(posicao_nbs_fiscal).clicar()
     return SelecaoEmpresaFilial()
 
 def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:

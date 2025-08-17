@@ -133,7 +133,7 @@ class Confirmar:
         )
         assert coordenada, f"Coordenada do botão 'Cancelar' não encontrado na janela '{titulo}'"
 
-        bot.mouse.clicar_mouse(coordenada=coordenada)
+        bot.mouse.mover(coordenada).clicar()
         assert bot.util.aguardar_condicao(lambda: janela.fechada, timeout=5),\
             f"Janela '{titulo}' não foi fechada corretamente"
 
