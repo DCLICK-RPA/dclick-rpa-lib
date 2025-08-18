@@ -1,5 +1,4 @@
-"""Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick  
-#### Necessário inicializar o logger `bot.logger.inicializar_logger()` para utilizá-lo"""
+"""Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick"""
 
 from . import dashboard
 from . import dealernet
