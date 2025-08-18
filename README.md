@@ -185,5 +185,33 @@ Pacote destinado ao sistema NBSi
 > Necessário instalar a dependência adicional `dclick[ocr]` caso seja usado o `LeitorOCR` da biblioteca `bot`
 
 ```Python
-...
+# Abrir o NBS e realizar o login
+# Retorna a janela shortcut
+janela_shortcut = nbs.abrir_e_login()
+
+# Fecha as janelas do NBS
+# Útil para o encerramento do bot
+nbs.fechar_janelas_nbs()
+```
+
+> Os pacotes internos do `nbs` representam os módulos da janela `Shortcut`  
+> Cada pacote fica responsável pela sua manipulação
+
+Exemplo com o pacote `nbs.nbs_fiscal`
+```Python
+# Abrir o módulo `Nbs Fiscal`
+# Retornado `SelecaoEmpresaFilial
+selecao_empresa = nbs.nbs_fiscal.abrir_modulo_nbs_fiscal(janela_shortcut)
+
+# Classe para tratar a seleção da empresa e filial do menu `Nbs Fiscal`
+selecao_empresa.selecionar_empresa("empresa")\
+               .selecionar_filial("filial")
+janela_sistema_fiscal = selecao_empresa.confirmar()
+selecao_empresa.checar_selecao() # Checar se a seleção da Empresa/Filial aconteceu com sucesso
+
+# Fecha a janela `Nbs Fiscal` e todas as janelas descendentes abertas
+# Útil para um loop de processamento das notas fiscais
+nbs.nbs_fiscal.fechar_janela_nbs_fiscal()
+
+# Pacotes internos ao `nbs.nbs_fiscal` para navegação e manipulação das janelas
 ```
