@@ -5,7 +5,7 @@ import bot
 from bot.sistema import JanelaW32
 
 janela_shortcut = lambda: JanelaW32(
-    lambda janela: janela.titulo.lower().startswith("nbs shortcut")
+    lambda janela: janela.class_name == "TForm_Atalhos"
                    and janela.elemento.visivel,
     aguardar = 10
 )
