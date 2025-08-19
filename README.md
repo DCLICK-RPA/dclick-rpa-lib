@@ -21,6 +21,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 
 - Refatorado `email.notificar_email_simples()` mas mantido funcionalidade
 - Utilizado nova versão do `bot` e alterado pacotes dependentes onde houveram alterações
+- Adicionado `nbs.pecas_compras`
 
 </details>
 <details>
