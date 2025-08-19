@@ -90,6 +90,7 @@ class SelecaoEmpresaFilial:
         return (empresa, filial)
 
 @bot.util.decoradores.prefixar_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
+@bot.util.decoradores.retry()
 def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
                              imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
     """Abrir o módulo `Nbs Fiscal`
@@ -97,8 +98,9 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
     - Retornado `SelecaoEmpresaFilial`"""
     bot.logger.informar(f"Abrindo o módulo 'NBS Fiscal'")
-    abas = janela_shortcut.elemento.descendentes(
-        lambda elemento: elemento.class_name == "TfcShapeBtn",
+    abas = janela_shortcut.focar().elemento.descendentes(
+        lambda elemento: elemento.class_name == "TfcShapeBtn"
+                         and elemento.visivel,
         aguardar = 5
     )
     *_, aba_adm = janela_shortcut.ordernar_elementos_coordenada(abas)
