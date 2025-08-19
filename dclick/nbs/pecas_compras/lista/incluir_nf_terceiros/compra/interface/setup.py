@@ -12,7 +12,7 @@ def abrir_interface (janela: bot.sistema.JanelaW32) -> AbaFila:
         .clicar()
 
     try: j = janela.janela_processo(
-        lambda j: j.class_name == "TForm_InterfaceCompra",
+        lambda j: j.class_name == "TForm_InterfaceCompra" and j.elemento.visivel,
         aguardar = 10
     )
     except Exception:

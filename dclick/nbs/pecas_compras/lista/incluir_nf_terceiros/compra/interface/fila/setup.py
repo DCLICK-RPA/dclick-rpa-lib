@@ -42,7 +42,7 @@ class AbaFila:
             assert dialogo.clicar(texto), f"Diálogo de confirmação não fechou conforme esperado"
 
         try: return bot.sistema.JanelaW32(
-            lambda j: j.class_name == "TForm_MonitorNFeCompra",
+            lambda j: j.class_name == "TForm_MonitorNFeCompra" and j.elemento.visivel,
             aguardar = 10
         )
         except Exception:
