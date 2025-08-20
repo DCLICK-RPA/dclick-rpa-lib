@@ -17,17 +17,9 @@ def abrir_e_login () -> JanelaW32:
     - Variáveis .ini `[nbs] -> usuario, senha, executavel`
     - Retorna a janela `NBS ShortCut`"""
     usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
-    bot.sistema.abrir_processo(executavel, shell=True)
-
-    try: janela_login = JanelaW32(
-            lambda janela: janela.class_name == "TForm_SenhaLogin"
-                           and janela.elemento.visivel,
-            aguardar = 15
-        ).focar()
-    except Exception:
-        raise Exception("Janela de login não foi encontrada após abrir o programa")
-
+    janela_login = JanelaW32.iniciar(executavel)
     bot.logger.informar("Aberto o NBS")
+
     filhos = janela_login.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=5))
     input_usuario, input_senha = (filho for filho in filhos if filho.class_name == "TOvcPictureField")
     *_, input_confirmar = (filho for filho in filhos if filho.class_name == "TfcImageBtn")
