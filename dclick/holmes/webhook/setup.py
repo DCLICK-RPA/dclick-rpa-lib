@@ -185,8 +185,8 @@ class QueryProcessosWebhook [T]:
     # Consultar os processos
     processos = query.consultar(limite=50)
     # Processos do Webhook que falharam na validação das properties
-    for item in query.itens_webhook_com_properties_invalida:
-        print(f"Item {item.id_processo} apresentou falha na validação das properties")
+    for processo in query.itens_webhook_com_properties_invalida:
+        print(f"{processo!r} apresentou falha na validação das properties")
     ```
 
     ## Veja `ProcessoWebhook` para mais detalhes
