@@ -14,7 +14,7 @@ def abrir_interface (janela: bot.sistema.JanelaW32) -> AbaFila:
     try: j = janela.janela_processo(
         lambda j: j.class_name == "TForm_InterfaceCompra" and j.elemento.visivel,
         aguardar = 10
-    )
+    ).focar()
     except Exception:
         raise Exception("Janela 'Entrada de Nota Fiscal' não abriu conforme esperado")
 

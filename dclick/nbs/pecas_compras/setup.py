@@ -5,7 +5,7 @@ from typing import Self
 import bot
 
 janela_compras = lambda: bot.sistema.JanelaW32(
-    lambda j: j.titulo.startswith("Compras") and j.elemento.visivel,
+    lambda j: j.titulo.startswith("Compras") and j.visivel,
     aguardar = 10
 )
 
@@ -41,6 +41,7 @@ def abrir_modulo (
     if imagem is None:
         posicao = coordenada_painel.transformar(0.5, 0.03)
     else:
+        bot.mouse.mover((0, 0)) # Remover mouse da janela antes de procurar
         posicao = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=3)
         assert posicao, "Imagem do módulo não foi encontrada"
     bot.mouse.mover(posicao).clicar()
@@ -54,7 +55,7 @@ def abrir_modulo (
         return True
     bot.util.aguardar_condicao(procurar_janela_informativa, timeout=5, delay=0.5)
 
-    try: return janela_compras()
+    try: return janela_compras().focar()
     except Exception: raise Exception("Janela 'Compras' não abriu conforme esperado")
 
 def fechar_janela_modulo (titulo: str = "Compras") -> None:
@@ -93,7 +94,7 @@ class SelecaoEmpresaFilial:
     def __init__ (self, nome_empresa: str) -> None:
         bot.logger.informar("Selecionando a empresa/filial")
         self.nome_empresa = nome_empresa
-        self.janela_compras = janela_compras()
+        self.janela_compras = janela_compras().focar()
 
     def abrir_janela_via_atalho (self) -> Self:
         """Abrir a janela de seleção via atalho"""

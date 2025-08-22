@@ -13,14 +13,14 @@ class OpcoesInclusaoNfTerceiros:
         self.janela = janela_compras.janela_processo(
             lambda j: j.class_name == "TForm_EntradaOpcao" and j.elemento.visivel,
             aguardar = 10
-        )
+        ).focar()
 
     @property
     def janela_entrada_nf (self) -> bot.sistema.JanelaW32:
         try: return self.janela_compras.janela_processo(
             lambda j: j.class_name == "TFormEntradaNota" and j.elemento.visivel,
             aguardar = 10
-        )
+        ).focar()
         except Exception:
             raise Exception("Janela 'Entrada de Nota Fiscal' não abriu conforme esperado")
 

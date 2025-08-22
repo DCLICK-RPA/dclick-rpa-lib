@@ -16,7 +16,8 @@ def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32
         .menu("Outros", "Impostos a Recolher")
 
     return janela_sistema_fiscal\
-        .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=10)
+        .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=10)\
+        .focar()
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Lista' da janela 'Impostos a Recolher'")
 class AbaLista:

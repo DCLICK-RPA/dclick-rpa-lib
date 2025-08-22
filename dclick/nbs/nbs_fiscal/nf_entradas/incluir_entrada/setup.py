@@ -9,6 +9,7 @@ IMAGEM_BOTAO_INCLUIR_ENTRADA = bot.imagem.Imagem.from_base64("data:image/png;bas
 """Imagem do botão `Incluir Entrada` na resolução `1920x1080`"""
 
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Incluir Entrada'")
+@bot.util.decoradores.retry()
 def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
                                 imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
@@ -16,19 +17,19 @@ def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
     - `imagem=None` é feito o click em posição esperada
     - Retornado a janela de `Entrada Diversas`"""
     bot.logger.informar(f"Abrindo o menu 'Incluir Entradas'")
-    painel = janela_entrada.elemento\
-        .sleep()\
-        .encontrar(lambda e: e.class_name == "TPageControl")\
-        .encontrar(lambda e: e.class_name == "TPanel")
+    painel = janela_entrada.elemento.focar()\
+        .encontrar(lambda e: e.visivel and e.class_name == "TPageControl", aguardar=10)\
+        .encontrar(lambda e: e.visivel and e.class_name == "TPanel")
 
     if imagem is None:
         posicao_botao = painel.coordenada.transformar(0.05, 0.5)
     else:
+        bot.mouse.mover((0, 0)) # Remover mouse da janela antes de procurar
         posicao_botao = imagem.procurar_imagem(regiao=painel.coordenada, segundos=3)
         assert posicao_botao, "Imagem do botão não foi encontrada"
 
     bot.mouse.mover(posicao_botao).clicar()
-    return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo, aguardar=10)
+    return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=10).focar()
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
 class CalculoTributos:

@@ -114,6 +114,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
     if imagem is None:
         posicao_nbs_fiscal = coordenada_painel.transformar(0.5, 0.26)
     else:
+        bot.mouse.mover((0, 0)) # Remover mouse da janela antes de procurar
         posicao_nbs_fiscal = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=3)
         assert posicao_nbs_fiscal, "Imagem do módulo não foi encontrada"
 
