@@ -40,10 +40,11 @@ class ProcessoWebhook[T]:
     - `incrementar_tentativas_webhook()` incrementar o campo `tentativas` do processo no banco de dados do webhook
     - `atualizar_controle_webhook()` atualizar o campo `controle` do processo no banco de dados do webhook
 
-    ### Acessar processo do `Holmes`
+    ### Acessar dados do processo no `Holmes`
     - `holmes` processo no Holmes
     - `processo_em_aberto` checar se o processo `self.holmes` está aberto
     - `tarefa_em_aberto` consultar a tarefa em aberto no processo `self.holmes`
+    - `tarefa_atribuida_a(_id="", nome="")` checar se a `tarefa_em_aberto` está atribuido ao usuário `_id` e/ou `nome`
 
     ### Manipular tarefa
     - `encaminhar_tarefa(id_acao="")` tomar ação `id_acao` na `self.tarefa_em_aberto`
@@ -123,6 +124,19 @@ class ProcessoWebhook[T]:
         )
         assert tarefa, f"Não há tarefa em aberto para o {self!r}"
         return tarefa
+
+    def tarefa_atribuida_a (self, _id: str | None = None, nome: str | None = None) -> bool:
+        """Checar se a `tarefa_em_aberto` está atribuido ao usuário `_id` e/ou `nome`"""
+        assert _id or nome, "Nome ou id do usuário é necessário para a comparação"
+
+        try: atribuido = self.tarefa_em_aberto.assignee
+        except Exception: return False
+        if not atribuido: return False
+
+        return all((
+            _id and atribuido.id == _id,
+            nome and atribuido.name == nome,
+        ))
 
     def encaminhar_tarefa (
             self, id_acao: str,
