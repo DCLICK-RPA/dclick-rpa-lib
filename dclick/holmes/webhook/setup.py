@@ -35,6 +35,11 @@ class ProcessoWebhook[T]:
     - `webhook` interno do banco de dados do processo recebidos via webhook
     - `[properties, author, documents]` enviados pelo webhook do Holmes
 
+    ### Útil
+    - `repr(processo)` ou `f"{processo!r}"` representação do processo como `str`. Usar em Logs
+    - Implementado `==` e `hash()` para comparação e usar como chave de um `dict` ou `set`
+    - `stringify_properties()` transformar o `properties` para um json string
+
     ### Manipular processo do `Webhook`
     - `remover_webhook()` remover o processo do banco de dados do webhook
     - `incrementar_tentativas_webhook()` incrementar o campo `tentativas` do processo no banco de dados do webhook
@@ -68,6 +73,10 @@ class ProcessoWebhook[T]:
     def __hash__ (self) -> int:
         return hash(self.webhook.id_processo)
 
+    def stringify_properties (self) -> str:
+        """Transformar o `properties` para um json string"""
+        return bot.formatos.Json(self.properties).stringify(False)
+
     def remover_webhook (self) -> typing.Self:
         """Remover o processo do banco de dados do webhook"""
         bot.logger.informar(f"Removendo o {self!r}")
@@ -94,16 +103,6 @@ class ProcessoWebhook[T]:
         )
         assert response.is_success, f"Erro ao atualizar o campo controle do {self!r} no webhook | Status code '{response.status_code}' inesperado"
         return self
-
-    def to_json (self, indentar: bool = False) -> str:
-        return bot.formatos.Json(
-            {
-                "id_webhook":   self.webhook.id_webhook,
-                "id_processo":  self.webhook.id_processo,
-                "properties":   self.properties,
-                "author":       self.author,
-            }
-        ).stringify(indentar)
 
     @functools.cached_property
     def holmes (self) ->  Processo:
@@ -245,7 +244,7 @@ class QueryProcessosWebhook [T]:
             pw.properties = item_webhook.dados.properties
             bot.logger.alertar("\n\t".join((
                 f"Properties do {pw!r} não está com o formato esperado",
-                pw.to_json(),
+                str(pw.properties),
                 mensagem_erro := str(erro),
             )))
             return self.itens_webhook_com_properties_invalida.append((pw, mensagem_erro))
