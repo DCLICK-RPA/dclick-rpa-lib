@@ -182,8 +182,8 @@ class QueryProcessosWebhook [T]:
     query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'")
     # Os processos terão as `properties` como `PropertiesServico`
     query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'", PropertiesServico)
-    # Consultar os processos
-    processos = query.consultar(limite=50)
+    # Procurar por processos
+    processos = query.procurar(limite=50)
     # Processos do Webhook que falharam na validação das properties
     for processo in query.itens_webhook_com_properties_invalida:
         print(f"{processo!r} apresentou falha na validação das properties")
@@ -254,10 +254,10 @@ class QueryProcessosWebhook [T]:
         return pw
 
     @bot.util.decoradores.prefixar_erro("Erro ao se obter os Processos do Webhook")
-    def consultar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
-        """consultar os processos no webhook e realizar a validação
+    def procurar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
+        """Procurar os processos no webhook e realizar a validação
         - `limite` quantidade máxima de processos retornados"""
-        bot.logger.informar(f"Consultando por processos no webhook | Query({self.query}) | Limite({limite})")
+        bot.logger.informar(f"Procurando por processos no webhook | Query({self.query}) | Limite({limite})")
 
         checar_conexao_webhook()
         response = client_singleton().get(

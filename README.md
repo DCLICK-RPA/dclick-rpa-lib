@@ -145,8 +145,8 @@ class PropertiesServico:
     campo_opcional: str | None
 query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'", PropertiesServico)
 
-# Consultar os processos
-processos = query.consultar(limite=50)
+# Procurar por processos
+processos = query.procurar(limite=50)
 # Processos do Webhook que falharam na validação das properties
 for processo in query.itens_webhook_com_properties_invalida:
     print(f"{processo!r} apresentou falha na validação das properties")
