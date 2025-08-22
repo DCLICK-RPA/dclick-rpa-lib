@@ -317,7 +317,7 @@ def tomar_acao_tarefa (
         propriedades: list[dict[Literal["id", "value", "text"], str]] | None = None
     ) -> None:
     """Tomar `acao` na `tarefa`
-    - `propriedades` caso seja necessário um adicional (motivo de pendência)
+    - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
     bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) do Holmes")
 
