@@ -125,16 +125,16 @@ class ProcessoWebhook[T]:
         return tarefa
 
     def tarefa_atribuida_a (self, _id: str | None = None, nome: str | None = None) -> bool:
-        """Checar se a `tarefa_em_aberto` está atribuido ao usuário `_id` e/ou `nome`"""
-        assert _id or nome, "Nome ou id do usuário é necessário para a comparação"
+        """Checar se a `tarefa_em_aberto` está atribuido ao usuário `_id / nome`"""
+        assert any((_id, nome)), "Nome ou id do usuário é necessário para a comparação"
 
         try: atribuido = self.tarefa_em_aberto.assignee
         except Exception: return False
         if not atribuido: return False
 
         return all((
-            _id and atribuido.id == _id,
-            nome and atribuido.name == nome,
+            _id is None or atribuido.id == _id,
+            nome is None or atribuido.name == nome,
         ))
 
     def encaminhar_tarefa (
