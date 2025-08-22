@@ -35,6 +35,10 @@ assignee_id = ${holmes:id_usuario}
 nature_id = 60ef741c6154ba000cf5d1c9
 ext = .xml
 
+[webhook]
+base_url = http://127.0.0.1:5000
+token = A7gg47oi5wzif4wcEj4WIDoGmB0OvDsP
+
 [dealernet.login]
 url =
 usuario =
