@@ -5,3 +5,4 @@
 - https://suporte.holmes.app/pt-br/integrações-com-o-holmes"""
 
 from dclick.holmes.setup import *
+from dclick.holmes import webhook

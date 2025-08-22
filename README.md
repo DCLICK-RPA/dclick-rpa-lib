@@ -22,6 +22,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 - Refatorado `email.notificar_email_simples()` mas mantido funcionalidade
 - Utilizado nova versão do `bot` e alterado pacotes dependentes onde houveram alterações
 - Adicionado `nbs.pecas_compras`
+- Adicionado `holmes.webhook`
 
 </details>
 <details>
@@ -122,6 +123,33 @@ QueryTaskV2()
 
 # Consultar a tarefa `id_tarefa`
 consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
+```
+
+<br>
+
+`holmes.webhook`  
+Pacote destinado a consulta e manipulação dos processos no [Webhook do Holmes](https://github.com/DCLICK-RPA/dclick-webhook-notificacao-holmes)
+
+> Veja a descrição das classes para um melhor contexto
+
+```python
+# Os processos terão as `properties` como `dict`
+query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'")
+
+# Os processos terão as `properties` como `PropertiesServico`
+class PropertiesServico:
+    filial: str
+    empresa: str
+    nota_de_servicos: typing.Literal["Sim"]
+    iss_aliquota: int | float
+    campo_opcional: str | None
+query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'", PropertiesServico)
+
+# Consultar os processos
+processos = query.consultar(limite=50)
+# Processos do Webhook que falharam na validação das properties
+for item in query.itens_webhook_com_properties_invalida:
+    print(f"Item {item.id_processo} apresentou falha na validação das properties")
 ```
 
 <br><br>
