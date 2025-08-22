@@ -264,10 +264,7 @@ class QueryProcessosWebhook [T]:
                 if processo is not None
             ]
 
-        json = bot.formatos.Json(map(repr, processos))\
-                           .stringify(indentar=True)
-        bot.logger.informar(f"Encontrado '{len(processos)}' Processos(s):\n{json}")
-
+        bot.logger.informar(f"Encontrado '{len(processos)}' Processos(s)")
         return processos
 
 __all__ = [
