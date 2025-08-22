@@ -1,5 +1,5 @@
 # std
-import dataclasses, datetime, functools, typing
+import datetime, functools, typing
 from concurrent.futures import ThreadPoolExecutor
 # interno
 import dclick
@@ -28,7 +28,6 @@ def checar_conexao_webhook () -> None:
     mensagem = "Conexão com o Webhook não detectada"
     assert client_singleton().head("/webhook/holmes").status_code == 200, mensagem
 
-@dataclasses.dataclass
 class ProcessoWebhook[T]:
     """Representação do processo no Webhook validado pelo `QueryProcessosWebhook`
 
@@ -43,7 +42,7 @@ class ProcessoWebhook[T]:
 
     ### Acessar processo do `Holmes`
     - `holmes` processo no Holmes
-    - `processo_em_aberto` checar se o processo no Holmes está aberto
+    - `processo_em_aberto` checar se o processo `self.holmes` está aberto
     - `tarefa_em_aberto` consultar a tarefa em aberto no processo `self.holmes`
 
     ### Manipular tarefa
@@ -58,9 +57,7 @@ class ProcessoWebhook[T]:
     """Propriedade `processo.author`"""
     documents: list[modelos.Document]
     """Propriedade `processo.documents`"""
-    holmes: Processo
-    """Processo no Holmes"""
-    
+
     def __repr__ (self) -> str:
         return f"<{self.__class__.__name__} holmes({self.webhook.id_processo}) webhook({self.webhook.id_webhook})>"
 
@@ -102,14 +99,19 @@ class ProcessoWebhook[T]:
             {
                 "id_webhook":   self.webhook.id_webhook,
                 "id_processo":  self.webhook.id_processo,
-                "properties":   self.properties.__dict__,
-                "author":       self.author.__dict__,
+                "properties":   self.properties,
+                "author":       self.author,
             }
         ).stringify(indentar)
 
+    @functools.cached_property
+    def holmes (self) ->  Processo:
+        """Processo no Holmes"""
+        return dclick.holmes.consultar_processo(self.webhook.id_processo)
+
     @property
     def processo_em_aberto (self) -> bool:
-        """Checar se o processo no Holmes está aberto"""
+        """Checar se o processo `self.holmes` está aberto"""
         return self.holmes.status.lower().strip() == STATUS_ABERTO
 
     @functools.cached_property
@@ -179,9 +181,9 @@ class QueryProcessosWebhook [T]:
 
     query: str
     classe_validadora_properties: type[T]
-    itens_webhook_com_properties_invalida: list[tuple[modelos._ItemWebhook, str]]
+    itens_webhook_com_properties_invalida: list[tuple["ProcessoWebhook[dict[str, typing.Any]]", str]]
     """Itens do webhook que falharem a validação do `$.dados.properties` conforme `classe_validadora_properties`
-    - Formato `[(item, mensagem_erro)]`
+    - Formato `[(processo, mensagem_erro)]` o `processo.properties` é tratado como `dict`
     - Sugerido notificar o cliente do erro para alterar algo no processo"""
 
     def __init__ (self, query: str, classe_validadora_properties: type[T] = dict[str, typing.Any]) -> None:
@@ -209,34 +211,33 @@ class QueryProcessosWebhook [T]:
             )))
             return
 
-        # Parse `processo.dados.properties` conforme `classe_validadora_properties`
-        try: properties = item_webhook.dados.properties \
-            if typing.get_origin(self.classe_validadora_properties) is dict \
-            else self.unmarshaller_properties.parse(item_webhook.dados.properties)
-        except Exception as erro:
-            bot.logger.alertar("\n\t".join((
-                f"Properties do processo no webhook id({item_webhook.id_webhook}) não está com o formato esperado",
-                str(item_webhook),
-                mensagem_erro := str(erro),
-            )))
-            return self.itens_webhook_com_properties_invalida.append((item_webhook, mensagem_erro))
-
-        i = item_webhook
-        pw = ProcessoWebhook[T](
-            properties  = properties, # type: ignore
-            author      = i.dados.author,
-            documents   = i.dados.documents,
-            holmes      = dclick.holmes.consultar_processo(i.id_processo),
-            webhook     = modelos.Webhook(
-                id_webhook      = i.id_webhook,
-                id_processo     = i.id_processo,
-                tentativas      = i.tentativas,
-                controle        = i.controle,
-                criado_em       = datetime.datetime.fromisoformat(i.criado_em),
-                atualizado_em   = datetime.datetime.fromisoformat(i.atualizado_em),
-            ),
+        pw = ProcessoWebhook()
+        pw.author = item_webhook.dados.author
+        pw.documents = item_webhook.dados.documents
+        pw.webhook = modelos.Webhook(
+            id_webhook      = item_webhook.id_webhook,
+            id_processo     = item_webhook.id_processo,
+            tentativas      = item_webhook.tentativas,
+            controle        = item_webhook.controle,
+            criado_em       = datetime.datetime.fromisoformat(item_webhook.criado_em),
+            atualizado_em   = datetime.datetime.fromisoformat(item_webhook.atualizado_em),
         )
 
+        # Parse `processo.dados.properties` conforme `classe_validadora_properties`
+        try: properties = item_webhook.dados.properties \
+            if dict in (self.classe_validadora_properties, typing.get_origin(self.classe_validadora_properties))\
+            else self.unmarshaller_properties.parse(item_webhook.dados.properties)
+        except Exception as erro:
+            pw.properties = item_webhook.dados.properties
+            bot.logger.alertar("\n\t".join((
+                f"Properties do {pw!r} não está com o formato esperado",
+                pw.to_json(),
+                mensagem_erro := str(erro),
+            )))
+            return self.itens_webhook_com_properties_invalida.append((pw, mensagem_erro))
+
+        pw.properties = properties
+        pw.holmes # aproveitar o ThreadPool e consultar o processo
         return pw
 
     @bot.util.decoradores.prefixar_erro("Erro ao se obter os Processos do Webhook")
