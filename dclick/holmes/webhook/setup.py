@@ -9,16 +9,15 @@ from dclick.holmes.webhook import modelos
 import bot
 
 STATUS_ABERTO = "opened"
-TOKEN = bot.configfile.obter_opcao_ou("webhook", "token")
 
 @functools.cache
 def client_singleton () -> bot.http.Client:
     """Criar o http `Client` configurado com o `base_url`, `token` e timeout
     - O Client ficará aberto após a primeira chamada na função devido ao `@cache`"""
-    base_url, *_ = bot.configfile.obter_opcoes_obrigatorias("webhook", "base_url")
+    base_url, token = bot.configfile.obter_opcoes_obrigatorias("webhook", "base_url", "token")
     return bot.http.Client(
         base_url = base_url,
-        params = { "token": TOKEN },
+        params = { "token": token },
         timeout = 10
     )
 
