@@ -16,7 +16,7 @@ class AbaPesquisar:
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
         bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
-        self.janela = janela
+        self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
               .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
@@ -27,36 +27,32 @@ class AbaPesquisar:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
                       and e.texto == self.NOME_ABA
+                      and e.visivel
         )
 
     @property
     def grid (self) -> ElementoW32:
-        return self.painel_aba.encontrar(lambda e: e.class_name == "TwwDBGrid")
+        return self.painel_aba.encontrar(lambda e: e.class_name == "TwwDBGrid" and e.visivel)
 
     def alternar_inicio_emissao (self) -> Self:
         """Alternar o estado do checkbox `Emissao` de início"""
-        elemento, *_ = self.janela.ordernar_elementos_coordenada(
-            self.painel_aba.descendentes(lambda e: e.class_name == "TDateTimePicker", aguardar=5)
-        ) or [None]
-        assert elemento, "Elemento 'Data Emissão Início' não foi encontrado"
-
-        elemento.apertar("space")
+        self.painel_aba\
+            [0]["TDateTimePicker"]\
+            .apertar("space")
         return self
 
     def preencher_numero_nfe (self, texto: str) -> Self:
-        elemento, *_ = self.janela.ordernar_elementos_coordenada(
-            self.painel_aba.descendentes(lambda e: e.class_name == "TOvcPictureField", aguardar=5)
-        ) or [None]
-        assert elemento, "Elemento 'Número NFe' não foi encontrado"
-
-        elemento.digitar(texto).apertar("tab")
+        self.painel_aba\
+            [0]["TOvcPictureField"]\
+            .digitar(texto)\
+            .apertar("tab")
         return self
 
     def selecionar_fornecedor (self, fornecedor: str) -> Self:
         """Selecionar o `fornecedor` na parte inferior da aba
         - Feito validação se foi selecionado com sucesso"""
         elemento = self.painel_aba[-1].to_uia()\
-            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=5)\
+            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo" and e.visivel, aguardar=5)\
             .atalho("alt", "down")\
             .digitar(fornecedor, virtual=False, focar=False)\
             .sleep(0.5)\
@@ -100,13 +96,14 @@ class AbaPesquisar:
 
         return self
 
-    def salvar (self) -> Self:
+    def salvar (self) -> None:
         """Clicar no botão `Salvar` e confirmar diálogo de confirmação
         - Confirmado diálogo sobre o `SEFAZ` caso apareça
-        - Erro caso diálogo seja diferente do esperado"""
+        - Erro caso diálogo seja diferente do esperado
+        - Janela `Monitor Notas Eletrônicas` fechada"""
         self.painel_aba[-1]\
             .to_uia()\
-            .encontrar(lambda e: e.botao and e.texto == "Salvar")\
+            .encontrar(lambda e: e.botao and e.texto == "Salvar" and e.visivel)\
             .clicar()
 
         dialogo = self.janela.dialogo(aguardar=3)
@@ -126,7 +123,7 @@ class AbaPesquisar:
         dialogo = self.janela.dialogo(aguardar=0.5)
         assert not dialogo, f"Diálogo inesperado encontrado após salvar: {texto}"
 
-        return self
+        assert self.janela.fechar(), "Esperado janela fechar após salvar"
 
 __all__ = [
     "AbaPesquisar",
