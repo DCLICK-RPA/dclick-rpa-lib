@@ -12,18 +12,21 @@ janela_shortcut = lambda: JanelaW32(
 """Janela `NBS ShortCut` aberta após login"""
 
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o NBS ou ao realizar login")
-def abrir_e_login () -> JanelaW32:
+def abrir_e_login (usuario: str | None = None, senha: str | None = None) -> JanelaW32:
     """Abrir o NBS e realizar o login
-    - Variáveis .ini `[nbs] -> usuario, senha, executavel`
+    - Variáveis .ini `[nbs] -> executavel, [usuario, senha]`
     - Retorna a janela `NBS ShortCut`"""
-    usuario, senha, executavel = bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario", "senha", "executavel")
-    janela_login = JanelaW32.iniciar(executavel)
-    bot.logger.informar("Aberto o NBS")
+    executavel, *_ = bot.configfile.obter_opcoes_obrigatorias("nbs", "executavel")
+    usuario = usuario or bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario")[0]
+    senha = senha or bot.configfile.obter_opcoes_obrigatorias("nbs", "senha")[0]
 
+    bot.logger.informar("Abrindo o NBS")
+    janela_login = JanelaW32.iniciar(executavel)
+
+    bot.logger.informar(f"Realizando login no NBS com o usuário '{usuario}'")
     filhos = janela_login.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=5))
     input_usuario, input_senha = (filho for filho in filhos if filho.class_name == "TOvcPictureField")
     *_, input_confirmar = (filho for filho in filhos if filho.class_name == "TfcImageBtn")
-
     input_usuario.digitar(usuario)
     input_senha.digitar(senha)
     input_confirmar.sleep(0.5).clicar()
