@@ -54,17 +54,11 @@ def abrir_modulo (
     try: return janela_compras().focar()
     except Exception: raise Exception("Janela 'Compras' não abriu conforme esperado")
 
-def fechar_janela_modulo (titulo: str = "Compras") -> None:
-    """Fechar a janela do módulo
-    - Usado o `destruir` na janela para encerrar todas as janelas dependentes
-    - Ignorado caso não encontre
-    - `AssertionError` caso falhe ao encerrar"""
-    try:
-        janela = bot.sistema.JanelaW32(lambda j: titulo in j.titulo, aguardar=1)
-        assert janela.destruir(5), f"Falha ao encerrar a janela do módulo '{titulo}'"
-        janela.sleep()
-    except AssertionError: raise
-    except Exception: return
+def fechar_janela_modulo () -> None:
+    """Fechar a janela do módulo pelo processo
+    - Ignorado caso não encontrado"""
+    try: janela_compras().encerrar()
+    except Exception: pass
 
 @bot.util.decoradores.prefixar_erro_classe("Falha ao selecionar a empresa/filial do módulo")
 class SelecaoEmpresaFilial:
