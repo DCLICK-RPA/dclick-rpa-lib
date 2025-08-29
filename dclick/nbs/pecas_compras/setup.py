@@ -5,10 +5,11 @@ from typing import Self
 import bot
 
 janela_compras = lambda: bot.sistema.JanelaW32(
-    lambda j: j.titulo.startswith("Compras") and j.visivel,
+    lambda j: j.class_name == "TForm_Principal" and j.visivel,
     aguardar = 10
 )
 
+CLASS_NAME_JANELA_INFORMATIVA = "TFrmListaNfeRen"
 IMAGEM_MODULO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAAwCAIAAAA3ogXuAAAB/ElEQVRYCc3BAY7TCBAAwe6XD/PyvsWsRcLqTglGh6usuBkrbsaKm7HiZqy4GSt+i8q/qLjAipepPKh4pBZacYEVL1MrfqH8UAJacYEVL1MrpfiVAhZacYEVL1Mr5UPxSfmhBLTiAitepn779m1m+EoBC624wIqXqRQQD5QPBQhoxQVWvEO+iyfKp0ArLrDiHSoVPynFB4VAKy6w4h0qFT8pxQeFQCsusOIdKhU/KYXyXaAVF1jxDpUC4pPyKb7TiguseIdK8R+04gIr3qHygorfZcXvUiv+NCtuxoqbseJmrLgZK27Gipux4masuBkrbsaKm7HiZqy4GStuxooHupxq+BusOOnWcNKt4X9nxUm3hr/NipNuDV/ocqgBdDnU6AI1gC6nGkAXqAF0OdRw0AVqeGbFSbeGZ7o1HHRrdGsA3RpAt0a3hoNujW4Nz3RrdGsA3RoeWHHSreGZbg0H3RrdGkC3BtCt0a3hoFujW8NBl1MNoFvDF1acdGt4plvDQbdGtwbQrQF0a3RrOOjW6NYAujUcdGs46NbwzIqTbg0n3RrdGg66Nbo1gG4NoFujW8NBt0a3BtCt4aBbo1sD6NbwwIoHupxqOOhyqAF0awDdGkC3RpdTDaBbw0GXUw2gC9TwzIo/RLeGy6z4Q3RruMyKm7HiZqy4GStu5h8cwtCwMlN0DQAAAABJRU5ErkJggg==")
 """Imagem do botão do módulo na resolução `1920x1080`"""
 
@@ -46,14 +47,9 @@ def abrir_modulo (
         assert posicao, "Imagem do módulo não foi encontrada"
     bot.mouse.mover(posicao).clicar()
 
-    # fechar janela informativa
-    def procurar_janela_informativa () -> bool:
-        foco = bot.sistema.JanelaW32.from_foco()
-        titulo = foco.titulo
-        if titulo == janela_shortcut.titulo: return False
-        if not titulo.startswith("Compras"): foco.fechar(3)
-        return True
-    bot.util.aguardar_condicao(procurar_janela_informativa, timeout=5, delay=0.5)
+    janela = bot.sistema.JanelaW32.aguardar_nova_janela()
+    if janela.class_name == CLASS_NAME_JANELA_INFORMATIVA:
+        assert janela.fechar(), "Falha ao fechar janela informativa"
 
     try: return janela_compras().focar()
     except Exception: raise Exception("Janela 'Compras' não abriu conforme esperado")
