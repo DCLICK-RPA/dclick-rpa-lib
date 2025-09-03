@@ -49,6 +49,7 @@ class SelecaoEmpresaFilial:
     def confirmar (self) -> bot.sistema.JanelaW32:
         """Clicar no botão de confirmar
         - Fechado janela informativa que pode aparecer
+        - Erro caso apareça diálogo
         - Utilizar `self.checar_selecao` para checar sucesso após
         - Retornado janela `Sistema Fiscal`"""
         self.janela.elemento\
@@ -60,6 +61,9 @@ class SelecaoEmpresaFilial:
                         .sleep()\
                         .fechar()
         except Exception: pass
+
+        if dialogo := self.janela.dialogo():
+            raise Exception(f"Diálogo inesperado: '{dialogo.texto}'")
 
         try: return bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=5)
         except Exception:
