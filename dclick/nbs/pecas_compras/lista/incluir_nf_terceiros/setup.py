@@ -8,6 +8,8 @@ class OpcoesInclusaoNfTerceiros:
     janela: bot.sistema.JanelaW32
     janela_compras: bot.sistema.JanelaW32
 
+    CLASSNAME_JANELA_ENTRADA_FRETE = "TForm_EntradaFrete"
+
     def __init__ (self, janela_compras: bot.sistema.JanelaW32) -> None:
         self.janela_compras = janela_compras.focar()
         self.janela = janela_compras.janela_processo(
@@ -25,11 +27,17 @@ class OpcoesInclusaoNfTerceiros:
 
     def clicar_botao_compra (self) -> bot.sistema.JanelaW32:
         """Clicar no botão `Compra`
+        - Caso a janela `Conhecimento de Transporte` apareça, será cliado em `Entrada Sem Frete`
         - Retornado janela `Entrada de Nota Fiscal`"""
-        self.janela.to_uia()\
-            .elemento\
-            .encontrar(lambda e: e.botao and e.texto == "Compra")\
-            .clicar()
+        with bot.sistema.JanelaW32.aguardar_nova_janela() as janela:
+            self.janela.to_uia().elemento\
+                .encontrar(lambda e: e.botao and e.texto == "Compra")\
+                .clicar()
+
+        if janela.class_name == self.CLASSNAME_JANELA_ENTRADA_FRETE:
+            janela.elemento.encontrar(lambda e: e.texto == "Entrada Sem Frete" and e.visivel).clicar()
+            janela.elemento.encontrar(lambda e: e.texto == "OK").clicar()
+
         return self.janela_entrada_nf
 
 __all__ = [

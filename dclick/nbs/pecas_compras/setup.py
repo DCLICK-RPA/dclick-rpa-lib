@@ -45,9 +45,10 @@ def abrir_modulo (
         bot.mouse.mover((0, 0)) # Remover mouse da janela antes de procurar
         posicao = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=3)
         assert posicao, "Imagem do módulo não foi encontrada"
-    bot.mouse.mover(posicao).clicar()
 
-    janela = bot.sistema.JanelaW32.aguardar_nova_janela()
+    with bot.sistema.JanelaW32.aguardar_nova_janela() as janela:
+        bot.mouse.mover(posicao).clicar()
+
     if janela.class_name == CLASS_NAME_JANELA_INFORMATIVA:
         assert janela.fechar(), "Falha ao fechar janela informativa"
 
@@ -82,7 +83,7 @@ class SelecaoEmpresaFilial:
     nome_empresa: str
 
     def __init__ (self, nome_empresa: str) -> None:
-        bot.logger.informar("Selecionando a empresa/filial")
+        bot.logger.informar(f"Selecionando a empresa/filial '{nome_empresa}'")
         self.nome_empresa = nome_empresa
         self.janela_compras = janela_compras().focar()
 

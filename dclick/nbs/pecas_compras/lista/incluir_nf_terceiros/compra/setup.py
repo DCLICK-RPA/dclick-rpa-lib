@@ -276,18 +276,17 @@ class Confirmar:
         - Confirmar diálogo `Número de Controle` e retornar o valor
         - Esperado que a janela feche"""
         self.janela.aguardar()
-        texto = ""
+        texto_dialogo = ""
 
-        try:
-            for _ in range(5):
-                dialogo = self.janela.dialogo(aguardar=1)
-                if not dialogo: break
-                if "imprimir" in texto: dialogo.negar()
-                else: dialogo.confirmar()
-        except Exception: pass
+        for _ in range(5):
+            dialogo = self.janela.dialogo(aguardar=1)
+            if not dialogo: break
+            texto_dialogo = dialogo.texto
+            if "imprimir" in texto_dialogo: dialogo.negar()
+            else: dialogo.confirmar()
 
-        match = regex.search(r"\d+", texto)
-        assert "sucesso" in texto.lower() and match, f"Diálogo inesperado: '{texto}'"
+        match = regex.search(r"\d+", texto_dialogo)
+        assert "sucesso" in texto_dialogo.lower() and match, f"Diálogo inesperado: '{texto_dialogo}'"
         assert bot.util.aguardar_condicao(lambda: self.janela.fechada, timeout=10),\
             f"Janela '{self.janela.titulo}' não fechou conforme esperado"
 
