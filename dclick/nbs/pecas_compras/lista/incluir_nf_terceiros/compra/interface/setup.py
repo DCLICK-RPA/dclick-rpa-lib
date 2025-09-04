@@ -206,7 +206,13 @@ class Confirmar:
                         .clicar()
         except Exception: pass
 
-        assert self.janela.fechar(), "Janela não fechou após confirmação"
+        if self.janela.fechar():
+            return
+
+        mensagem = "Janela não fechou após confirmação"
+        if dialogo := self.janela.dialogo(aguardar=0.2):
+            mensagem += f"; Diálogo inesperado '{dialogo.texto}'"
+        raise AssertionError(mensagem)
 
 __all__ = [
     "abrir_interface",
