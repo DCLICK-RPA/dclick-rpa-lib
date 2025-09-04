@@ -206,7 +206,7 @@ class Confirmar:
                         .clicar()
         except Exception: pass
 
-        assert self.janela.fechar(3), "Janela não fechou após confirmação"
+        assert self.janela.fechar(), "Janela não fechou após confirmação"
 
 __all__ = [
     "abrir_interface",
