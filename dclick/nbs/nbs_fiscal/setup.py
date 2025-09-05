@@ -125,6 +125,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
     bot.mouse.mover(posicao_nbs_fiscal).clicar()
     return SelecaoEmpresaFilial()
 
+@bot.util.decoradores.retry()
 def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
     """Fechar a janela nbs fiscal `titulo`
     - Usado o `destruir` na janela para encerrar todas as janelas dependentes
@@ -132,7 +133,7 @@ def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
     - `AssertionError` caso falhe ao encerrar"""
     try:
         janela = bot.sistema.JanelaW32(lambda j: j.titulo == titulo, aguardar=1)
-        assert janela.destruir(5), f"Falha ao encerrar a janela nbs fiscal '{titulo}'"
+        assert janela.destruir(3), f"Falha ao encerrar a janela nbs fiscal '{titulo}'"
         janela.sleep()
     except AssertionError: raise
     except Exception: return
