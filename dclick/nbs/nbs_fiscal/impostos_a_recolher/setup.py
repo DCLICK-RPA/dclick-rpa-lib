@@ -66,17 +66,18 @@ class AbaLista:
 
     def preencher_fornecedor (self, texto: str) -> Self:
         """Preencher o campo `Fornecedor` e apertado `TAB` para confirmar
+        - Utilizado apenas os digitos do `texto`
         - Erro caso apareça diálogo com mensagem"""
+        digitos = "".join(char for char in texto if char.isdigit())
         self.painel_superior_aba\
             .encontrar(lambda e: e.class_name == "TCPF_CGC")\
             .apertar("backspace")\
-            .digitar(texto)\
+            .digitar(digitos)\
             .apertar("tab")
 
-        if dialogo := self.janela.dialogo(aguardar=1):
+        if dialogo := self.janela.aguardar().dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.confirmar()
-            raise Exception(f"Falha ao preencher o campo fornecedor com '{texto}': '{mensagem}'")
+            raise Exception(f"Falha ao preencher o campo fornecedor com '{digitos}': '{mensagem}'")
 
         return self
 
