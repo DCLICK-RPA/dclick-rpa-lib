@@ -1,17 +1,17 @@
 # interno
 from datetime import date
-from typing import Self, Literal
+from typing import Self, Literal, Callable
 # externo
 import bot
-from bot.sistema.janela import ElementoW32, ElementoUIA
+from bot.sistema.janela import ElementoW32, ElementoUIA, Dialogo, JanelaW32
 
 IMAGEM_BOTAO_INCLUIR_ENTRADA = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABuSURBVEhL7ZFBCsAwCAT9/6cthVpiWbcG482BPelOhIg2MnLIyCEluYi8QaTkQfecPHqA4Som+YtbJrjpKmBxywQ+fUh4IGl5RPlDGfvyezko7FCW5y836TeEVjkDN5NSuzp3udEqP8TIISMHqF5RR2cYX0l7YAAAAABJRU5ErkJggg==")
 """Imagem do botão `Incluir Entrada` na resolução `1920x1080`"""
 
 @bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Incluir Entrada'")
 @bot.util.decoradores.retry()
-def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
-                                imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> bot.sistema.JanelaW32:
+def abrir_menu_incluir_entrada (janela_entrada: JanelaW32,
+                                imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada
@@ -29,15 +29,15 @@ def abrir_menu_incluir_entrada (janela_entrada: bot.sistema.JanelaW32,
         assert posicao_botao, "Imagem do botão não foi encontrada"
 
     bot.mouse.mover(posicao_botao).clicar()
-    return bot.sistema.JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=10).focar()
+    return JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=10).focar()
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
 class CalculoTributos:
     """Representação da janela `Cálculo de tributos` da aba `Capa`"""
 
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
         self.janela = janela
 
@@ -89,9 +89,9 @@ class CalculoTributos:
 class AbaCapa:
     """Representação da aba `Capa` na janela `Entrada Diversas`"""
 
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
@@ -227,7 +227,11 @@ class AbaCapa:
         valor = elementos[9].to_uia().texto
         return float(valor.replace(",", "."))
 
-    def preencher_valor_iss_valores_nota (self, valor_iss: int | float) -> Self:
+    def preencher_valor_iss_valores_nota (self, valor_iss: int | float,
+                                                tratamento_dialogos: Callable[[Dialogo], None] | None = None) -> Self:
+        """Preencher o campo `Valor ISS` e apertado `TAB` para confirmar
+        - `tratamento_dialogos` função utilizada para tratar os possíveis diálogos que serão abertos
+        - Erro caso exista algum diálogo com mensagem"""
         elementos = self.janela.ordernar_elementos_coordenada(
             self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
         )
@@ -237,6 +241,11 @@ class AbaCapa:
             .apertar("backspace")\
             .digitar(str(valor_iss).replace(".", ","))\
             .apertar("tab")
+
+        try: self.janela.capturar_dialogos(tratamento_dialogos)
+        except Exception as erro:
+            raise Exception(f"Falha ao preencher o valor iss '{valor_iss}'; {erro}") from None
+
         return self
 
     def preencher_codigo_servico_prefeitura_valores_nota (self, codigo: str) -> Self:
@@ -248,9 +257,11 @@ class AbaCapa:
         elementos[11].apertar("backspace").digitar(codigo).apertar("tab")
         return self
 
-    def preencher_total_nota_valores_nota (self, total: int | float) -> Self:
+    def preencher_total_nota_valores_nota (self, total: int | float,
+                                                 tratamento_dialogos: Callable[[Dialogo], None] | None = None) -> Self:
         """Preencher o campo `Total Nota` e apertado `TAB` para confirmar
-        - Erro caso apareça diálogo com mensagem"""
+        - `tratamento_dialogos` função utilizada para tratar os possíveis diálogos que serão abertos
+        - Erro caso exista algum diálogo com mensagem"""
         elementos = self.janela.ordernar_elementos_coordenada(
             self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
         )
@@ -260,10 +271,9 @@ class AbaCapa:
                      .digitar(str(total).replace(".", ","))\
                      .apertar("enter")
 
-        if dialogo := self.janela.dialogo(aguardar=0.5):
-            mensagem = dialogo.texto
-            dialogo.confirmar()
-            raise Exception(f"Falha ao preencher o total nota '{total}': '{mensagem}'")
+        try: self.janela.capturar_dialogos(tratamento_dialogos)
+        except Exception as erro:
+            raise Exception(f"Falha ao preencher o total nota '{total}'; {erro}") from None
 
         return self
 
@@ -325,9 +335,9 @@ class AbaCapa:
 class AbaContabilizacao:
     """Representação da aba `Contabilização` na janela `Entrada Diversas`"""
 
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
@@ -375,9 +385,9 @@ class AbaContabilizacao:
 class AbaFaturamento:
     """Representação da aba `Faturamento` na janela `Entrada Diversas`"""
 
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
@@ -469,9 +479,9 @@ class AbaFaturamento:
 class AbaRetencoesPJ:
     """Representação da aba `Retenções PJ` na janela `Entrada Diversas`"""
 
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
         self.janela = janela
         try: janela.to_uia()\
@@ -544,14 +554,14 @@ class Confirmar:
     """Representação do processo de Confirmação na janela `Entrada Diversas`"""
 
     full_hd: bool
-    janela: bot.sistema.JanelaW32
+    janela: JanelaW32
 
     IMAGEM_CONFIRMAR = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAAAdCAYAAADimZEAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVGhD7ZaBlYMgDEDZiW1Yho7CAg7BKE7CEQQMGNR4tvfORt9vAWOMX6RV0zQF4RjY1DzPQdhHZDEQWQxEFgORxeBWWSru1PhTuE0WiFKvBer4E7hFFhal1IuMeQK/ltWIEllj+KJ8sBriFoyjYs6y5jLWBq1t8GTcfVyWFcu8JEpbn/suGKWD9X3cSfxnBGEuyeKLihA3572L5LbVdcZVoXCOMVHqMq6My+eC6DymTHAld/qO8WnGlfHSh7yuzsZyDXzdmr/Pk665IyuGNX08zhYFOINutgOKq0WhGbcZXwtv5Jd2ikezFff7dpVbHiDK3+fJkLKqkLiT41xRwJ6s7pgzeT1rbgZe404EJavGD2KodplZvcySJ0PLwkKysNTC4xxRwKCAxF/JguuOZjTOk6FlRRGNmF4UwJVFLvC5D8UdFv0mWeUhJXEXZAEbYRi2qMIiqCyoq7h2oa1/KZqi3/EaonryD8l2Rq8MZQGksMui/j+7soBG2BeLAg5lAUnYl4sCTskSFkQWA5HFQGQxEFkMRBaDKgsawjFJVvqU7cQWwg8Fw9KgLVft2wAAAABJRU5ErkJggg==")
     """Imagem do botão `Confirmar` na resolução `1920x1080`"""
     IMAGEM_CANCELAR = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVFhH7ZQ9ksIwDIV9J2Yyw10oUuQg6ag4BS1dzkCdkhNwgK1TeC1HCpYsO94MFGRdfAPRj+X3Ysc8fyZbeVENEVRDBJsMscbY3gG/Wv6bUQ0hwbkcodV8M5EhTHDfp3NKfg/kDQlEbzPjYfvGuNaZ002r+QDjxR6ai71ruRWyVyYUL5+1Ps5sxuH8wOfBnszR9qOs+wDvNgSITCFKr4myqfs4OPD/+bicHNMOr562c8aJOOUobjp7pfit09fB2ck5jZvjT2+wliNpCOCqtxsCGw0FhTCz4OTgprxo2mAQF6fLi4S12TqTvbZ4LSmenaOf1qwhkRnvMgTwm8I3R5tjAuDKafGA8HQg/oqG9atzOH+/MkCJKZmhsxDl7bOeQkM006m+aA6n7KOqsWqK9lHF51CI3/SKIeLK+B6og/olPs9jV6ZoDicyRDXDiY9iGJf9nNkEdpxlHD+iTIivCQ3BHPUsb93hhdJaKH5Zp2QOhxniOpOic7k9kTdECGb5HZoBpA1JCPY1OzUDiL4hIHbPgteIDPnvVEME1RBBNURQDWFM9hfM9zt0FZHS5AAAAABJRU5ErkJggg==")
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
-    def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
+    def __init__ (self, janela: JanelaW32) -> None:
         bot.logger.informar("Confirmando na janela 'Entrada Diversas'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()

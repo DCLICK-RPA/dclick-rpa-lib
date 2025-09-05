@@ -1,8 +1,8 @@
 # std
-from typing import Self
+from typing import Self, Callable
 # externo
 import bot
-from bot.sistema.janela import ElementoW32
+from bot.sistema.janela import ElementoW32, Dialogo
 
 @bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Documento' da janela 'Compromisso'")
 class AbaDocumento:
@@ -96,26 +96,15 @@ class Confirmar:
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)
 
-    def clicar_ok (self) -> Self:
-        """Clicar no botão `OK`"""
+    def clicar_ok (self, tratamento_dialogos: Callable[[Dialogo], None] | None = None) -> Self:
+        """Clicar no botão `OK`
+        - `tratamento_dialogos` função utilizada para tratar os possíveis diálogos que serão abertos
+        - Erro caso exista algum diálogo com mensagem"""
         self.janela.elemento\
             .encontrar(lambda e: e.texto.upper() == "OK" and e.class_name == "TBitBtn")\
             .clicar()
-        return self
 
-    def confirmar_dialogos (self) -> Self:
-        """Realizar ação de confirmação nos diálogos que aparecem"""
-        aguardar = 3
-        for _ in range(5):
-            dialogo = self.janela.dialogo(aguardar=aguardar)
-            if not dialogo: break
-            aguardar /= 2
-
-            texto = dialogo.texto
-            try: dialogo.confirmar()
-            except Exception as erro:
-                raise Exception(f"Falha ao confirmar o diálogo '{texto}'; {erro}")
-
+        self.janela.capturar_dialogos(tratamento_dialogos)
         return self
 
     def fechar_janela_ficha_controle_via_imagem (self) -> None:
