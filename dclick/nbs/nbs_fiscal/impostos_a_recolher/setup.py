@@ -75,7 +75,7 @@ class AbaLista:
 
         if dialogo := self.janela.dialogo(aguardar=1):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao preencher o campo fornecedor com '{texto}': '{mensagem}'")
 
         return self
@@ -139,7 +139,7 @@ class AbaLista:
 
         if dialogo := self.janela.dialogo():
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao clicar na imagem do óculos para procurar: '{mensagem}'")
 
         return self
@@ -173,7 +173,7 @@ class AbaLista:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao clicar na imagem para enviar os registro selecionados para compromisso: '{mensagem}'")
 
         return self
@@ -195,7 +195,7 @@ class AbaLista:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao clicar na imagem para enviar todos os registro para compromisso: '{mensagem}'")
 
         return self
@@ -276,7 +276,7 @@ class AbaCompromisso:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao clicar na imagem do botão para gerar compromisso: '{mensagem}'")
 
         try: return self.janela.janela_processo(

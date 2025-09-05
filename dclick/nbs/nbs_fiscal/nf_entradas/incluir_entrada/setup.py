@@ -66,7 +66,7 @@ class CalculoTributos:
         if dialogo := self.janela.dialogo(aguardar=0.2):
             texto = dialogo.texto.lower()
             assert "divergente" in texto, f"Esperado diálogo de confirmação 'valor divergente' | Encontrado: {texto}"
-            assert dialogo.clicar("Sim"), "Falha ao fechar o diálogo de confirmação de valor divergente"
+            dialogo.confirmar()
 
         return self
 
@@ -79,7 +79,7 @@ class CalculoTributos:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha após clicar em 'OK' na janela 'Cácula de Tributos': '{mensagem}'")
 
         assert bot.util.aguardar_condicao(lambda: self.janela.fechada, timeout=5),\
@@ -132,7 +132,7 @@ class AbaCapa:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao preencher o cnpj/cpf '{texto}': '{mensagem}'")
 
         return self
@@ -262,7 +262,7 @@ class AbaCapa:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao preencher o total nota '{total}': '{mensagem}'")
 
         return self
@@ -298,7 +298,7 @@ class AbaCapa:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(mensagem)
 
         return CalculoTributos(
@@ -366,7 +366,7 @@ class AbaContabilizacao:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao confirmar a contabilização padrão: '{mensagem}'")
 
         return self
@@ -450,7 +450,7 @@ class AbaFaturamento:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao confirmar a condição de pagamento: '{mensagem}'")
 
         return self
@@ -534,7 +534,7 @@ class AbaRetencoesPJ:
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao clicar para gravar na aba 'Retenções PJ': '{mensagem}'")
 
         return self
@@ -585,7 +585,7 @@ class Confirmar:
         texto = dialogo.texto.lower()
         if "data de barreira" not in texto: return self
 
-        assert dialogo.clicar("Sim"), "Diálogo 'Data de Barreira' não fechou conforme esperado"
+        dialogo.confirmar()
         return self
 
     def dialogo_confirmacao (self) -> str:
@@ -594,7 +594,7 @@ class Confirmar:
         assert dialogo, "Diálogo de confirmação não encontrado"
 
         texto = dialogo.texto.lower()
-        assert dialogo.clicar("OK"), "Diálogo de confirmação não fechou conforme esperado"
+        dialogo.confirmar()
         return texto
 
     def fechar_janela_ficha_controle_pagamento_via_imagem (self) -> None:

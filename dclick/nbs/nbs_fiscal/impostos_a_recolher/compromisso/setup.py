@@ -44,7 +44,7 @@ class AbaDocumento:
 
         if dialogo := self.janela.dialogo(aguardar=1):
             mensagem = dialogo.texto
-            dialogo.clicar("OK")
+            dialogo.confirmar()
             raise Exception(f"Falha ao preencher o campo fornecedor com '{texto}': '{mensagem}'")
 
         return self
