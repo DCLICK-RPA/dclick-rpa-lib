@@ -145,16 +145,25 @@ class AbaLista:
 
         return self
 
-    def obter_linhas_registro_grid_via_ocr (self, leitor: bot.imagem.LeitorOCR) -> list[tuple[str, tuple[int, int]]]:
-        """Obter o texto e posição dos registros no elemento `painel_grid`
-        - Feito `upper()` nos textos e separado por espaço"""
-        coordenada = self.painel_grid.coordenada
-        x_central = coordenada.x + (coordenada.largura // 2)
-        extracao = leitor.ler_tela(self.painel_grid.coordenada)
+    def obter_linhas_registro_grid_via_ocr (self, leitor: bot.imagem.LeitorOCR) -> list[tuple[str, bot.estruturas.Coordenada]]:
+        """Obter `(texto.upper() separado por espaço, Coordenada na tela)` dos registros no elemento `painel_grid`"""
+        painel = self.painel_grid
+        imagem = painel.imagem
+        x, y, *_ = painel.coordenada
         return [
-            (linha.upper(), (x_central, y))
-            for index, (linha, y) in enumerate(leitor.concatenar_linhas(extracao))
-            if index != 0 # remover a linha com o nome das colunas
+            (
+                texto.upper(),
+                # Transformar a coordenada para a tela
+                bot.estruturas.Coordenada(
+                    x = coordenada.x + x,
+                    y = coordenada.y + y,
+                    largura = coordenada.largura,
+                    altura = coordenada.altura,
+                )
+            )
+            for index, (texto, coordenada) in enumerate(leitor.ler_linhas(imagem))
+            # Remover header
+            if index != 0
         ]
 
     def clicar_seta_enviar_selecionados_compromisso_via_imagem (self) -> Self:
