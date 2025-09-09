@@ -185,6 +185,10 @@ class Documento:
             writer.write(self.conteudo.decode(charset) if charset else self.conteudo)
         return destino
 
+class UploadDocumento:
+    id: str
+    url: str
+
 class Assignee:
     id: str
     name: str

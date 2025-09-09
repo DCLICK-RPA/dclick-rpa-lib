@@ -1,5 +1,5 @@
 # std
-import certifi, mimetypes
+import base64, certifi, mimetypes
 from functools import cache
 from typing import Callable, Generator, Literal, Self
 # interno
@@ -239,11 +239,44 @@ def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     bot.logger.informar(f"Consultando tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}")
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
     tarefa = bot.formatos.Unmarshaller(modelos.Tarefa)\
                          .parse(response.json())
 
     return tarefa
+
+def tomar_acao_tarefa (
+        id_tarefa: str,
+        id_acao: str,
+        propriedades: list[dict[Literal["id", "value", "text"], str]] | None = None
+    ) -> None:
+    """Tomar `acao` na `tarefa`
+    - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
+
+    response = client_singleton().post(
+        f"/v1/tasks/{id_tarefa}/action",
+        json = {
+            "task": { 
+                "action_id": id_acao,
+                "confirm_action": True,
+                "property_values": propriedades or []
+            }
+    })
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao tomar ação em tarefa no Holmes"
+
+def assumir_tarefa (id_tarefa: str) -> None:
+    """Assumir a tarefa `id_tarefa`
+    - Variáveis utilizadas `[holmes] -> "host", "token", "id_usuario"`"""
+    bot.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
+
+    usuario = bot.configfile.obter_opcoes_obrigatorias("holmes", "id_usuario")[0]
+    response = client_singleton().put(
+        f"/v1/tasks/{id_tarefa}/assign",
+        json = { "user_id": usuario }
+    )
+    assert response.is_success, f"Status code '{response.status_code}' diferente do esperado ao assumir tarefa no Holmes"
 
 def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento` da tarefa `id_tarefa`
@@ -251,19 +284,30 @@ def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Do
     bot.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar documento de tarefa no Holmes"
 
     return modelos.Documento(response.content, dict(response.headers))
 
-def consultar_documento (id_documento: str) -> modelos.Documento:
-    """Consultar o documento `id_documento`
+def anexar_documento_tarefa (id_tarefa: str,
+                             id_documento: str,
+                             documento: tuple[str, bytes],
+                             mime_type: str | None = None) -> None:
+    """Realizar upload do documento `id_documento` na tarefa `id_tarefa`
+    - `documento` sendo o `(nome_extensão, conteúdo)`
+    - `mime_type` para informar manualmente o tipo do conteúdo
+    - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
-    bot.logger.informar(f"Consultando documento({id_documento}) no Holmes")
+    bot.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
 
-    response = client_singleton().get(f"/v1/documents/{id_documento}/download")
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-
-    return modelos.Documento(response.content, dict(response.headers))
+    nome_extensao, conteudo = documento
+    mime = mime_type or mimetypes.guess_type(nome_extensao)[0]
+    response = client_singleton().post(
+        f"/v1/tasks/{id_tarefa}/documents/{id_documento}",
+        files = {
+            "file": (nome_extensao, conteudo, mime or "application/octet-stream")
+        }
+    )
+    assert response.status_code == 204, f"Status code '{response.status_code}' diferente do esperado ao anexar documento em tarefa no Holmes"
 
 @bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar o processo({args[0]}) no Holmes")
 def consultar_processo (id_processo: str) -> modelos.Processo:
@@ -272,7 +316,7 @@ def consultar_processo (id_processo: str) -> modelos.Processo:
     bot.logger.informar(f"Consultando processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}")
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
     return bot.formatos.Unmarshaller(modelos.Processo)\
                        .parse(response.json())
 
@@ -283,7 +327,7 @@ def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     bot.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}/details")
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
 
     body = response.json()
     body = body.get("instance", {}) if isinstance(body, dict) else {}
@@ -307,69 +351,60 @@ def consultar_itens_tabela_tarefa (
         url = f"/v1/tasks/{id_tarefa}/tables/{id_tabela}/table_items",
         params = { "page": page, "per_page": per_page }
     )
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
     return bot.formatos.Unmarshaller(modelos.ItensTabelaTarefa)\
                        .parse(response.json())
 
-def tomar_acao_tarefa (
-        id_tarefa: str,
-        id_acao: str,
-        propriedades: list[dict[Literal["id", "value", "text"], str]] | None = None
-    ) -> None:
-    """Tomar `acao` na `tarefa`
-    - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
+def consultar_documento (id_documento: str) -> modelos.Documento:
+    """Consultar o documento `id_documento`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
-    bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) do Holmes")
+    bot.logger.informar(f"Consultando documento({id_documento}) no Holmes")
+
+    response = client_singleton().get(f"/v1/documents/{id_documento}/download")
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar documento no Holmes"
+
+    return modelos.Documento(response.content, dict(response.headers))
+
+def upload_documento (nome_extensao: str, conteudo: str | bytes) -> modelos.UploadDocumento:
+    """Realizar o upload do documento `nome_extensao` via `base64`
+    - `conteudo=bytes` transformado para `base64`
+    - `conteudo=str` esperado como `base64`
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
 
     response = client_singleton().post(
-        f"/v1/tasks/{id_tarefa}/action",
+        "/v1/documents",
         json = {
-            "task": { 
-                "action_id": id_acao,
-                "confirm_action": True,
-                "property_values": propriedades or []
+            "document": {
+                "filename": nome_extensao,
+                "base64_file": (conteudo if isinstance(conteudo, str)
+                                else base64.b64encode(conteudo).decode())
             }
-    })
-    assert response.status_code == 200, f"O status code '{response.status_code}' foi diferente do esperado"
-
-def assumir_tarefa (id_tarefa: str) -> None:
-    """Assumir a tarefa `id_tarefa`
-    - Variáveis utilizadas `[holmes] -> "host", "token", "id_usuario"`"""
-    bot.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
-
-    usuario = bot.configfile.obter_opcoes_obrigatorias("holmes", "id_usuario")[0]
-    response = client_singleton().put(
-        f"/v1/tasks/{id_tarefa}/assign",
-        json = { "user_id": usuario }
-    )
-    assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
-
-def anexar_documento_tarefa (id_tarefa: str,
-                             id_documento: str,
-                             documento: tuple[str, bytes],
-                             mime_type: str | None = None) -> None:
-    """Realizar upload do documento `id_documento` na tarefa `id_tarefa`
-    - `documento` sendo o `(nome_extensão, conteúdo)`
-    - `mime_type` para informar manualmente o tipo do conteúdo
-    - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
-    bot.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
-
-    nome_extensao, conteudo = documento
-    mime = mime_type or mimetypes.guess_type(nome_extensao)[0]
-    response = client_singleton().post(
-        f"/v1/tasks/{id_tarefa}/documents/{id_documento}",
-        files = {
-            "file": (nome_extensao, conteudo, mime or "application/octet-stream")
         }
     )
-    assert response.status_code == 204, f"O status code '{response.status_code}' foi diferente do esperado"
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao realizar upload de documento no Holmes"
+    return bot.formatos.Unmarshaller(modelos.UploadDocumento)\
+                       .parse(response.json())
+
+def remover_documento (id_documento: str, descricao: str | None = None) -> None:
+    """Remover o documento `id_documento`
+    - `descricao` para informar o motivo da remoção
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Removendo documento({id_documento}) no Holmes")
+
+    response = client_singleton().delete(
+        f"/v1/documents/{id_documento}",
+        params = { "description": descricao } if descricao else None
+    )
+    assert response.status_code == 204, f"Status code '{response.status_code}' diferente do esperado ao remover documento no Holmes"
 
 __all__ = [
     "QueryTaskV2",
     "assumir_tarefa",
     "QueryDocumentV2",
     "consultar_tarefa",
+    "upload_documento",
+    "remover_documento",
     "tomar_acao_tarefa",
     "consultar_processo",
     "consultar_documento",

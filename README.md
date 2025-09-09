@@ -23,6 +23,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 - Utilizado nova versão do `bot` e alterado pacotes dependentes onde houveram alterações
 - Adicionado `nbs.pecas_compras`
 - Adicionado `holmes.webhook`
+- Adicionado funções de upload e remoção de documentos no `holmes`
 
 </details>
 <details>
