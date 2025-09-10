@@ -155,7 +155,7 @@ class AbaTotalNota:
     def comparar_colunas (self) -> Self:
         """Comprar os campos do `painel_imposto_digitado` e `painel_soma_imposto`
         - Erro caso algum valor diferente do outro"""
-        ordenar = self.janela.ordernar_elementos_coordenada
+        ordenar = self.janela.aguardar().ordernar_elementos_coordenada
         elementos_ordenados = zip(
             ordenar(self.painel_imposto_digitado.to_uia().filhos(aguardar=2)),
             ordenar(self.painel_soma_imposto.to_uia().filhos(aguardar=2))
