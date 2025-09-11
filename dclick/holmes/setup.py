@@ -365,16 +365,35 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
 
     return modelos.Documento(response.content, dict(response.headers))
 
-def upload_documento (nome_extensao: str, conteudo: str | bytes) -> modelos.UploadDocumento:
+def consultar_classificacao_documento (id_documento: str) -> modelos.ClassificacaoDocumento:
+    """Consultar a classificação do documento `id_documento`
+    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    bot.logger.informar(f"Consultando classificação do documento({id_documento}) no Holmes")
+
+    response = client_singleton().get(f"/v1/documents/{id_documento}/classify")
+    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar classificação de documento no Holmes"
+
+    return bot.formatos.Unmarshaller(modelos.ClassificacaoDocumento)\
+                       .parse(response.json())
+
+def upload_documento (
+        nome_extensao: str,
+        conteudo: str | bytes,
+        classificacao: modelos.ClassificacaoDocumentoDict | None = None
+    ) -> modelos.UploadDocumento:
     """Realizar o upload do documento `nome_extensao` via `base64`
     - `conteudo=bytes` transformado para `base64`
     - `conteudo=str` esperado como `base64`
+    - `classificacao` aplicar classificação no documento
+        - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [] }`
+        - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [{ "id": "cnpj", "value": "03095314000618" }] }`
     - Variáveis utilizadas `[holmes] -> "host", "token"`"""
     bot.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
 
     response = client_singleton().post(
         "/v1/documents",
         json = {
+            "classification": classificacao or {},
             "document": {
                 "filename": nome_extensao,
                 "base64_file": (conteudo if isinstance(conteudo, str)
@@ -412,4 +431,5 @@ __all__ = [
     "consultar_documento_tarefa",
     "consultar_detalhes_processo",
     "consultar_itens_tabela_tarefa",
+    "consultar_classificacao_documento",
 ]

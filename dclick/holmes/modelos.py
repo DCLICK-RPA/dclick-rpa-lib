@@ -1,7 +1,7 @@
 # std
 from email.message import Message
 from email.parser import HeaderParser
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, TypedDict
 # externo
 from bot.util import normalizar
 from bot.sistema import Caminho
@@ -239,3 +239,17 @@ class Meta:
 class ItensTabelaTarefa:
     items: list[ItemTabelaTarefa]
     meta: Meta
+
+class ClassificacaoDocumento:
+    id: str
+    nature_id: str | None
+    file_name: str
+    property_values: list[Property]
+
+class ClassificacaoDocumentoPropertyDict (TypedDict):
+    id: str
+    value: str
+
+class ClassificacaoDocumentoDict (TypedDict):
+    nature_id: str
+    property_values: list[ClassificacaoDocumentoPropertyDict]
