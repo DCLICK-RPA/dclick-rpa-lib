@@ -46,23 +46,20 @@ class SelecaoEmpresaFilial:
         return self
 
     @bot.util.decoradores.prefixar_erro("Erro ao confirmar a seleção da Empresa/Filial")
-    def confirmar (self) -> bot.sistema.JanelaW32:
+    def confirmar (self, class_name_janela_informativa: str = "TFrmListaNfeRen") -> bot.sistema.JanelaW32:
         """Clicar no botão de confirmar
         - Fechado janela informativa que pode aparecer
         - Erro caso apareça diálogo
         - Utilizar `self.checar_selecao` para checar sucesso após
         - Retornado janela `Sistema Fiscal`"""
-        self.janela.elemento\
-            .encontrar(lambda e: "confirma" in e.texto.lower())\
-            .clicar()
+        with bot.sistema.JanelaW32.aguardar_nova_janela() as nova_janela:
+            self.janela.elemento\
+                .encontrar(lambda e: "confirma" in e.texto.lower())\
+                .clicar()
 
-        # Janela informativa fechada caso aparecer
-        try: self.janela.janela_processo(lambda j: j.class_name == "TFrmListaNfeRen", aguardar=2)\
-                        .sleep()\
-                        .fechar()
-        except Exception: pass
-
-        if dialogo := self.janela.dialogo():
+        if nova_janela.class_name == class_name_janela_informativa:
+            assert nova_janela.fechar(), "Falha ao fechar janela informativa"
+        if dialogo := self.janela.aguardar().dialogo():
             raise Exception(f"Diálogo inesperado: '{dialogo.texto}'")
 
         try: return bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=5)
@@ -108,7 +105,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
         aguardar = 5
     )
     *_, aba_adm = janela_shortcut.ordernar_elementos_coordenada(abas)
-    aba_adm.clicar()
+    aba_adm.sleep().clicar()
 
     coordenada_painel = janela_shortcut.elemento\
         .focar()\
