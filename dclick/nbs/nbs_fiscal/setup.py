@@ -38,6 +38,7 @@ class SelecaoEmpresaFilial:
             .encontrar(lambda e: e.class_name == "TwwDBLookupCombo")\
             .clicar()\
             .digitar(filial, virtual=False)\
+            .sleep(0.25)\
             .apertar("enter")
 
         valor = elemento.valor
