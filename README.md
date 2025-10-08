@@ -1,7 +1,7 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==4.0</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==4.1</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
 Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.2/dclick-1.2-py3-none-any.whl`  
@@ -16,6 +16,12 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 
 ## Changelog 🔧
 
+<details>
+<summary>v1.3</summary>
+
+- Utilizado nova versão do `bot`
+
+</details>
 <details>
 <summary>v1.2</summary>
 
