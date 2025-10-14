@@ -3,12 +3,10 @@ import datetime, functools, typing
 from concurrent.futures import ThreadPoolExecutor
 # interno
 import dclick
-from dclick.holmes.modelos import Processo, Activity
 from dclick.holmes.webhook import modelos
+from dclick.holmes.modelos import Processo, Activity, Tarefa
 # externo
 import bot
-
-STATUS_ABERTO = "opened"
 
 @functools.cache
 def client_singleton () -> bot.http.Client:
@@ -40,18 +38,19 @@ class ProcessoWebhook[T]:
     - `stringify_properties()` transformar o `properties` para um json string
 
     ### Manipular processo do `Webhook`
-    - `remover_webhook()` remover o processo do banco de dados do webhook
-    - `incrementar_tentativas_webhook()` incrementar o campo `tentativas` do processo no banco de dados do webhook
-    - `atualizar_controle_webhook()` atualizar o campo `controle` do processo no banco de dados do webhook
+    - `remover_webhook()`                   remover o processo do banco de dados do webhook
+    - `incrementar_tentativas_webhook()`    incrementar o campo `tentativas` do processo no banco de dados do webhook
+    - `atualizar_controle_webhook()`        atualizar o campo `controle` do processo no banco de dados do webhook
 
     ### Acessar dados do processo no `Holmes`
-    - `holmes` processo no Holmes
-    - `processo_em_aberto` checar se o processo `self.holmes` está aberto
-    - `tarefa_em_aberto` consultar a tarefa em aberto no processo `self.holmes`
-    - `tarefa_atribuida_a(_id="", nome="")` checar se a `tarefa_em_aberto` está atribuido ao usuário `_id` e/ou `nome`
+    - `holmes`                              processo no Holmes
+    - `processo_em_aberto`                  checar se o processo `self.holmes` está aberto
+    - `atividade_aberta`                    consultar a atividade aberta no processo `self.holmes`
+    - `tarefa_aberta`                       consultar a tarefa aberta no processo `self.holmes`
+    - `tarefa_atribuida_a(_id="", nome="")` checar se a `atividade_aberta` está atribuido ao usuário `_id` e/ou `nome`
 
     ### Manipular tarefa
-    - `encaminhar_tarefa(id_acao="")` tomar ação `id_acao` na `self.tarefa_em_aberto`
+    - `encaminhar_tarefa(id_acao="")`       tomar ação `id_acao` na `self.atividade_aberta`
     """
 
     webhook: modelos.Webhook
@@ -62,6 +61,8 @@ class ProcessoWebhook[T]:
     """Propriedade `processo.author`"""
     documents: list[modelos.Document]
     """Propriedade `processo.documents`"""
+
+    STATUS_ABERTO = "opened"
 
     def __repr__ (self) -> str:
         return f"<{self.__class__.__name__} holmes({self.webhook.id_processo}) webhook({self.webhook.id_webhook})>"
@@ -74,7 +75,10 @@ class ProcessoWebhook[T]:
 
     def stringify_properties (self) -> str:
         """Transformar o `properties` para um json string"""
-        return bot.formatos.Json(self.properties).stringify(False)
+        return (
+            bot.formatos.Json(self.properties)
+                        .stringify(indentar=False)
+        )
 
     def remover_webhook (self) -> typing.Self:
         """Remover o processo do banco de dados do webhook"""
@@ -111,23 +115,31 @@ class ProcessoWebhook[T]:
     @property
     def processo_em_aberto (self) -> bool:
         """Checar se o processo `self.holmes` está aberto"""
-        return self.holmes.status.lower().strip() == STATUS_ABERTO
+        return self.holmes.status.lower().strip() == self.STATUS_ABERTO
 
     @functools.cached_property
-    def tarefa_em_aberto (self) -> Activity:
-        """Consultar a tarefa em aberto no processo `self.holmes`
-        - `AssertionError` caso não possua tarefa em aberto"""
+    def atividade_aberta (self) -> Activity:
+        """Consultar a atividade aberta no processo `self.holmes`
+        - `AssertionError` caso não possua atividade aberta"""
         tarefa = self.holmes.obter_atividade(
-            lambda a: a.status.lower().strip() == STATUS_ABERTO
+            lambda a: a.status.lower().strip() == self.STATUS_ABERTO
         )
-        assert tarefa, f"Não há tarefa em aberto para o {self!r}"
+        assert tarefa, f"Não há atividade aberta para o {self!r}"
         return tarefa
 
+    @functools.cached_property
+    def tarefa_aberta (self) -> Tarefa:
+        """Consultar a tarefa aberta no processo `self.holmes`
+        - `AssertionError` caso não possua tarefa aberta"""
+        return dclick.holmes.consultar_tarefa(
+            self.atividade_aberta.id
+        )
+
     def tarefa_atribuida_a (self, _id: str | None = None, nome: str | None = None) -> bool:
-        """Checar se a `tarefa_em_aberto` está atribuido ao usuário `_id / nome`"""
+        """Checar se a `atividade_aberta` está atribuido ao usuário `_id / nome`"""
         assert any((_id, nome)), "Nome ou id do usuário é necessário para a comparação"
 
-        try: atribuido = self.tarefa_em_aberto.assignee
+        try: atribuido = self.atividade_aberta.assignee
         except Exception: return False
         if not atribuido: return False
 
@@ -137,12 +149,13 @@ class ProcessoWebhook[T]:
         ))
 
     def encaminhar_tarefa (
-            self, id_acao: str,
+            self,
+            id_acao: str,
             propriedades: list[dict[typing.Literal['id', 'value', 'text'], str]] | None = None
         ) -> typing.Self:
-        """Tomar ação `id_acao` na `self.tarefa_em_aberto`
+        """Tomar ação `id_acao` na `self.atividade_aberta`
         - `propriedades` caso seja necessário informar algum adicional"""        
-        dclick.holmes.tomar_acao_tarefa(self.tarefa_em_aberto.id, id_acao, propriedades)
+        dclick.holmes.tomar_acao_tarefa(self.atividade_aberta.id, id_acao, propriedades)
         return self
 
 class QueryProcessosWebhook [T]:

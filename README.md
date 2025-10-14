@@ -17,6 +17,12 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.
 ## Changelog 🔧
 
 <details>
+<summary>v1.4</summary>
+
+- Atualizado propriedades do `dclick.holmes.webhook.ProcessoWebhook`
+
+</details>
+<details>
 <summary>v1.3</summary>
 
 - Utilizado nova versão do `bot`
