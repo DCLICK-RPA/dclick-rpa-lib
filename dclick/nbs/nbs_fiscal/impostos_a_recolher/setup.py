@@ -92,11 +92,12 @@ class AbaLista:
         data_formatada = data.strftime(r"%d/%m/%Y")
         dia, mes, ano = data_formatada.split("/")
 
-        posicao_dia = elemento.coordenada.transformar(0.25)
-        bot.mouse.mover(posicao_dia).clicar()
-        elemento.digitar(dia, virtual=False, focar=False)\
-            .apertar("right").digitar(mes, virtual=False, focar=False)\
-            .apertar("right").digitar(ano, virtual=False, focar=False)
+        # feito o mês primeiro devido a situação especial de mês sem dia 31
+        posicao_mes = elemento.coordenada.transformar(0.4)
+        bot.mouse.mover(posicao_mes).clicar()
+        elemento.digitar(mes, virtual=False, focar=False)\
+            .apertar("left").digitar(dia, virtual=False, focar=False)\
+            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Data Início' | Esperado '{data_formatada}' | Encontrado '{texto}'"
@@ -114,11 +115,12 @@ class AbaLista:
         data_formatada = data.strftime(r"%d/%m/%Y")
         dia, mes, ano = data_formatada.split("/")
 
-        posicao_dia = elemento.coordenada.transformar(0.25)
-        bot.mouse.mover(posicao_dia).clicar()
-        elemento.digitar(dia, virtual=False, focar=False)\
-            .apertar("right").digitar(mes, virtual=False, focar=False)\
-            .apertar("right").digitar(ano, virtual=False, focar=False)
+        # feito o mês primeiro devido a situação especial de mês sem dia 31
+        posicao_mes = elemento.coordenada.transformar(0.4)
+        bot.mouse.mover(posicao_mes).clicar()
+        elemento.digitar(mes, virtual=False, focar=False)\
+            .apertar("left").digitar(dia, virtual=False, focar=False)\
+            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Data Fim' | Esperado '{data_formatada}' | Encontrado '{texto}'"
@@ -260,11 +262,13 @@ class AbaCompromisso:
         data_formatada = data.strftime(r"%d/%m/%Y")
         dia, mes, ano = data_formatada.split("/")
 
+        # feito o mês primeiro devido a situação especial de mês sem dia 31
         posicao_dia = elemento.coordenada.transformar(0.1)
         bot.mouse.mover(posicao_dia).clicar()
-        elemento.digitar(dia, virtual=False, focar=False)\
+        elemento\
             .apertar("right").digitar(mes, virtual=False, focar=False)\
-            .apertar("right").digitar(ano, virtual=False, focar=False)
+            .apertar("left").digitar(dia, virtual=False, focar=False)\
+            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Vencimento' | Esperado '{data_formatada}' | Encontrado '{texto}'"
