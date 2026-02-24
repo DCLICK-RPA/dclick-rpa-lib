@@ -3,9 +3,8 @@ from email.message import Message
 from email.parser import HeaderParser
 from typing import Any, Callable, Literal, TypedDict
 # externo
-from bot.util import normalizar
-from bot.sistema import Caminho
 from bot.tipagem import SupportsBool
+from bot.estruturas import String, Caminho
 
 class DocQueryTaskV2:
     id: str
@@ -106,9 +105,9 @@ class Tarefa:
 
     def possui_acoes (self, *nomes: str) -> bool:
         """Checar se a `tarefa` possui todas as ações `nomes`"""
-        existentes = [normalizar(a.name) for a in self.actions]
+        existentes = [String(a.name).normalizar() for a in self.actions]
         return all(
-            normalizar(nome) in existentes
+            String(nome).normalizar() in existentes
             for nome in nomes
         )
 

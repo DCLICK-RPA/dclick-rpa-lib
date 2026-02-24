@@ -265,7 +265,7 @@ class QueryProcessosWebhook [T]:
         pw.holmes # aproveitar o ThreadPool e consultar o processo
         return pw
 
-    @bot.util.decoradores.prefixar_erro("Erro ao procurar Processos no Webhook")
+    @bot.erro.adicionar_prefixo("Erro ao procurar Processos no Webhook")
     def procurar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
         """Procurar os processos no webhook e realizar a validação
         - `limite` quantidade máxima de processos retornados"""

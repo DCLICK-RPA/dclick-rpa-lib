@@ -22,7 +22,7 @@ def client_singleton () -> bot.http.Client:
 class QueryTaskV2:
     """Classe para realizar a construção da Query das tasks e iteração sobre os resultados obtidos
     - Versão `v2` do `/search`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`
+    - Variáveis utilizadas `[holmes] -> host, token`
     - Variáveis dinâmicas para aplicação dos termos conforme seção `[holmes.QueryTaskV2.termos]`
         - `{ "field": "nome_opção", "type": "is", "value": "valor_opção"` }"""
 
@@ -73,7 +73,7 @@ class QueryTaskV2:
         self.terms.append(kwargs)
         return self
 
-    @bot.util.decoradores.prefixar_erro("Falha ao consultar tarefas no Holmes")
+    @bot.erro.adicionar_prefixo("Falha ao consultar tarefas no Holmes")
     def consultar (self) -> modelos.RaizQueryTaskV2:
         """Realizar a consulta da query conforme `query_body`"""
         bot.logger.informar("Procurando por tarefas no Holmes")
@@ -132,7 +132,7 @@ class QueryTaskV2:
 class QueryDocumentV2:
     """Classe para realizar a construção da Query dos documents e iteração sobre os resultados obtidos
     - Versão `v2` do `/search`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`
+    - Variáveis utilizadas `[holmes] -> host, token`
     - Variáveis dinâmicas para aplicação dos termos conforme seção `[holmes.QueryDocumentV2.termos]`
         - `{ "field": "nome_opção", "type": "is", "value": "valor_opção"` }"""
 
@@ -183,7 +183,7 @@ class QueryDocumentV2:
         self.terms.append(kwargs)
         return self
 
-    @bot.util.decoradores.prefixar_erro("Falha ao consultar documentos no Holmes")
+    @bot.erro.adicionar_prefixo("Falha ao consultar documentos no Holmes")
     def consultar (self) -> modelos.RaizQueryDocumentV2:
         """Realizar a consulta da query conforme `query_body`"""
         bot.logger.informar("Procurando por documentos no Holmes")
@@ -232,10 +232,10 @@ class QueryDocumentV2:
         for doc in self.paginar_query(filtro, limite):
             yield consultar_documento(doc.document_id)
 
-@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar a tarefa({args[0]}) no Holmes")
+@bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar a tarefa({args[0]}) no Holmes")
 def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     """Consultar a tarefa `id_tarefa`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}")
@@ -252,7 +252,7 @@ def tomar_acao_tarefa (
     ) -> None:
     """Tomar `acao` na `tarefa`
     - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().post(
@@ -268,7 +268,7 @@ def tomar_acao_tarefa (
 
 def assumir_tarefa (id_tarefa: str) -> None:
     """Assumir a tarefa `id_tarefa`
-    - Variáveis utilizadas `[holmes] -> "host", "token", "id_usuario"`"""
+    - Variáveis utilizadas `[holmes] -> host, token, id_usuario`"""
     bot.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
 
     usuario = bot.configfile.obter_opcoes_obrigatorias("holmes", "id_usuario")[0]
@@ -280,7 +280,7 @@ def assumir_tarefa (id_tarefa: str) -> None:
 
 def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento` da tarefa `id_tarefa`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
@@ -296,7 +296,7 @@ def anexar_documento_tarefa (id_tarefa: str,
     - `documento` sendo o `(nome_extensão, conteúdo)`
     - `mime_type` para informar manualmente o tipo do conteúdo
     - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
 
     nome_extensao, conteudo = documento
@@ -309,10 +309,10 @@ def anexar_documento_tarefa (id_tarefa: str,
     )
     assert response.status_code == 204, f"Status code '{response.status_code}' diferente do esperado ao anexar documento em tarefa no Holmes"
 
-@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar o processo({args[0]}) no Holmes")
+@bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar o processo({args[0]}) no Holmes")
 def consultar_processo (id_processo: str) -> modelos.Processo:
     """Consultar o processo `id_processo`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}")
@@ -320,10 +320,10 @@ def consultar_processo (id_processo: str) -> modelos.Processo:
     return bot.formatos.Unmarshaller(modelos.Processo)\
                        .parse(response.json())
 
-@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar detalhes do processo({args[0]}) no Holmes")
+@bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar detalhes do processo({args[0]}) no Holmes")
 def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     """Consultar os detalhes do processo `id_processo`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}/details")
@@ -335,7 +335,7 @@ def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     return bot.formatos.Unmarshaller(modelos.DetalhesProcesso)\
                        .parse(body)
 
-@bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao consultar itens de tabela da tarefa({args[0]}) no Holmes")
+@bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar itens de tabela da tarefa({args[0]}) no Holmes")
 def consultar_itens_tabela_tarefa (
         id_tarefa: str,
         id_tabela: str,
@@ -344,7 +344,7 @@ def consultar_itens_tabela_tarefa (
     ) -> modelos.ItensTabelaTarefa:
     """Consultar itens da tabela `id_tabela` da tarefa `id_tarefa`
     - `page, per_page` realizar a paginação. Default: Primeiros 100
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(
@@ -357,7 +357,7 @@ def consultar_itens_tabela_tarefa (
 
 def consultar_documento (id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando documento({id_documento}) no Holmes")
 
     response = client_singleton().get(f"/v1/documents/{id_documento}/download")
@@ -367,7 +367,7 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
 
 def consultar_classificacao_documento (id_documento: str) -> modelos.ClassificacaoDocumento:
     """Consultar a classificação do documento `id_documento`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Consultando classificação do documento({id_documento}) no Holmes")
 
     response = client_singleton().get(f"/v1/documents/{id_documento}/classify")
@@ -387,7 +387,7 @@ def upload_documento (
     - `classificacao` aplicar classificação no documento
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [] }`
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [{ "id": "cnpj", "value": "03095314000618" }] }`
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
 
     response = client_singleton().post(
@@ -408,7 +408,7 @@ def upload_documento (
 def remover_documento (id_documento: str, descricao: str | None = None) -> None:
     """Remover o documento `id_documento`
     - `descricao` para informar o motivo da remoção
-    - Variáveis utilizadas `[holmes] -> "host", "token"`"""
+    - Variáveis utilizadas `[holmes] -> host, token`"""
     bot.logger.informar(f"Removendo documento({id_documento}) no Holmes")
 
     response = client_singleton().delete(
