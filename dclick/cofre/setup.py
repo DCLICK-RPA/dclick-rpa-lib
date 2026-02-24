@@ -25,8 +25,13 @@ def client_singleton () -> bot.http.Client:
 
 @bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar segredo({args[0]}) no Cofre")
 def consultar_segredo[T] (nome: str, fields: type[T] = DictNormalizado[str]) -> modelos.Segredo[T]:
-    """Consultar o segredo `nome` e retornar uma classe modelo de resposta.  
-    Por padrão o campo `fields` é uma classe no estilo `dict`
+    """Consultar o segredo `nome` e retornar uma classe modelo de resposta
+
+    - Por padrão o campo `fields` é uma classe no estilo `dict`
+    ```python
+    segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS")
+    username: str | None = segredo.fields.get("username", default=None)
+    ```
 
     - Utilizar `fields` com uma classe anotada para validar os campos esperados
     ```python
