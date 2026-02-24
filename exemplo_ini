@@ -47,9 +47,9 @@ senha =
 [dealernet.menu.opcoes_empresa]
 28541237000107 = FIAT, TURIM - FIAT
 
-[dashboard]
-codigo_automacao = ORI_FATDEALER
-host = https://rpa-admin.dclick.com.br
+[cofre]
+host = https://api.runner.dclick.com.br
+apikey = 
 
 [nbs]
 usuario = RPA
