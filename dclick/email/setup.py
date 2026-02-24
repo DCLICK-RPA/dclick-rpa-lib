@@ -26,7 +26,7 @@ def notificar_email_simples (
     - `anexar_log` para anexar o log raiz
     - `anexos` caminhos para anexos adicionais
     - `destinatarios` especificar os destinatários da notificação
-        - `destinatarios=None` Variáveis utilizadas `[email.destinatarios] -> "sucesso", "erro"`
+        - `destinatarios=None` Variáveis utilizadas `[email.destinatarios] -> sucesso, erro`
         - `destinatarios=None e tipo="parcial"` utiliza os destinatários do `erro`
     - Variáveis utilizadas `[email.enviar] -> user, password, host, [port: 587, ssl: False, ]`"""
     assunto = f"{nome_bot} - {status.capitalize()}"
