@@ -82,7 +82,7 @@ class ProcessoWebhook[T]:
 
     def remover_webhook (self) -> typing.Self:
         """Remover o processo do banco de dados do webhook"""
-        bot.logger.informar(f"Removendo o {self!r}")
+        dclick.logger.informar(f"Removendo o {self!r}")
         response = client_singleton().delete(f"/webhook/holmes/{self.webhook.id_webhook}")
         assert response.is_success, f"Erro ao remover a {self!r} do webhook | Status code '{response.status_code}' inesperado"
         return self
@@ -90,7 +90,7 @@ class ProcessoWebhook[T]:
     def incrementar_tentativas_webhook (self) -> typing.Self:
         """Incrementar o campo `tentativas` do processo no banco de dados do webhook
         - Incrementado `self.webhook.tentativas` para refletir com o banco"""
-        bot.logger.informar(f"Incrementando o campo tentativas do {self!r}")
+        dclick.logger.informar(f"Incrementando o campo tentativas do {self!r}")
         response = client_singleton().patch(f"/webhook/holmes/{self.webhook.id_webhook}/tentativas")
         assert response.is_success, f"Erro ao incrementar tentativas do {self!r} no webhook | Status code '{response.status_code}' inesperado"
         self.webhook.tentativas += 1
@@ -99,7 +99,7 @@ class ProcessoWebhook[T]:
     def atualizar_controle_webhook (self) -> typing.Self:
         """Atualizar o campo `controle` do processo no banco de dados do webhook
         - Utilizado o campo `self.webhook.controle`"""
-        bot.logger.informar(f"Atualizando o campo controle {self!r}")
+        dclick.logger.informar(f"Atualizando o campo controle {self!r}")
         response = client_singleton().put(
             f"/webhook/holmes/{self.webhook.id_webhook}/controle",
             json = self.webhook.controle
@@ -228,7 +228,7 @@ class QueryProcessosWebhook [T]:
         """Realizar o parse do `processo` para o `ProcessoWebhook[T]`"""
         try: item_webhook = self.unmarshaller_item_webhook.parse(processo)
         except Exception as erro:
-            bot.logger.alertar("\n\t".join((
+            dclick.logger.alertar("\n\t".join((
                 f"Processo do webhook ignorado devido ao formato inválido",
                 "Isso não deveria ser possível",
                 str(erro),
@@ -254,7 +254,7 @@ class QueryProcessosWebhook [T]:
             else self.unmarshaller_properties.parse(item_webhook.dados.properties)
         except Exception as erro:
             pw.properties = item_webhook.dados.properties
-            bot.logger.alertar("\n\t".join((
+            dclick.logger.alertar("\n\t".join((
                 f"Properties do {pw!r} não está com o formato esperado",
                 str(pw.properties),
                 mensagem_erro := str(erro),
@@ -269,7 +269,7 @@ class QueryProcessosWebhook [T]:
     def procurar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
         """Procurar os processos no webhook e realizar a validação
         - `limite` quantidade máxima de processos retornados"""
-        bot.logger.informar(f"Procurando por processos no webhook | Query({self.query}) | Limite({limite})")
+        dclick.logger.informar(f"Procurando por processos no webhook | Query({self.query}) | Limite({limite})")
 
         checar_conexao_webhook()
         response = client_singleton().get(
@@ -290,7 +290,7 @@ class QueryProcessosWebhook [T]:
                 if processo is not None
             ]
 
-        bot.logger.informar(f"Encontrado '{len(processos)}' Processos(s)")
+        dclick.logger.informar(f"Encontrado '{len(processos)}' Processos(s)")
         return processos
 
 __all__ = [

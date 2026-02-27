@@ -3,7 +3,8 @@ import base64, certifi, mimetypes
 from functools import cache
 from typing import Callable, Generator, Literal, Self
 # interno
-from . import modelos
+import dclick
+from dclick.holmes import modelos
 # externo
 import bot
 
@@ -76,14 +77,14 @@ class QueryTaskV2:
     @bot.erro.adicionar_prefixo("Falha ao consultar tarefas no Holmes")
     def consultar (self) -> modelos.RaizQueryTaskV2:
         """Realizar a consulta da query conforme `query_body`"""
-        bot.logger.informar("Procurando por tarefas no Holmes")
+        dclick.logger.informar("Procurando por tarefas no Holmes")
 
         response = client_singleton().post("/v2/search", json=self.query_body)
         assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
         raiz = bot.formatos.Unmarshaller(modelos.RaizQueryTaskV2)\
                            .parse(response.json())
 
-        bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' tarefa(s) de um total de '{raiz.total}'")
+        dclick.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' tarefa(s) de um total de '{raiz.total}'")
         return raiz
 
     def paginar_query (
@@ -186,14 +187,14 @@ class QueryDocumentV2:
     @bot.erro.adicionar_prefixo("Falha ao consultar documentos no Holmes")
     def consultar (self) -> modelos.RaizQueryDocumentV2:
         """Realizar a consulta da query conforme `query_body`"""
-        bot.logger.informar("Procurando por documentos no Holmes")
+        dclick.logger.informar("Procurando por documentos no Holmes")
 
         response = client_singleton().post("/v2/search", json=self.query_body)
         assert response.is_success, f"O status code '{response.status_code}' foi diferente do esperado"
         raiz = bot.formatos.Unmarshaller(modelos.RaizQueryDocumentV2)\
                            .parse(response.json())
 
-        bot.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' documento(s) de um total de '{raiz.total}'")
+        dclick.logger.informar(f"Consulta resultou em '{len(raiz.docs)}' documento(s) de um total de '{raiz.total}'")
         return raiz
 
     def paginar_query (
@@ -236,7 +237,7 @@ class QueryDocumentV2:
 def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     """Consultar a tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Consultando tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
@@ -253,7 +254,7 @@ def tomar_acao_tarefa (
     """Tomar `acao` na `tarefa`
     - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().post(
         f"/v1/tasks/{id_tarefa}/action",
@@ -269,7 +270,7 @@ def tomar_acao_tarefa (
 def assumir_tarefa (id_tarefa: str) -> None:
     """Assumir a tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token, id_usuario`"""
-    bot.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
 
     usuario = bot.configfile.obter_opcoes_obrigatorias("holmes", "id_usuario")[0]
     response = client_singleton().put(
@@ -281,7 +282,7 @@ def assumir_tarefa (id_tarefa: str) -> None:
 def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento` da tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar documento de tarefa no Holmes"
@@ -297,7 +298,7 @@ def anexar_documento_tarefa (id_tarefa: str,
     - `mime_type` para informar manualmente o tipo do conteúdo
     - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
 
     nome_extensao, conteudo = documento
     mime = mime_type or mimetypes.guess_type(nome_extensao)[0]
@@ -313,7 +314,7 @@ def anexar_documento_tarefa (id_tarefa: str,
 def consultar_processo (id_processo: str) -> modelos.Processo:
     """Consultar o processo `id_processo`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando processo({id_processo}) no Holmes")
+    dclick.logger.informar(f"Consultando processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
@@ -324,7 +325,7 @@ def consultar_processo (id_processo: str) -> modelos.Processo:
 def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     """Consultar os detalhes do processo `id_processo`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
+    dclick.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
 
     response = client_singleton().get(f"/v1/processes/{id_processo}/details")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
@@ -345,7 +346,7 @@ def consultar_itens_tabela_tarefa (
     """Consultar itens da tabela `id_tabela` da tarefa `id_tarefa`
     - `page, per_page` realizar a paginação. Default: Primeiros 100
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
+    dclick.logger.informar(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
 
     response = client_singleton().get(
         url = f"/v1/tasks/{id_tarefa}/tables/{id_tabela}/table_items",
@@ -358,7 +359,7 @@ def consultar_itens_tabela_tarefa (
 def consultar_documento (id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando documento({id_documento}) no Holmes")
+    dclick.logger.informar(f"Consultando documento({id_documento}) no Holmes")
 
     response = client_singleton().get(f"/v1/documents/{id_documento}/download")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar documento no Holmes"
@@ -368,7 +369,7 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
 def consultar_classificacao_documento (id_documento: str) -> modelos.ClassificacaoDocumento:
     """Consultar a classificação do documento `id_documento`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Consultando classificação do documento({id_documento}) no Holmes")
+    dclick.logger.informar(f"Consultando classificação do documento({id_documento}) no Holmes")
 
     response = client_singleton().get(f"/v1/documents/{id_documento}/classify")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado ao consultar classificação de documento no Holmes"
@@ -388,7 +389,7 @@ def upload_documento (
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [] }`
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [{ "id": "cnpj", "value": "03095314000618" }] }`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
+    dclick.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
 
     response = client_singleton().post(
         "/v1/documents",
@@ -409,7 +410,7 @@ def remover_documento (id_documento: str, descricao: str | None = None) -> None:
     """Remover o documento `id_documento`
     - `descricao` para informar o motivo da remoção
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    bot.logger.informar(f"Removendo documento({id_documento}) no Holmes")
+    dclick.logger.informar(f"Removendo documento({id_documento}) no Holmes")
 
     response = client_singleton().delete(
         f"/v1/documents/{id_documento}",

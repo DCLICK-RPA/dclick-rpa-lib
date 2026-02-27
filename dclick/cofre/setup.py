@@ -2,6 +2,7 @@
 import certifi
 from functools import cache
 # interno
+import dclick
 from dclick.cofre import modelos
 # externo
 import bot
@@ -44,7 +45,7 @@ def consultar_segredo[T] (nome: str, fields: type[T] = DictNormalizado[str]) -> 
 
     - Variáveis utilizadas `[cofre] -> host, apikey, [x-real-ip: ""]`
         - `x-real-ip`: opcional `<IP da máquina>`, mas importante para a auditoria"""
-    bot.logger.informar(f"Consultando segredo({nome}) no Cofre")
+    dclick.logger.informar(f"Consultando segredo({nome}) no Cofre")
 
     response = client_singleton().get(f"/api/vault/get/{nome}")
     assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
