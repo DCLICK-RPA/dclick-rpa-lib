@@ -28,21 +28,36 @@ class ResponseHttp (httpx.Response):
         - Caso existam múltiplos headers de mesmo nome, os valores serão concatenados por `,`"""
         return DictNormalizado(getattr(self, "_headers", {}))
 
-    def esperar_sucesso (self) -> typing.Self:
-        """Fazer o `assert` se o `response.status_code` de retorno é `2xx`"""
-        if not self.is_success:
-            erro = AssertionError(f"Status code de Resposta HTTP '{self.status_code}' não é de sucesso")
-            Erros.RetornoInesperado.erro(erro)
-            raise erro
-        return self
+    def esperar_sucesso (self, mensagem: str | None = None) -> typing.Self:
+        """Fazer o `assert` se o `response.status_code` de retorno é `2xx`
+        - `mensagem` sobrescreve a mensagem utilizada como erro"""
+        if self.is_success:
+            return self
 
-    def esperar_status_code (self, status: int) -> typing.Self:
-        """Fazer o `assert` se `response.status_code == status`"""
-        if self.status_code != status:
-            erro = AssertionError(f"Status code de Resposta HTTP '{self.status_code}' diferente do esperado '{status}'")
-            Erros.RetornoInesperado.erro(erro)
-            raise erro
-        return self
+        msg_status = f"Status code de Resposta HTTP '{self.status_code}' não é de sucesso"
+        if mensagem:
+            erro = AssertionError(mensagem)
+            erro.add_note(msg_status)
+        else:
+            erro = AssertionError(msg_status)
+
+        Erros.RetornoInesperado.erro(erro)
+        raise erro
+
+    def esperar_status_code (self, status: int, mensagem: str | None = None) -> typing.Self:
+        """Fazer o `assert` se `response.status_code == status`
+        - `mensagem` sobrescreve a mensagem utilizada como erro"""
+        if self.status_code == status:
+            return self
+
+        msg_status = f"Status code de Resposta HTTP '{self.status_code}' diferente do esperado '{status}'"
+        if mensagem:
+            erro = AssertionError(mensagem)
+            erro.add_note(msg_status)
+        else:
+            erro = AssertionError(msg_status)
+        Erros.RetornoInesperado.erro(erro)
+        raise erro
 
     def esperar_tipo_conteudo (self, tipo: str) -> typing.Self:
         """Fazer o `assert` se `tipo` está no `Header: Content-Type`"""
