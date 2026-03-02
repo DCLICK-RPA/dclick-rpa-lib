@@ -9,11 +9,11 @@ from dclick.holmes.modelos import Processo, Activity, Tarefa
 import bot
 
 @functools.cache
-def client_singleton () -> bot.http.Client:
+def client_singleton () -> dclick.http.ClienteHttp:
     """Criar o http `Client` configurado com o `base_url`, `token` e timeout
     - O Client ficará aberto após a primeira chamada na função devido ao `@cache`"""
     base_url, token = bot.configfile.obter_opcoes_obrigatorias("webhook", "base_url", "token")
-    return bot.http.Client(
+    return dclick.http.ClienteHttp(
         base_url = base_url,
         params = { "token": token },
         timeout = 10
@@ -83,16 +83,22 @@ class ProcessoWebhook[T]:
     def remover_webhook (self) -> typing.Self:
         """Remover o processo do banco de dados do webhook"""
         dclick.logger.informar(f"Removendo o {self!r}")
-        response = client_singleton().delete(f"/webhook/holmes/{self.webhook.id_webhook}")
-        assert response.is_success, f"Erro ao remover a {self!r} do webhook | Status code '{response.status_code}' inesperado"
+        (
+            client_singleton()
+            .delete(f"/webhook/holmes/{self.webhook.id_webhook}")
+            .esperar_sucesso(f"Erro ao remover a {self!r} do webhook")
+        )
         return self
 
     def incrementar_tentativas_webhook (self) -> typing.Self:
         """Incrementar o campo `tentativas` do processo no banco de dados do webhook
         - Incrementado `self.webhook.tentativas` para refletir com o banco"""
         dclick.logger.informar(f"Incrementando o campo tentativas do {self!r}")
-        response = client_singleton().patch(f"/webhook/holmes/{self.webhook.id_webhook}/tentativas")
-        assert response.is_success, f"Erro ao incrementar tentativas do {self!r} no webhook | Status code '{response.status_code}' inesperado"
+        (
+            client_singleton()
+            .patch(f"/webhook/holmes/{self.webhook.id_webhook}/tentativas")
+            .esperar_sucesso(f"Erro ao incrementar tentativas do {self!r} no webhook")
+        )
         self.webhook.tentativas += 1
         return self
 
@@ -100,11 +106,14 @@ class ProcessoWebhook[T]:
         """Atualizar o campo `controle` do processo no banco de dados do webhook
         - Utilizado o campo `self.webhook.controle`"""
         dclick.logger.informar(f"Atualizando o campo controle {self!r}")
-        response = client_singleton().put(
-            f"/webhook/holmes/{self.webhook.id_webhook}/controle",
-            json = self.webhook.controle
+        (
+            client_singleton()
+            .put(
+                url = f"/webhook/holmes/{self.webhook.id_webhook}/controle",
+                json = self.webhook.controle
+            )
+            .esperar_sucesso(f"Erro ao atualizar o campo controle do {self!r} no webhook")
         )
-        assert response.is_success, f"Erro ao atualizar o campo controle do {self!r} no webhook | Status code '{response.status_code}' inesperado"
         return self
 
     @functools.cached_property
@@ -212,6 +221,7 @@ class QueryProcessosWebhook [T]:
     - Sugerido notificar o cliente do erro para alterar algo no processo"""
 
     def __init__ (self, query: str, classe_validadora_properties: type[T] = dict[str, typing.Any]) -> None:
+        dclick.logger.informar(f"Iniciando QueryProcessosWebhook para buscar processos no webhook | Query({self.query})")
         self.query = query
         self.itens_webhook_com_properties_invalida = []
         self.classe_validadora_properties = classe_validadora_properties
@@ -228,12 +238,10 @@ class QueryProcessosWebhook [T]:
         """Realizar o parse do `processo` para o `ProcessoWebhook[T]`"""
         try: item_webhook = self.unmarshaller_item_webhook.parse(processo)
         except Exception as erro:
-            dclick.logger.alertar("\n\t".join((
-                f"Processo do webhook ignorado devido ao formato inválido",
-                "Isso não deveria ser possível",
-                str(erro),
-                str(processo),
-            )))
+            dclick.logger.alertar(
+                f"Processo do webhook ignorado devido ao formato inválido. Isso não deveria ser possível",
+                processo = processo,
+            )
             return
 
         pw = ProcessoWebhook()
@@ -254,12 +262,11 @@ class QueryProcessosWebhook [T]:
             else self.unmarshaller_properties.parse(item_webhook.dados.properties)
         except Exception as erro:
             pw.properties = item_webhook.dados.properties
-            dclick.logger.alertar("\n\t".join((
+            dclick.logger.alertar(
                 f"Properties do {pw!r} não está com o formato esperado",
-                str(pw.properties),
-                mensagem_erro := str(erro),
-            )))
-            return self.itens_webhook_com_properties_invalida.append((pw, mensagem_erro))
+                properties = pw.properties
+            )
+            return self.itens_webhook_com_properties_invalida.append((pw, str(erro)))
 
         pw.properties = properties
         pw.holmes # aproveitar o ThreadPool e consultar o processo
@@ -269,20 +276,18 @@ class QueryProcessosWebhook [T]:
     def procurar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
         """Procurar os processos no webhook e realizar a validação
         - `limite` quantidade máxima de processos retornados"""
-        dclick.logger.informar(f"Procurando por processos no webhook | Query({self.query}) | Limite({limite})")
-
         checar_conexao_webhook()
-        response = client_singleton().get(
-            "/webhook/holmes",
-            params = {
-                "limit": limite,
-                "query": self.query,
-            }
+        json = (
+            client_singleton()
+            .get(
+                url = "/webhook/holmes",
+                query = { "limit": limite, "query": self.query }
+            )
+            .esperar_status_code(200)
+            .json(dict)
         )
-        assert response.status_code == 200, f"Status code diferente de 200: '{response.status_code}'"
+        assert isinstance(processos := json.get("processos"), list), f"Formato inesperado na resposta do webhook: {json}"
 
-        json = response.json()
-        assert isinstance(json, dict) and isinstance(processos := json.get("processos"), list), f"Formato inesperado na resposta do webhook: {json}"
         with ThreadPoolExecutor(max_workers=10) as pool:
             processos = [
                 processo
