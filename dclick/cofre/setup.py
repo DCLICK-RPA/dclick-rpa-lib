@@ -1,6 +1,5 @@
 # std
-import certifi
-from functools import cache
+import certifi, functools
 # interno
 import dclick
 from dclick.cofre import modelos
@@ -8,12 +7,12 @@ from dclick.cofre import modelos
 import bot
 from bot.estruturas import DictNormalizado
 
-@cache
-def client_singleton () -> bot.http.Client:
+@functools.cache
+def client_singleton () -> dclick.http.ClienteHttp:
     """Criar o http `Client` configurado com o `host`, `token` e timeout
     - O Client ficará aberto após a primeira chamada na função devido ao `@cache`"""
     host, apikey = bot.configfile.obter_opcoes_obrigatorias("cofre", "host", "apikey")
-    return bot.http.Client(
+    return dclick.http.ClienteHttp(
         base_url = host,
         headers  = {
             "x-api-key": apikey,
@@ -47,20 +46,27 @@ def consultar_segredo[T] (nome: str, fields: type[T] = DictNormalizado[str]) -> 
         - `x-real-ip`: opcional `<IP da máquina>`, mas importante para a auditoria"""
     dclick.logger.informar(f"Consultando segredo({nome}) no Cofre")
 
-    response = client_singleton().get(f"/api/vault/get/{nome}")
-    assert response.status_code == 200, f"Status code '{response.status_code}' diferente do esperado"
-
-    segredo: modelos.Segredo = (
-        bot.formatos.Unmarshaller(modelos._Segredo)
-        .parse(response.json())
-    ) # type: ignore
-    segredo.fields = (
-        fields(segredo.fields) # type: ignore
-        if isinstance(fields(), (dict, DictNormalizado))
-        else bot.formatos.Unmarshaller(fields).parse(segredo.fields)
+    _segredo = (
+        client_singleton()
+        .get(f"/api/vault/get/{nome}")
+        .esperar_status_code(200)
+        .esperar_tipo_conteudo("json")
+        .unmarshal(modelos._Segredo)
     )
 
-    return segredo
+    try: 
+        segredo = modelos.Segredo[T]()
+        segredo.__dict__ = _segredo.__dict__
+        segredo.fields = (
+            fields(_segredo.fields) # type: ignore
+            if isinstance(fields(), (dict, DictNormalizado))
+            else bot.formatos.Unmarshaller(fields).parse(_segredo.fields)
+        )
+        return segredo
+
+    except Exception as erro:
+        dclick.erros.api.RespostaJson.erro(erro)
+        raise
 
 __all__ = [
     "consultar_segredo"
