@@ -2,8 +2,11 @@
 from enum import Enum
 from typing import Iterable
 from functools import cache
+# interno
+import dclick
 # externo
 import bot
+from bot.estruturas import String, DictNormalizado
 
 Z_INDEX_FOCADO = 9999
 Z_INDEX_NAO_FOCADO = 9900
@@ -23,9 +26,9 @@ class Localizadores:
     TEXTO_JANELA_MENU = "span.x-window-header-text"
 
 @cache
-def de_para_opcoes () -> bot.estruturas.LowerDict[list[str]]:
+def de_para_opcoes () -> DictNormalizado[list[str]]:
     secao = "dealernet.menu.opcoes_empresa"
-    return bot.estruturas.LowerDict({
+    return DictNormalizado({
         opcao: [
             item.strip()
             for item in bot.configfile.obter_opcao_ou(secao, opcao).split(",")
@@ -65,7 +68,7 @@ def checar_iframe_janela_menu_no_topo (navegador: bot.navegador.Edge, nome_menu:
             }
             return nome
         """, Localizadores.JANELA_MENU, Localizadores.TEXTO_JANELA_MENU)
-        return bot.util.normalizar(str(maior_nome)) == bot.util.normalizar(nome_menu)
+        return String(maior_nome).normalizar() == String(nome_menu).normalizar()
     except Exception: return False
 
 def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -> None:
@@ -73,11 +76,11 @@ def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -
     - `nome_menu` observado ser a última parte das opções em `selecionar_opcao_menu()`
     - Menu é trago para frente dos demais menus"""
     janela_encontrada = None
-    nome_menu = bot.util.normalizar(nome_menu)
+    nome_menu = String(nome_menu).normalizar()
 
     for janela in navegador.alterar_frame().procurar(Localizadores.JANELA_MENU):
         texto = janela.encontrar(Localizadores.TEXTO_JANELA_MENU).texto
-        if bot.util.normalizar(texto) == nome_menu: janela_encontrada = janela
+        if String(texto).normalizar() == nome_menu: janela_encontrada = janela
         else: navegador.driver.execute_script("arguments[0].style.zIndex = arguments[1];", janela.elemento, Z_INDEX_NAO_FOCADO)
 
     if not janela_encontrada:
@@ -95,17 +98,17 @@ def selecionar_opcao_menu (
     - Checado se o `menu` já se encontra selecionado
     - Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Menus.PRODUTOS)`"""
     assert opcoes, "Nenhuma opção informada"
-    opcoes = [bot.util.normalizar(opcao) for opcao in opcoes]
+    opcoes = [String(opcao).normalizar() for opcao in opcoes]
     elemento_menu = navegador.alterar_frame().encontrar(menu)
 
     # checar se já se encontra selecionado
-    if menu is Menus.EMPRESA and opcoes[-1] == bot.util.normalizar(elemento_menu.texto):
+    if menu is Menus.EMPRESA and opcoes[-1] == String(elemento_menu.texto).normalizar():
         return
     if menu is not Menus.EMPRESA and checar_iframe_janela_menu_no_topo(navegador, opcoes[-1]):
         return
 
     # abrir menu
-    bot.logger.informar(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
+    dclick.logger.informar(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
     elemento_menu.clicar()
 
     # navegar nas opções
@@ -124,7 +127,7 @@ def selecionar_opcao_menu (
         # encontrar `/ul/a` onde o texto seja igual a `opção` desejada
         opcao_ul = next((
             e for e in ul.procurar("li > a")
-            if opcao == bot.util.normalizar(e.texto)
+            if opcao == String(e.texto).normalizar()
         ), None)
         assert opcao_ul, f"Nenhuma das opções do <ul> possui o texto da opção '{opcao}'"
 
@@ -135,7 +138,7 @@ def selecionar_opcao_menu (
         else:
             with opcao_ul.aguardar_invisibilidade(): opcao_ul.clicar()
 
-    bot.logger.informar("Opções selecionadas com sucesso")
+    dclick.logger.informar("Opções selecionadas com sucesso")
 
 __all__ = [
     "Menus",

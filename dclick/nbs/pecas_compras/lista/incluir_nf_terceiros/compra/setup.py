@@ -1,8 +1,11 @@
 # std
 import re as regex
 from typing import Self
+# interno
+import dclick
 # externo
 import bot
+from bot.estruturas import String
 from bot.sistema.janela import ElementoW32
 
 def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
@@ -14,7 +17,7 @@ def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
     posicao = painel.coordenada.transformar(*xy_offset)
 
     bot.mouse.mover(posicao)
-    try: janela_entrada_nf.janela_processo(lambda j: bot.util.normalizar(j.titulo) == "recalculo",
+    try: janela_entrada_nf.janela_processo(lambda j: String(j.titulo).normalizar() == "recalculo",
                                            aguardar = 3)
     except Exception: raise Exception("Mouse na posição inválida para clicar no botão 'Recálculo'")
     bot.mouse.clicar()
@@ -22,7 +25,7 @@ def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
     dialogo = janela_entrada_nf.focar().dialogo(aguardar=0.3)
     assert not dialogo, f"Diálogo inesperado ao clicar no botão 'Recálculo': {dialogo.texto}"
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'CapaNotaFiscal' da janela 'Entrada de Nota Fiscal'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'CapaNotaFiscal' da janela 'Entrada de Nota Fiscal'")
 class AbaCapaNotaFiscal:
     """Representação da aba `CapaNotaFiscal` da janela `Entrada de Nota Fiscal`"""
 
@@ -31,7 +34,7 @@ class AbaCapaNotaFiscal:
     NOME_ABA = "CapaNotaFiscal"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -45,7 +48,7 @@ class AbaCapaNotaFiscal:
                       and e.texto == self.NOME_ABA
         )
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Financeiro' da janela 'Entrada de Nota Fiscal'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Financeiro' da janela 'Entrada de Nota Fiscal'")
 class AbaFinanceiro:
     """Representação da aba `Financeiro` da janela `Entrada de Nota Fiscal`"""
 
@@ -56,7 +59,7 @@ class AbaFinanceiro:
     """Imagem do botão `Gerar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -99,7 +102,7 @@ class AbaFinanceiro:
             .sleep(0.5)\
             .apertar("tab", focar=False)\
             .to_uia().valor
-        assert bot.util.normalizar(tipo) == bot.util.normalizar(valor),\
+        assert String(tipo).normalizar() == String(valor).normalizar(),\
             f"Tipo de Pagamento selecionado não foi o esperado | Esperado({tipo}) | Selecionado({valor})"
         return self
 
@@ -121,7 +124,7 @@ class AbaFinanceiro:
 
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'TotalNota' da janela 'Entrada de Nota Fiscal'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'TotalNota' da janela 'Entrada de Nota Fiscal'")
 class AbaTotalNota:
     """Representação da aba `TotalNota` da janela `Entrada de Nota Fiscal`"""
 
@@ -130,7 +133,7 @@ class AbaTotalNota:
     NOME_ABA = "TotalNota"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -165,7 +168,7 @@ class AbaTotalNota:
             assert a == b, f"Comparação de valores dos campos na posição '{posicao}' estão diferentes do esperado | '{a}' != '{b}'"
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Locações' da janela 'Entrada de Nota Fiscal'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Locações' da janela 'Entrada de Nota Fiscal'")
 class AbaLocacoes:
     """Representação da aba `Locações` da janela `Entrada de Nota Fiscal`"""
 
@@ -174,7 +177,7 @@ class AbaLocacoes:
     NOME_ABA = "Locações"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -210,7 +213,7 @@ class AbaLocacoes:
             .sleep(0.5)\
             .apertar("tab", focar=False)\
             .to_uia().valor
-        assert bot.util.normalizar(local) == bot.util.normalizar(valor),\
+        assert String(local).normalizar() == String(valor).normalizar(),\
             f"Local selecionado não foi o esperado | Esperado({local}) | Selecionado({valor})"
         return self
 
@@ -251,14 +254,14 @@ class AbaLocacoes:
         assert posicao is None, "Cor vermelha detectada no painel 'Itens Lançados'"
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Entrada de Nota Fiscal'")
+@bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Entrada de Nota Fiscal'")
 class Confirmar:
     """Representação do processo de Confirmação na janela `Entrada de Nota Fiscal`"""
 
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Confirmando na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Confirmando na janela '{janela.titulo}'")
         self.janela = janela
 
     @property
@@ -287,7 +290,7 @@ class Confirmar:
 
         match = regex.search(r"\d+", texto_dialogo)
         assert "sucesso" in texto_dialogo.lower() and match, f"Diálogo inesperado: '{texto_dialogo}'"
-        assert bot.util.aguardar_condicao(lambda: self.janela.fechada, timeout=10),\
+        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=10),\
             f"Janela '{self.janela.titulo}' não fechou conforme esperado"
 
         return match.group()

@@ -1,8 +1,10 @@
 # std
 from typing import Self
+# interno
+import dclick
 # externo
 import bot
-from bot.util import normalizar
+from bot.estruturas import String
 
 IMAGEM_MODULO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAvCAYAAACyoNkAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGVSURBVGhD7ZhtroQgDEVdOktzZ765ozdem6JoLM5DTkKE8lFOSubHDNNL6KKt0UWjSCktvZVhSN8WSbgoxTxBMEviG3uVsNNVbBzHpbelliQIyaBVhCRaMjI1JcHtWexTpShIaU5XWxKEZKLYt5IfYVYWPCEJbs9GIYDnqpKoKARzkqx4BLefjMvywny+YH226zzBeK7+fxL9iODSWlmvipBSQezLVfoObj8Zl7WiCuVqCZKQDLg4K2ahKL41BElYJj5hS60KWsIyek/4CUESmplPmP0nCc/+1FO1hN/gFyTBb9yiAl20Nbpoa3TR1uiirdFFW+PdovhL0qIxb76E+a/ObWP8LnJnZUXtBh1fvdjVfWfI5eii+gW2r03xYqQk7u1nrCRu15DLosrReoKYNsL+UQzYMcmtJ4c/Rt4B9rC9OSU3V3q2BXPaGPM4FAV6EPDmFTsmpXEdn92TXb98N3iHaMyb1y+wa4AXA3v77Z6zcVIkCjSGvjbFi5GSuLefsb045+wa4oq2SBdtjS7aGi8RnaY/CSKCTRQAu6YAAAAASUVORK5CYII=")
 """Imagem do módulo `Nbs Fiscal` na resolução `1920x1080`"""
@@ -16,7 +18,7 @@ class SelecaoEmpresaFilial:
     filial: str
 
     def __init__ (self) -> None:
-        bot.logger.informar(f"Selecionando a empresa/filial")
+        dclick.logger.informar(f"Selecionando a empresa/filial")
         self.empresa = self.filial = ""
         try: self.janela = bot.sistema.JanelaW32(lambda j: "Empresa/Filial" in j.titulo, aguardar=10).focar()
         except Exception: raise Exception("Janela de seleção 'Empresa/Filial' não encontrada")
@@ -42,11 +44,11 @@ class SelecaoEmpresaFilial:
             .apertar("enter")
 
         valor = elemento.valor
-        assert normalizar(valor) == normalizar(filial),\
+        assert String(valor).normalizar() == String(filial).normalizar(),\
             f"Falha ao preencher a filial | Esperado '{filial}' | Encontrado '{valor}'"
         return self
 
-    @bot.util.decoradores.prefixar_erro("Erro ao confirmar a seleção da Empresa/Filial")
+    @bot.erro.adicionar_prefixo("Erro ao confirmar a seleção da Empresa/Filial")
     def confirmar (self, class_name_janela_informativa: str = "TFrmListaNfeRen") -> bot.sistema.JanelaW32:
         """Clicar no botão de confirmar
         - Fechado janela informativa que pode aparecer
@@ -70,12 +72,12 @@ class SelecaoEmpresaFilial:
     def checar_selecao (self) -> None:
         """Checar se a seleção da Empresa/Filial aconteceu com sucesso"""
         empresa, filial = self.obter_empresa_filial_selecionada()
-        assert normalizar(self.empresa) in normalizar(empresa),\
+        assert String(self.empresa).normalizar() in String(empresa).normalizar(),\
             f"Falha ao selecionar a empresa '{self.empresa}' | Encontrado '{empresa}'"
-        assert normalizar(self.filial) in normalizar(filial),\
+        assert String(self.filial).normalizar() in String(filial).normalizar(),\
             f"Falha ao selecionar a filial '{self.filial}' | Encontrado '{filial}'"
 
-    @bot.util.decoradores.prefixar_erro("Falha ao obter a empresa/filial selecionada na janela 'Sistema Fiscal'")
+    @bot.erro.adicionar_prefixo("Falha ao obter a empresa/filial selecionada na janela 'Sistema Fiscal'")
     def obter_empresa_filial_selecionada (self) -> tuple[str, str]:
         """Obter a `(empresa, filial)` selecionada na janela `Sistema Fiscal`"""
         barra_status = bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=3)\
@@ -91,15 +93,15 @@ class SelecaoEmpresaFilial:
         )
         return (empresa, filial)
 
-@bot.util.decoradores.prefixar_erro("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
-@bot.util.decoradores.retry()
+@bot.erro.adicionar_prefixo("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
+@bot.erro.retry()
 def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
                              imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
     """Abrir o módulo `Nbs Fiscal`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
     - Retornado `SelecaoEmpresaFilial`"""
-    bot.logger.informar(f"Abrindo o módulo 'NBS Fiscal'")
+    dclick.logger.informar(f"Abrindo o módulo 'NBS Fiscal'")
     abas = janela_shortcut.focar().elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn"
                          and elemento.visivel,
@@ -123,7 +125,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
     bot.mouse.mover(posicao_nbs_fiscal).clicar()
     return SelecaoEmpresaFilial()
 
-@bot.util.decoradores.retry()
+@bot.erro.retry()
 def fechar_janela_nbs_fiscal (titulo: str = "Sistema Fiscal") -> None:
     """Fechar a janela nbs fiscal `titulo`
     - Usado o `destruir` na janela para encerrar todas as janelas dependentes

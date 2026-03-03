@@ -1,5 +1,7 @@
 # std
 from typing import Callable
+# interno
+import dclick
 # externo
 import bot
 from bot.sistema import JanelaW32
@@ -11,7 +13,7 @@ janela_shortcut = lambda: JanelaW32(
 )
 """Janela `NBS ShortCut` aberta após login"""
 
-@bot.util.decoradores.prefixar_erro("Falha ao abrir o NBS ou ao realizar login")
+@bot.erro.adicionar_prefixo("Falha ao abrir o NBS ou ao realizar login")
 def abrir_e_login (usuario: str | None = None, senha: str | None = None) -> JanelaW32:
     """Abrir o NBS e realizar o login
     - Variáveis .ini `[nbs] -> executavel, [usuario, senha]`
@@ -20,10 +22,10 @@ def abrir_e_login (usuario: str | None = None, senha: str | None = None) -> Jane
     usuario = usuario or bot.configfile.obter_opcoes_obrigatorias("nbs", "usuario")[0]
     senha = senha or bot.configfile.obter_opcoes_obrigatorias("nbs", "senha")[0]
 
-    bot.logger.informar("Abrindo o NBS")
+    dclick.logger.informar("Abrindo o NBS")
     janela_login = JanelaW32.iniciar(executavel)
 
-    bot.logger.informar(f"Realizando login no NBS com o usuário '{usuario}'")
+    dclick.logger.informar(f"Realizando login no NBS com o usuário '{usuario}'")
     filhos = janela_login.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=5))
     input_usuario, input_senha = (filho for filho in filhos if filho.class_name == "TOvcPictureField")
     *_, input_confirmar = (filho for filho in filhos if filho.class_name == "TfcImageBtn")
@@ -31,14 +33,14 @@ def abrir_e_login (usuario: str | None = None, senha: str | None = None) -> Jane
     input_senha.digitar(senha)
     input_confirmar.sleep(0.5).clicar()
 
-    assert bot.util.aguardar_condicao(
+    assert bot.tempo.aguardar(
         lambda: janela_login.fechada,
         timeout = 10
     ), "Janela de login não fechou corretamente"
 
     try:
         janela = janela_shortcut().focar()
-        bot.logger.informar(f"Login realizado | Aberto {janela}")
+        dclick.logger.informar(f"Login realizado | Aberto {janela}")
         return janela
     except Exception: pass
 
@@ -55,7 +57,7 @@ def fechar_janelas_nbs (filtro: Callable[[JanelaW32], bot.tipagem.SupportsBool] 
     filtro = filtro or (lambda j: j.titulo.lower().startswith("nbs"))
     try:
         while janela := JanelaW32(filtro, aguardar=0.5):
-            bot.logger.informar(f"Fechando a {janela!r}")
+            dclick.logger.informar(f"Fechando a {janela!r}")
             janela.encerrar(1)
     except Exception: pass
 

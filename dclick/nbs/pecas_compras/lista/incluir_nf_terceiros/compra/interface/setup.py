@@ -1,5 +1,7 @@
 # std
 from typing import Self
+# interno
+import dclick
 # externo
 import bot
 from bot.sistema.janela import ElementoW32
@@ -7,7 +9,7 @@ from bot.sistema.janela import ElementoW32
 def abrir_interface (janela: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Abrir a opção `Interface` na janela `Entrada de Nota Fiscal`
     - Retornado janela `Interface de Compra`"""
-    bot.logger.informar(f"Abrindo a opção 'Interface' na {janela!r}")
+    dclick.logger.informar(f"Abrindo a opção 'Interface' na {janela!r}")
 
     janela.to_uia()\
         .elemento\
@@ -20,7 +22,7 @@ def abrir_interface (janela: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     except Exception:
         raise Exception("Janela 'Interface de Compra' não abriu conforme esperado")
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Fila' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Fila' da janela 'Interface de Compra'")
 class AbaFila:
     """Representação da aba `Fila` da janela `Interface de Compra`"""
 
@@ -31,7 +33,7 @@ class AbaFila:
     """Imagem do botão `Carregar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -69,7 +71,7 @@ class AbaFila:
         except Exception:
             raise Exception("Janela 'Monitor Notas Eletrônicas' não abriu conforme esperado")
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Interface de Compra CFOP'")
+@bot.erro.adicionar_prefixo_classe("Falha na janela 'Interface de Compra CFOP'")
 class InterfaceCompraCFOP:
 
     janela: bot.sistema.JanelaUIA
@@ -120,7 +122,7 @@ class InterfaceCompraCFOP:
             raise Exception(f"Diálogo encontrado ao clicar em OK: '{dialogo.texto}'")
         assert self.janela.fechar(), "Janela não fechada conforme esperado"
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Definir Tributação/CFOP' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Definir Tributação/CFOP' da janela 'Interface de Compra'")
 class AbaTributacaoCFOP:
     """Representação da aba `Definir Tributação/CFOP` da janela `Interface de Compra`"""
 
@@ -129,7 +131,7 @@ class AbaTributacaoCFOP:
     NOME_ABA = "Definir Tributação/CFOP"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -159,11 +161,11 @@ class AbaTributacaoCFOP:
         bot.mouse.mover(posicao).clicar(botao="right")
 
         assert (popup := self.janela.popup(aguardar=3)), "Popup para definir o CFOP não foi encontrado"
-        popup.menu("Definir CFOP")
+        popup.clicar("Definir CFOP")
 
         return InterfaceCompraCFOP()
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Interface de Compra'")
 class Confirmar:
     """Representação do processo de Confirmação na janela `Interface de Compra`"""
 
@@ -173,7 +175,7 @@ class Confirmar:
     """Imagem do botão `Aceitar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Confirmando na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Confirmando na janela '{janela.titulo}'")
         self.janela = janela
 
     @property

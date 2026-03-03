@@ -6,6 +6,7 @@ from datetime import date as Date
 import dclick
 # externo
 import bot
+from bot.estruturas import String, DictNormalizado
 
 NOME_MENU = "NFe"
 
@@ -83,7 +84,7 @@ class TabelaRegistro:
 
         return self
 
-    @bot.util.decoradores.retry(tentativas=2)
+    @bot.erro.retry(tentativas=2)
     def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
@@ -93,10 +94,13 @@ class TabelaRegistro:
 
         # buscar os nomes dos headers e seus index
         dados_header = dict[int, str]()
-        headers_esperados = list(map(bot.util.normalizar, DadosRegistro.__annotations__))
+        headers_esperados = [
+            String(header).normalizar()
+            for header in DadosRegistro.__annotations__.keys()
+        ]
 
         for index, th in enumerate(tabela_registros.procurar("thead th")):
-            texto = bot.util.normalizar(th.texto)
+            texto = String(th.texto).normalizar()
             if texto not in headers_esperados: continue
             dados_header[index] = texto
 
@@ -144,7 +148,7 @@ class ExtrairDadosRegistro:
             elemento.clicar()
         return self
 
-    def extrair_visao_geral (self) -> bot.estruturas.LowerDict[str]:
+    def extrair_visao_geral (self) -> DictNormalizado[str]:
         """Extrair os dados da aba `Visão Geral`"""
         # mais rápido via script
         try:
@@ -160,11 +164,11 @@ class ExtrairDadosRegistro:
                 return dados
             """)
             if dados and isinstance(dados, dict):
-                return bot.estruturas.LowerDict(dados)
+                return DictNormalizado(dados)
         except Exception: pass
 
         # tenta via selenium caso script não resulte em sucesso
-        dados = bot.estruturas.LowerDict[str]()
+        dados = DictNormalizado[str]()
         tabela = self.navegador.encontrar(self.TABELA_DADOS_VISAO_GERAL)\
                                .aguardar_visibilidade()
 

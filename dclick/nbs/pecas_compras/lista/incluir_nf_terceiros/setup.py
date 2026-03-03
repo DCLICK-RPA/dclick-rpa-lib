@@ -1,7 +1,7 @@
 # externo
 import bot
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na janela de seleção para incluir nota fiscal de terceiros")
+@bot.erro.adicionar_prefixo_classe("Falha na janela de seleção para incluir nota fiscal de terceiros")
 class OpcoesInclusaoNfTerceiros:
     """Representação da janela com opções para incluir nota fiscal de terceiros na aba `Lista` da janela `Compras`"""
 

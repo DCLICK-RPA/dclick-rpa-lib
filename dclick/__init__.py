@@ -6,5 +6,7 @@ from dclick import (
     http,
     cofre,
     email,
-    holmes
+    holmes,
+    nbs,
+    dealernet,
 )

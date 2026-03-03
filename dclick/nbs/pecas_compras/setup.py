@@ -1,8 +1,11 @@
 # std
 import re as regex
 from typing import Self
+# interno
+import dclick
 # externo
 import bot
+from bot.estruturas import String
 
 janela_compras = lambda: bot.sistema.JanelaW32(
     lambda j: j.class_name == "TForm_Principal" and j.visivel,
@@ -13,8 +16,8 @@ CLASS_NAME_JANELA_INFORMATIVA = "TFrmListaNfeRen"
 IMAGEM_MODULO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAAwCAIAAAA3ogXuAAAB/ElEQVRYCc3BAY7TCBAAwe6XD/PyvsWsRcLqTglGh6usuBkrbsaKm7HiZqy4GSt+i8q/qLjAipepPKh4pBZacYEVL1MrfqH8UAJacYEVL1MrpfiVAhZacYEVL1Mr5UPxSfmhBLTiAitepn779m1m+EoBC624wIqXqRQQD5QPBQhoxQVWvEO+iyfKp0ArLrDiHSoVPynFB4VAKy6w4h0qFT8pxQeFQCsusOIdKhU/KYXyXaAVF1jxDpUC4pPyKb7TiguseIdK8R+04gIr3qHygorfZcXvUiv+NCtuxoqbseJmrLgZK27Gipux4masuBkrbsaKm7HiZqy4GStuxooHupxq+BusOOnWcNKt4X9nxUm3hr/NipNuDV/ocqgBdDnU6AI1gC6nGkAXqAF0OdRw0AVqeGbFSbeGZ7o1HHRrdGsA3RpAt0a3hoNujW4Nz3RrdGsA3RoeWHHSreGZbg0H3RrdGkC3BtCt0a3hoFujW8NBl1MNoFvDF1acdGt4plvDQbdGtwbQrQF0a3RrOOjW6NYAujUcdGs46NbwzIqTbg0n3RrdGg66Nbo1gG4NoFujW8NBt0a3BtCt4aBbo1sD6NbwwIoHupxqOOhyqAF0awDdGkC3RpdTDaBbw0GXUw2gC9TwzIo/RLeGy6z4Q3RruMyKm7HiZqy4GStu5h8cwtCwMlN0DQAAAABJRU5ErkJggg==")
 """Imagem do botão do módulo na resolução `1920x1080`"""
 
-@bot.util.decoradores.prefixar_erro("Falha ao abrir o módulo 'Peças / Compras'")
-@bot.util.decoradores.retry()
+@bot.erro.adicionar_prefixo("Falha ao abrir o módulo 'Peças / Compras'")
+@bot.erro.retry()
 def abrir_modulo (
         janela_shortcut: bot.sistema.JanelaW32,
         imagem: bot.imagem.Imagem | None = IMAGEM_MODULO
@@ -24,7 +27,7 @@ def abrir_modulo (
     - `imagem=None` é feito o click em posição esperada na aba
     - Fechado possível janela informativa
     - Retornado a janela `Compras`"""
-    bot.logger.informar(f"Abrindo o módulo 'Peças / Compras'")
+    dclick.logger.informar(f"Abrindo o módulo 'Peças / Compras'")
     abas = janela_shortcut.focar().elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn"
                          and elemento.visivel,
@@ -61,7 +64,7 @@ def fechar_janela_modulo () -> None:
     try: janela_compras().encerrar()
     except Exception: pass
 
-@bot.util.decoradores.prefixar_erro_classe("Falha ao selecionar a empresa/filial do módulo")
+@bot.erro.adicionar_prefixo_classe("Falha ao selecionar a empresa/filial do módulo")
 class SelecaoEmpresaFilial:
     """Classe para tratar a seleção da empresa e filial do módulo
     - Necessário checar se a empresa já está selecionada pois a selecionada não aparece na seleção
@@ -83,7 +86,7 @@ class SelecaoEmpresaFilial:
     nome_empresa: str
 
     def __init__ (self, nome_empresa: str) -> None:
-        bot.logger.informar(f"Selecionando a empresa/filial '{nome_empresa}'")
+        dclick.logger.informar(f"Selecionando a empresa/filial '{nome_empresa}'")
         self.nome_empresa = nome_empresa
         self.janela_compras = janela_compras().focar()
 
@@ -115,7 +118,7 @@ class SelecaoEmpresaFilial:
     def checar_empresa_selecionada (self) -> bool:
         """Checar se a empresa selecionado possui `self.nome_empresa`"""
         empresa = self.obter_empresa_selecionada()
-        return bot.util.normalizar(self.nome_empresa) in bot.util.normalizar(empresa)
+        return String(self.nome_empresa).normalizar() in String(empresa).normalizar()
 
     def obter_empresa_selecionada (self) -> str:
         """Obter a `empresa` selecionada na janela"""

@@ -1,17 +1,19 @@
 # std
 from typing import Self, Callable
+# interno
+import dclick
 # externo
 import bot
 from bot.sistema.janela import ElementoW32, Dialogo
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Documento' da janela 'Compromisso'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Documento' da janela 'Compromisso'")
 class AbaDocumento:
     """Representação da aba `Documento` na janela `Compromisso`"""
 
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar("Abrindo a aba 'Documento' na janela 'Compromisso'")
+        dclick.logger.informar("Abrindo a aba 'Documento' na janela 'Compromisso'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -80,7 +82,7 @@ class AbaDocumento:
         elemento.digitar(texto, virtual=False)
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Compromisso'")
+@bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Compromisso'")
 class Confirmar:
     """Representação do processo de Confirmação na janela `Compromisso`"""
 
@@ -91,7 +93,7 @@ class Confirmar:
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar("Confirmando na janela 'Compromisso'")
+        dclick.logger.informar("Confirmando na janela 'Compromisso'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)
@@ -123,7 +125,7 @@ class Confirmar:
         assert coordenada, f"Coordenada do botão 'Cancelar' não encontrado na janela '{titulo}'"
 
         bot.mouse.mover(coordenada).clicar()
-        assert bot.util.aguardar_condicao(lambda: janela.fechada, timeout=5),\
+        assert bot.tempo.aguardar(lambda: janela.fechada, timeout=5),\
             f"Janela '{titulo}' não foi fechada corretamente"
 
 __all__ = [

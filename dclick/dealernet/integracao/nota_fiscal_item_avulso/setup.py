@@ -5,6 +5,7 @@ import typing
 import dclick
 # externo
 import bot
+from bot.estruturas import String
 
 NOME_MENU = "Nota Fiscal de Item Avulso"
 
@@ -22,7 +23,7 @@ class Localizadores:
 def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -> None:
     """Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`"""
     quantidade = len(nfe)
-    bot.logger.informar(f"Importando '{quantidade}' NFe(s) de item avulso")
+    dclick.logger.informar(f"Importando '{quantidade}' NFe(s) de item avulso")
     assert quantidade >= 1, "Pelo menos 1 NFe deve ser informada"
     assert all(n.existe() for n in nfe), f"Algum caminho da NFe não foi encontrado\n\t{nfe}"
 
@@ -54,7 +55,7 @@ def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -
         raise
 
     navegador.encontrar(Localizadores.BOTAO_FECHAR_UPLOAD).clicar()
-    bot.logger.informar(f"NFe(s) importada(s) com sucesso")
+    dclick.logger.informar(f"NFe(s) importada(s) com sucesso")
 
 class DadosRegistro:
 
@@ -124,7 +125,7 @@ class TabelaRegistro:
 
         return self
 
-    @bot.util.decoradores.retry(tentativas=2)
+    @bot.erro.retry(tentativas=2)
     def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
@@ -134,10 +135,13 @@ class TabelaRegistro:
 
         # buscar os nomes dos headers e seus index
         dados_header = dict[int, str]()
-        headers_esperados = list(map(bot.util.normalizar, DadosRegistro.__annotations__))
+        headers_esperados = [
+            String(header).normalizar()
+            for header in DadosRegistro.__annotations__.keys()
+        ]
 
         for index, th in enumerate(tabela_registros.procurar("thead th")):
-            texto = bot.util.normalizar(th.texto)
+            texto = String(th.texto).normalizar()
             if texto not in headers_esperados: continue
             dados_header[index] = texto
 
@@ -173,7 +177,7 @@ class AtualizarDadosRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
-        bot.logger.informar("Iniciando atualização dos dados")
+        dclick.logger.informar("Iniciando atualização dos dados")
 
     def clicar_atualizar_dados (self, registro: DadosRegistro) -> typing.Self:
         """Clicar para atualizar os dados do item avulso para o `registro`
@@ -243,7 +247,7 @@ class ProcessarDadosRegistro:
 
     def __init__ (self, navegador: bot.navegador.Edge) -> None:
         self.navegador = navegador
-        bot.logger.informar("Iniciando processamento dos dados")
+        dclick.logger.informar("Iniciando processamento dos dados")
 
     def selecionar_natureza_operacao (self, texto: str) -> typing.Self:
         """Selecionar a natureza da operação com o `texto`"""
@@ -332,7 +336,7 @@ class ProcessarDadosRegistro:
         """Clicar no botão Processar e retornar o resultado do `self.capturar_mensagens()`"""
         mensagem = self.capturar_mensagens()
         self.navegador.encontrar(self.BOTAO_PROCESSAR).clicar()
-        bot.util.aguardar_condicao(
+        bot.tempo.aguardar(
             lambda: mensagem != self.capturar_mensagens(),
             timeout = 15,
             delay = 0.5

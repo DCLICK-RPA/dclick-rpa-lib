@@ -3,11 +3,13 @@
 # std
 from __future__ import annotations
 from typing import Self, Literal
+# interno
+import dclick
 # externo
 import bot
 from bot.sistema.janela import ElementoW32
 
-@bot.util.decoradores.prefixar_erro_classe("Falha nas abas 'Situações Especiais / Suframa' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha nas abas 'Situações Especiais / Suframa' da janela 'Interface de Compra'")
 class AbaSituacoesEspeciaisSuframa:
     """Representação das abas `Situações Especiais / Suframa` da janela `Interface de Compra`"""
 
@@ -16,7 +18,7 @@ class AbaSituacoesEspeciaisSuframa:
     NOME_ABA = "SUFRAMA"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        bot.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
         self.aba.janela.to_uia()\
                        .elemento\
@@ -32,7 +34,7 @@ class AbaSituacoesEspeciaisSuframa:
             .encontrar(lambda e: e.class_name == "TTabSheet"
                                  and e.texto == self.NOME_ABA)
 
-@bot.util.decoradores.prefixar_erro_classe("Falha nas abas 'Situações Especiais / ICMS' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha nas abas 'Situações Especiais / ICMS' da janela 'Interface de Compra'")
 class AbaSituacoesEspeciaisICMS:
     """Representação das abas `Situações Especiais / ICMS` da janela `Interface de Compra`"""
 
@@ -41,7 +43,7 @@ class AbaSituacoesEspeciaisICMS:
     NOME_ABA = "ICMS"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        bot.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
         self.aba.janela.to_uia()\
                        .elemento\
@@ -75,7 +77,7 @@ class AbaSituacoesEspeciaisICMS:
             .clicar()
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha nas abas 'Situações Especiais / ICMS-ST' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha nas abas 'Situações Especiais / ICMS-ST' da janela 'Interface de Compra'")
 class AbaSituacoesEspeciaisIcmsSt:
     """Representação das abas `Situações Especiais / ICMS-ST` da janela `Interface de Compra`"""
 
@@ -84,7 +86,7 @@ class AbaSituacoesEspeciaisIcmsSt:
     NOME_ABA = "ICMS-ST"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        bot.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
         self.aba.janela.to_uia()\
                        .elemento\
@@ -119,7 +121,7 @@ class AbaSituacoesEspeciaisIcmsSt:
             .clicar()
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Situações Especiais' da janela 'Interface de Compra'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Situações Especiais' da janela 'Interface de Compra'")
 class AbaSituacoesEspeciais:
     """Representação da aba `Situações Especiais` da janela `Interface de Compra`"""
 
@@ -128,7 +130,7 @@ class AbaSituacoesEspeciais:
     NOME_ABA = "Situações Especiais"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\

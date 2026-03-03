@@ -1,6 +1,8 @@
 # interno
 from datetime import date
 from typing import Self, Literal, Callable
+# interno
+import dclick
 # externo
 import bot
 from bot.sistema.janela import ElementoW32, ElementoUIA, Dialogo, JanelaW32
@@ -8,15 +10,15 @@ from bot.sistema.janela import ElementoW32, ElementoUIA, Dialogo, JanelaW32
 IMAGEM_BOTAO_INCLUIR_ENTRADA = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABuSURBVEhL7ZFBCsAwCAT9/6cthVpiWbcG482BPelOhIg2MnLIyCEluYi8QaTkQfecPHqA4Som+YtbJrjpKmBxywQ+fUh4IGl5RPlDGfvyezko7FCW5y836TeEVjkDN5NSuzp3udEqP8TIISMHqF5RR2cYX0l7YAAAAABJRU5ErkJggg==")
 """Imagem do botão `Incluir Entrada` na resolução `1920x1080`"""
 
-@bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Incluir Entrada'")
-@bot.util.decoradores.retry()
+@bot.erro.adicionar_prefixo("Falha ao abrir o menu 'Incluir Entrada'")
+@bot.erro.retry()
 def abrir_menu_incluir_entrada (janela_entrada: JanelaW32,
                                 imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada
     - Retornado a janela de `Entrada Diversas`"""
-    bot.logger.informar(f"Abrindo o menu 'Incluir Entradas'")
+    dclick.logger.informar(f"Abrindo o menu 'Incluir Entradas'")
     painel = janela_entrada.elemento.focar()\
         .encontrar(lambda e: e.visivel and e.class_name == "TPageControl", aguardar=10)\
         .encontrar(lambda e: e.visivel and e.class_name == "TPanel")
@@ -31,17 +33,17 @@ def abrir_menu_incluir_entrada (janela_entrada: JanelaW32,
     bot.mouse.mover(posicao_botao).clicar()
     return JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=10).focar()
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na janela 'Cálculo de tributos'")
+@bot.erro.adicionar_prefixo_classe("Falha na janela 'Cálculo de tributos'")
 class CalculoTributos:
     """Representação da janela `Cálculo de tributos` da aba `Capa`"""
 
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
+        dclick.logger.informar("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
         self.janela = janela
 
-    @bot.util.decoradores.prefixar_erro(lambda args, _: f"Falha ao alterar o tributo '{args[0]}'")
+    @bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao alterar o tributo '{args[0]}'")
     def alterar_tributo (self, nome_tributo: Literal["INSS", "PIS", "CSLL", "COFINS", "IRRF", "ISS Retido"],
                                selecionar: bool = True,
                                imposto: int | float | None = None) -> Self:
@@ -82,17 +84,17 @@ class CalculoTributos:
             dialogo.confirmar()
             raise Exception(f"Falha após clicar em 'OK' na janela 'Cácula de Tributos': '{mensagem}'")
 
-        assert bot.util.aguardar_condicao(lambda: self.janela.fechada, timeout=5),\
+        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=5),\
             "Janela 'Cácula de Tributos' não foi fechada corretamente"
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Capa' da janela 'Entrada Diversas'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Capa' da janela 'Entrada Diversas'")
 class AbaCapa:
     """Representação da aba `Capa` na janela `Entrada Diversas`"""
 
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
+        dclick.logger.informar("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -296,7 +298,7 @@ class AbaCapa:
                      .apertar("tab")
         return self
 
-    @bot.util.decoradores.prefixar_erro("Falha ao abrir a janela de 'Calculo de Tributos'")
+    @bot.erro.adicionar_prefixo("Falha ao abrir a janela de 'Calculo de Tributos'")
     def abrir_janela_calculo_tributos (self) -> CalculoTributos:
         """Clicar para abrir a janela `Calculo de Tributos`
         - Retornado classe para tratar janela
@@ -331,14 +333,14 @@ class AbaCapa:
             .apertar("tab")
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Contabilização' da janela 'Entrada Diversas'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Contabilização' da janela 'Entrada Diversas'")
 class AbaContabilizacao:
     """Representação da aba `Contabilização` na janela `Entrada Diversas`"""
 
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
+        dclick.logger.informar("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -381,14 +383,14 @@ class AbaContabilizacao:
 
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Faturamento' da janela 'Entrada Diversas'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Faturamento' da janela 'Entrada Diversas'")
 class AbaFaturamento:
     """Representação da aba `Faturamento` na janela `Entrada Diversas`"""
 
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
+        dclick.logger.informar("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -475,14 +477,14 @@ class AbaFaturamento:
                     .apertar("tab")
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Retenções PJ' da janela 'Entrada Diversas'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Retenções PJ' da janela 'Entrada Diversas'")
 class AbaRetencoesPJ:
     """Representação da aba `Retenções PJ` na janela `Entrada Diversas`"""
 
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
+        dclick.logger.informar("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
         self.janela = janela
         try: janela.to_uia()\
                    .elemento\
@@ -505,7 +507,7 @@ class AbaRetencoesPJ:
             .focar()\
             .to_uia()
 
-    @bot.util.decoradores.prefixar_erro("Falha ao abrir a janela interna 'Retenções PJ'")
+    @bot.erro.adicionar_prefixo("Falha ao abrir a janela interna 'Retenções PJ'")
     def clicar_incluir (self) -> Self:
         """Clicar no botão verde `+` para incluir
         - Necessário para abrir a `janela_retencoes_pj`
@@ -549,7 +551,7 @@ class AbaRetencoesPJ:
 
         return self
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na confirmação da janela 'Entrada Diversas'")
+@bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Entrada Diversas'")
 class Confirmar:
     """Representação do processo de Confirmação na janela `Entrada Diversas`"""
 
@@ -562,7 +564,7 @@ class Confirmar:
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: JanelaW32) -> None:
-        bot.logger.informar("Confirmando na janela 'Entrada Diversas'")
+        dclick.logger.informar("Confirmando na janela 'Entrada Diversas'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)
@@ -623,7 +625,7 @@ class Confirmar:
         assert coordenada, f"Coordenada do botão 'Cancelar' não encontrado na janela '{titulo}'"
 
         bot.mouse.mover(coordenada).clicar()
-        assert bot.util.aguardar_condicao(lambda: janela.fechada, timeout=5),\
+        assert bot.tempo.aguardar(lambda: janela.fechada, timeout=5),\
             f"Janela '{titulo}' não foi fechada corretamente"
 
 __all__ = [

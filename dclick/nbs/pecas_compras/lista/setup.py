@@ -1,10 +1,11 @@
 # interno
+import dclick
 from .incluir_nf_terceiros import OpcoesInclusaoNfTerceiros
 # externo
 import bot
 from bot.sistema.janela import ElementoW32
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Lista' da janela 'Compras'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Lista' da janela 'Compras'")
 class AbaLista:
     """Representação da aba `Lista` na janela `Compras`"""
 
@@ -15,7 +16,7 @@ class AbaLista:
     """Imagem do botão `Incluir` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\

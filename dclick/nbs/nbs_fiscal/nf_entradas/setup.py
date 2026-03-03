@@ -1,12 +1,14 @@
+# interno
+import dclick
 # externo
 import bot
 
-@bot.util.decoradores.prefixar_erro("Falha ao abrir o menu 'Nota Fiscal de Entradas'")
-@bot.util.decoradores.retry()
+@bot.erro.adicionar_prefixo("Falha ao abrir o menu 'Nota Fiscal de Entradas'")
+@bot.erro.retry()
 def abrir_menu_nf_entradas (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Abrir o menu `Nota Fiscal de Entradas`
     - Retorna a janela de `Entradas`"""
-    bot.logger.informar(f"Abrindo o menu 'Nota Fiscal de Entradas'")
+    dclick.logger.informar(f"Abrindo o menu 'Nota Fiscal de Entradas'")
     janela_sistema_fiscal\
         .to_uia()\
         .menu("Notas Fiscais", "Nota Fiscal de Entradas")

@@ -1,10 +1,13 @@
 # std
 from typing import Self
+# interno
+import dclick
 # externo
 import bot
+from bot.estruturas import String
 from bot.sistema.janela import ElementoW32
 
-@bot.util.decoradores.prefixar_erro_classe("Falha na aba 'Pesquisar' da janela 'Monitor Notas Eletrônicas'")
+@bot.erro.adicionar_prefixo_classe("Falha na aba 'Pesquisar' da janela 'Monitor Notas Eletrônicas'")
 class AbaPesquisar:
     """Representação da aba `Pesquisar` na janela `Monitor Notas Eletrônicas`"""
 
@@ -15,7 +18,7 @@ class AbaPesquisar:
     """Imagem da coluna `Emissão` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        bot.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia()\
               .elemento\
@@ -59,7 +62,7 @@ class AbaPesquisar:
             .apertar("tab", focar=False)
 
         valor = elemento.valor
-        assert bot.util.normalizar(fornecedor) in bot.util.normalizar(valor),\
+        assert String(fornecedor).normalizar() in String(valor).normalizar(),\
             f"Falha ao selecionar o fornecedor '{fornecedor}' | Encontrado '{valor}'"
 
         return self
