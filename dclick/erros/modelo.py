@@ -17,7 +17,7 @@ class ModeloErroComLog:
     @property
     def mensagem_log (self) -> str:
         """Mensagem padrão no log"""
-        return f"[{self.codigo}] {self.descricao}"
+        return f"[{self.codigo}] - {self.descricao}"
 
     def alertar (self) -> None:
         """Log nível `WARNING`
