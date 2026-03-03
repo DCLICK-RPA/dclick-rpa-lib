@@ -24,7 +24,7 @@ def obter_descricao_release () -> str:
     requer_python = toml.obter("project.requires-python")
     dependencias = toml.obter("project.dependencies", list[str])
     pacotes = [atributo
-               for atributo in dir(bot)
+               for atributo in dir(dclick)
                if not atributo.startswith("_")]
 
     return "<br>".join((
