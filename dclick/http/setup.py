@@ -1,5 +1,5 @@
 # std
-import typing, functools
+import typing
 # interno
 from dclick.erros import api as Erros
 # externo
@@ -12,6 +12,8 @@ from httpx._client import USE_CLIENT_DEFAULT, UseClientDefault
 type METODOS_HTTP = typing.Literal["HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"]
 
 class ResponseHttp (httpx.Response):
+    """Response extensão do `httpx.Response` com métodos para facilitar validação de uma resposta http"""
+
     @classmethod
     def new (cls, response: httpx.Response) -> typing.Self:
         obj = super().__new__(cls)
@@ -22,7 +24,7 @@ class ResponseHttp (httpx.Response):
 
         return obj
 
-    @functools.cached_property
+    @property
     def headers (self) -> DictNormalizado[str]:
         """Headers com chaves normalizadas
         - Caso existam múltiplos headers de mesmo nome, os valores serão concatenados por `,`"""
@@ -38,8 +40,7 @@ class ResponseHttp (httpx.Response):
         if mensagem:
             erro = AssertionError(mensagem)
             erro.add_note(msg_status)
-        else:
-            erro = AssertionError(msg_status)
+        else: erro = AssertionError(msg_status)
 
         Erros.RetornoInesperado.erro(erro)
         raise erro
@@ -54,19 +55,26 @@ class ResponseHttp (httpx.Response):
         if mensagem:
             erro = AssertionError(mensagem)
             erro.add_note(msg_status)
-        else:
-            erro = AssertionError(msg_status)
+        else: erro = AssertionError(msg_status)
+
         Erros.RetornoInesperado.erro(erro)
         raise erro
 
-    def esperar_tipo_conteudo (self, tipo: str) -> typing.Self:
-        """Fazer o `assert` se `tipo` está no `Header: Content-Type`"""
+    def esperar_tipo_conteudo (self, tipo: str, mensagem: str | None = None) -> typing.Self:
+        """Fazer o `assert` se `tipo` está no `Header: Content-Type`
+        - `mensagem` sobrescreve a mensagem utilizada como erro"""
         content_type = self.headers.get("Content-Type", "").lower()
-        if tipo.lower() not in content_type:
-            erro = AssertionError(f"Content-Type de Resposta HTTP '{content_type}' diferente do esperado '{tipo}'")
-            Erros.RetornoInesperado.erro(erro)
-            raise erro
-        return self
+        if tipo.lower() in content_type:
+            return self
+
+        msg_conteudo = f"Content-Type de Resposta HTTP '{content_type}' diferente do esperado '{tipo}'"
+        if mensagem:
+            erro = AssertionError(mensagem)
+            erro.add_note(msg_conteudo)
+        else: erro = AssertionError(msg_conteudo)
+
+        Erros.RetornoInesperado.erro(erro)
+        raise erro
 
     @property
     def conteudo (self) -> bytes:
