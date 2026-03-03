@@ -1,21 +1,31 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==4.1</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==5.0</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.3/dclick-1.3-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.3/dclick-1.3-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v1.3/dclick-1.3-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-1.3-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.0-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
 
 ## Changelog 🔧
 
+<details>
+<summary>v2.0</summary>
+
+- Migração para a versão do `bot==5.0`
+- Removido pacote `dashboard`
+- Criado pacote `cofre`
+- Criado pacote `erros`
+- Criado pacote `http`
+
+</details>
 <details>
 <summary>v1.4</summary>
 
@@ -85,19 +95,6 @@ Configurar a seção `github` no .ini e executar o script `build_upload.py`
 ## Descrição breve dos pacotes com algumas funcionalidades
 Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e classes disponíveis para um melhor contexto
 
-### `dashboard`
-Pacote destinado ao dashboard da DClick
-```python
-# Gravar transação na dashboard com os dados para a automação `codigo_automacao`
-# `codigo_automacao` obtido do arquivo .ini
-gravar_transacao (
-    chave: str,
-    identificador: str,
-    mensagem: str = "",
-    data_hora: Datetime | None = None
-) -> None
-```
-
 ### `email`
 Pacote destinado ao envio de e-mail
 ```python
@@ -110,6 +107,70 @@ notificar_email_simples (
     anexos: list[bot.sistema.Caminho] | None = None,
     destinatarios: list[bot.tipagem.email] | None = None,
 ) -> None:
+```
+
+### `cofre`
+Pacote destinado ao cofre de senhas do `Runner`
+```python
+# Consultar o segredo `nome` e retornar uma classe modelo de resposta.
+# Exemplo com fields sendo um `dict`
+segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS")
+username: str | None = segredo.fields.get("username", default=None)
+# Exemplo com uma classe anotada e feito validação dos campos
+class Fields:
+    username: str
+    password: str
+segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS", Fields)
+print(segredo.fields.username, segredo.fields.password)
+```
+
+### `http`
+Pacote destinado ao protocolo http
+```python
+# Enviar um request conforme parâmetros
+# Retorna um `ResponseHttp` com métodos adicionais ao `httpx.Response`
+# Realizado logs automáticos de erros de api para requests e responses com os métodos modificados
+request(
+    metodo: Literal['HEAD', 'OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    url: str,
+    query: QueryParamTypes | None = None,
+    headers: HeaderTypes | None = None,
+    *,
+    json: object | None = None,
+    conteudo: RequestContent | None = None,
+    dados: RequestData | None = None,
+    arquivos: RequestFiles | None = None,
+    follow_redirects: bool = False,
+    timeout: TimeoutTypes = 60,
+    verify: str | bool = True
+) -> ResponseHttp
+
+# Criar um cliente `HTTP` para realizar requests
+# Extensão do `httpx.Client`
+# Retorno dos métodos `request, get, post, put, ...` é um `ResponseHttp` com métodos adicionais ao `httpx.Response`
+# Realizado logs automáticos de erros de api para requests e responses com os métodos modificados
+ClienteHttp(
+    base_url: URLTypes,
+    headers: HeaderTypes | None = None,
+    verify: str | bool = True,
+    timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
+    ...
+)
+```
+
+### `erros`
+Pacote com erros e suas codificações separadas por categorias.  
+> Possível de realizar log de `alerta` e `erro`, com o `dclick.logger`, para cada erro existente
+
+> A mensagem é no formato `[Código] - Descrição` e, na propriedade `extra`, é passado as informações sobre o erro
+```python
+# Gerar um log ERROR, da categoria arquivo
+# Falha ao gerar/baixar PDF
+dclick.erros.arquivo.FalhaPDF.erro()
+
+# Gerar um log WARNING, da categoria execução
+# Tentativa de acessar valor nulo/inexistente
+dclick.erros.execucao.ValorNuloOuInexistente.alertar()
 ```
 
 ### `holmes`
@@ -138,9 +199,7 @@ QueryTaskV2()
 consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
 ```
 
-<br>
-
-`holmes.webhook`  
+### `holmes.webhook`
 Pacote destinado a consulta e manipulação dos processos no [Webhook do Holmes](https://github.com/DCLICK-RPA/dclick-webhook-notificacao-holmes)
 
 > Veja a descrição das classes para um melhor contexto
@@ -164,8 +223,6 @@ processos = query.procurar(limite=50)
 for processo in query.itens_webhook_com_properties_invalida:
     print(f"{processo!r} apresentou falha na validação das properties")
 ```
-
-<br><br>
 
 ### `dealernet`
 Pacote destinado ao **Sistema Web Dealer-Net**  
@@ -219,8 +276,6 @@ class AtualizarDadosRegistro: ...
 # Iniciado a partir do `AtualizarDadosRegistro`
 class ProcessarDadosRegistro: ...
 ```
-
-<br><br>
 
 ### `nbs`
 Pacote destinado ao sistema NBSi
