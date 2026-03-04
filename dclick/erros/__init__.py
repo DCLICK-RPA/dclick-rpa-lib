@@ -5,6 +5,7 @@
 from dclick.erros import (
     api,
     arquivo,
+    comunicacao,
     entrada,
     execucao,
     saida,
