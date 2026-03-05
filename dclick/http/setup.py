@@ -6,7 +6,7 @@ from dclick.erros import api as Erros
 import httpx
 import httpx._types as types
 from bot.estruturas import DictNormalizado
-from bot.formatos import Json, ElementoXML, Unmarshaller
+from bot.formatos import Json, ElementoXML
 from httpx._client import USE_CLIENT_DEFAULT, UseClientDefault
 
 type METODOS_HTTP = typing.Literal["HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"]
@@ -109,26 +109,30 @@ class ResponseHttp (httpx.Response):
             raise ValueError(f"Erro ao realizar a validação do JSON da Resposta HTTP para o tipo esperado '{esperar}'") from erro
 
     def unmarshal[T] (self, cls: type[T]) -> T:
-        """Realizar o unmarshal do conteúdo `json` conforme a classe anotada `cls`
-        - Resposta deve ser um `dict` json
+        """Realizar o unmarshal do conteúdo `json` conforme a classe anotada `cls` ou `list[cls]`
+        - Resposta deve ser um json `dict` ou `list[dict]`
         - `ValueError` caso ocorra erro
         - Exemplo
-            ```
-            class Slideshow:
-                date: str
-                author: str
-                slides: list[dict[str, Any]]
-            class Root:
-                slideshow: Slideshow
-            root = request("GET", "https://httpbin.org/json").unmarshal(Root)
-            print(root.slideshow.author)
-            ```
+        ```
+        class Slideshow:
+            date: str
+            author: str
+            slides: list[dict[str, Any]]
+        class Root:
+            slideshow: Slideshow
+        root = request("GET", "https://httpbin.org/json").unmarshal(Root)
+        print(root.slideshow.author)
+        ```
         """
-        item = self.json(dict[str, typing.Any])
-        try: return Unmarshaller(cls).parse(item)
+        try: json = Json.parse(self.texto)
+        except Exception as erro:
+            Erros.RetornoInesperado.erro(erro)
+            raise ValueError("Erro ao realizar o parse para JSON da Resposta HTTP") from erro
+
+        try: return json.unmarshal(cls)
         except Exception as erro:
             Erros.RespostaJson.erro(erro)
-            raise ValueError(f"Erro ao realizar o Unmarshal do JSON da Resposta HTTP para a classe '{cls.__name__}'") from erro
+            raise ValueError(f"Erro ao realizar o Unmarshal do JSON da Resposta HTTP para '{cls}'") from erro
 
 class ClienteHttp (httpx.Client):
     """Criar um cliente `HTTP` para realizar requests. Extensão do `httpx.Client`
