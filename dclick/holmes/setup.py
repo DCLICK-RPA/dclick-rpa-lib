@@ -266,7 +266,7 @@ def tomar_acao_tarefa (
                     "property_values": propriedades or []
                 }
         })
-        .esperar_status_code(200, f"Falha ao ação na tarefa({id_tarefa}) no Holmes")
+        .esperar_status_code(200, f"Falha ao tomar ação na tarefa({id_tarefa}) no Holmes")
     )
 
 def assumir_tarefa (id_tarefa: str) -> None:
