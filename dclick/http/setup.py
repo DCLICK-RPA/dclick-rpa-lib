@@ -114,6 +114,9 @@ class ResponseHttp (httpx.Response):
         - `ValueError` caso ocorra erro
         - Exemplo
         ```
+        from typing import Any
+        from dclick.http import request
+
         class Slideshow:
             date: str
             author: str
