@@ -1,9 +1,38 @@
 # std
 from typing import Literal
+from smtplib import (
+    SMTPSenderRefused,
+    SMTPRecipientsRefused,
+    SMTPResponseException,
+)
+# interno
+import dclick.erros as Erros
 # externo
 import bot
 
 CAMINHO_EMAIL_SIMPLES = bot.sistema.Caminho(__file__).parente / "email_simples.html"
+
+def mapear_erro (erro: Exception) -> None:
+    try:
+        # Usuário
+        code = (int(erro.smtp_code)
+                if isinstance(erro, SMTPResponseException)
+                else 0)
+        if code in (251, 252) or isinstance(erro, (SMTPRecipientsRefused, SMTPSenderRefused)):
+            Erros.comunicacao.EnderecoEmailInvalido.erro(erro)
+            return
+
+        # Limite
+        if "limit" in bot.estruturas.String(str(erro)).normalizar():
+            Erros.comunicacao.LimiteEnvioEmail.erro(erro)
+            return
+
+        # Demais erros
+        Erros.comunicacao.EnvioEmailComResultados.erro(erro)
+
+    except Exception as e:
+        erro = e.with_traceback(erro.__traceback__)
+        Erros.sustentacao.FalhaTratativaErro.erro(erro)
 
 def separar_destinatarios (destinatarios: str) -> list[bot.tipagem.email]:
     """Separar um ou mais `destinatarios` concatenados por vírgula no configfile para uma lista"""
@@ -44,13 +73,16 @@ def notificar_email_simples (
         anexos.append(bot.logger.CAMINHO_LOG_RAIZ)
 
     # ler corpo do html e formatar as variáveis
-    html = CAMINHO_EMAIL_SIMPLES.path.read_text(encoding="utf-8")
+    html = CAMINHO_EMAIL_SIMPLES.ler_texto()
     for template, substituto in (("{nome_bot}", nome_bot),
                                  ("{assunto}",  assunto),
                                  ("{mensagem}", mensagem_email)):
         html = html.replace(template, substituto)
 
-    bot.email.enviar_email(destinatarios, assunto, html, anexos)
+    # enviar e tratar possível erro
+    resultado = bot.email.enviar_email(destinatarios, assunto, html, anexos)
+    if resultado.ok(): return
+    mapear_erro(resultado.erro())
 
 __all__ = [
     "notificar_email_simples",
