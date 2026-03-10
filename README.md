@@ -24,6 +24,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.
 - Criado pacote `cofre`
 - Criado pacote `erros`
 - Criado pacote `http`
+- Criado pacote `logger`
 
 </details>
 <details>
@@ -97,6 +98,7 @@ Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e c
 
 ### `email`
 Pacote destinado ao envio de e-mail
+> Realizado logs de `erros.comunicacao` automaticamente de acordo com possíveis erros
 ```python
 # Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - status`
 notificar_email_simples (
@@ -126,6 +128,7 @@ print(segredo.fields.username, segredo.fields.password)
 
 ### `http`
 Pacote destinado ao protocolo http
+> Realizado logs de `erros.api` automaticamente para o `request e response` dos métodos novos/modificados
 ```python
 # Enviar um request conforme parâmetros
 # Retorna um `ResponseHttp` com métodos adicionais ao `httpx.Response`
@@ -171,6 +174,47 @@ dclick.erros.arquivo.FalhaPDF.erro()
 # Gerar um log WARNING, da categoria execução
 # Tentativa de acessar valor nulo/inexistente
 dclick.erros.execucao.ValorNuloOuInexistente.alertar()
+```
+
+### `logger`
+Pacote para realizar e tratar Logs
+```python
+# Log para diferentes níveis com o nome `DCLICK`
+# Utilizado pelos pacotes da lib
+logger.debug (mensagem: str) -> MainLogger
+logger.informar (mensagem: str) -> MainLogger
+logger.alertar (mensagem: str) -> MainLogger
+logger.erro (mensagem: str, excecao: Exception | None = None) -> MainLogger
+# Possível de se passar itens extra com os argumentos nomeados
+# Aparecerão na propriedade `extra`
+logger.informar (
+    mensagem: str,
+    # Exemplo
+    quantidade = 10,
+    itens = [...],
+    dados = {...}
+) -> MainLogger
+
+# Criar um logger com nome próprio
+# Útil para identificar uma execução
+from dclick.logger.setup import MainLogger
+logger = MainLogger("MEU_LOG")                 # 1
+logger = dclick.logger.obter_logger("MEU_LOG") # 2
+
+# Necessário inicializar manualmente para configurar os handlers e formatação
+# Possível de se usar no logger criado ou no da `dclick.logger`
+logger.inicializar_logger()
+
+# Obter o `TracerLogger` utilizado para realizar o rastreamento de um processo
+# Possível de se realizar os logs com a mesma interface que o `MainLogger`
+from dclick.logger.setup import TracerLogger
+tracer: TracerLogger = logger.obter_tracer()
+# Sinalizar o encerramento do tracer
+tracer.encerrar("SUCCESS", "Sucesso ao se realizar determinada Ação")
+tracer.encerrar("ERROR", "Falha ao realizar determinada Ação")
+
+# Loggar o tempo de execução de uma função
+@logger.tempo_execucao
 ```
 
 ### `holmes`
