@@ -234,7 +234,7 @@ class QueryProcessosWebhook [T]:
     def unmarshaller_properties (self) -> bot.formatos.Unmarshaller[T]:
         return bot.formatos.Unmarshaller(self.classe_validadora_properties)
 
-    def parse (self, processo: typing.Any) -> ProcessoWebhook[T] | None:
+    def parse (self, processo: dict[str, typing.Any]) -> ProcessoWebhook[T] | None:
         """Realizar o parse do `processo` para o `ProcessoWebhook[T]`"""
         try: item_webhook = self.unmarshaller_item_webhook.parse(processo)
         except Exception as erro:
@@ -256,10 +256,18 @@ class QueryProcessosWebhook [T]:
             atualizado_em   = datetime.datetime.fromisoformat(item_webhook.atualizado_em),
         )
 
-        # Parse `processo.dados.properties` conforme `classe_validadora_properties`
-        try: properties = item_webhook.dados.properties \
-            if dict in (self.classe_validadora_properties, typing.get_origin(self.classe_validadora_properties))\
-            else self.unmarshaller_properties.parse(item_webhook.dados.properties)
+        try:
+            # Parse `processo.dados.properties` conforme `classe_validadora_properties`
+            properties = (
+                item_webhook.dados.properties
+                if dict in (self.classe_validadora_properties, typing.get_origin(self.classe_validadora_properties))
+                else self.unmarshaller_properties.parse(item_webhook.dados.properties)
+            )
+
+            pw.properties = properties
+            pw.holmes # aproveitar o ThreadPool e consultar o processo
+            return pw
+
         except Exception as erro:
             pw.properties = item_webhook.dados.properties
             dclick.logger.alertar(
@@ -267,10 +275,6 @@ class QueryProcessosWebhook [T]:
                 properties = pw.properties
             )
             return self.itens_webhook_com_properties_invalida.append((pw, str(erro)))
-
-        pw.properties = properties
-        pw.holmes # aproveitar o ThreadPool e consultar o processo
-        return pw
 
     @bot.erro.adicionar_prefixo("Erro ao procurar Processos no Webhook")
     def procurar (self, limite: int = 50) -> list[ProcessoWebhook[T]]:
