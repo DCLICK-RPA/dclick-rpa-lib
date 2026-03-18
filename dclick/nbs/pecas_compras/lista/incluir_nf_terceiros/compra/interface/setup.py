@@ -63,7 +63,7 @@ class AbaFila:
         for texto in ("NF-e", "Monitor"):
             dialogo = self.janela.dialogo(class_name_dialogo, aguardar=5)
             assert dialogo, f"Diálogo contendo botão '{texto}' não foi encontrado"
-            dialogo.confirmar()
+            dialogo.clicar(texto)
 
         try: return bot.sistema.JanelaW32(lambda j: j.class_name == "TForm_MonitorNFeCompra" and j.visivel,
                                           aguardar = 10)\
