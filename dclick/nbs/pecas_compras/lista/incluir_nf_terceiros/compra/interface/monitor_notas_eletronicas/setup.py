@@ -104,10 +104,13 @@ class AbaPesquisar:
         - Confirmado diálogo sobre o `SEFAZ` caso apareça
         - Erro caso diálogo seja diferente do esperado
         - Janela `Monitor Notas Eletrônicas` fechada"""
-        self.painel_aba[-1]\
-            .to_uia()\
-            .encontrar(lambda e: e.botao and e.texto == "Salvar" and e.visivel)\
-            .clicar()
+        botao = (
+            self.painel_aba[-1]
+            .to_uia()
+            .encontrar(lambda e: e.botao and e.texto == "Salvar" and e.visivel)
+        )
+        assert botao.ativo, "Botão para Salvar não está ativo para ser pressionado"
+        botao.clicar()
 
         dialogo = self.janela.dialogo(aguardar=3)
         assert dialogo, "Diálogo de confirmação, após clicar em 'Salvar', não encontrado"
