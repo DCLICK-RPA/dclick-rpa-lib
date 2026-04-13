@@ -17,6 +17,11 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.
 ## Changelog 🔧
 
 <details>
+<summary>v2.1</summary>
+
+- Criado pacote `nora`
+
+</details>
 <summary>v2.0</summary>
 
 - Migração para a versão do `bot==5.0`
@@ -215,6 +220,49 @@ tracer.encerrar("ERROR", "Falha ao realizar determinada Ação")
 
 # Loggar o tempo de execução de uma função
 @logger.tempo_execucao
+```
+
+### `nora`
+Pacote destinado a `Nora AI`, agente de extração via IA
+```python
+import dclick
+from bot.sistema import Caminho
+
+# Executar uma extração para o `agente`
+caminho_pdf = Caminho("./nfe_xpto.pdf")
+response = dclick.nora.executar_extracao(
+    agente = "yATCG7ty4u",
+    mime_type = "application/pdf",
+    file_name = caminho_pdf.nome,
+    content = caminho_pdf.encode_base64()
+) -> ResponseExecutar
+
+# Acompanhar uma extração via `tracking_code`
+dclick.nora.acompanhar_extracao (tracking_code: str) -> ResponseAcompanhar
+
+# Consultar a extração `extraction_id`
+dclick.nora.consultar_extracao (extraction_id: str) -> ResponseConsultar
+
+# Classe para realizar o acompanhamento de extrações até o `status = sucesso/erro`
+# Inicializar o Polling e adicionar os `tracking_codes`
+polling = (
+    dclick.nora.PollingExtracao()
+    .adicionar("vXRdxHZRrUKj", "wjM3N9ej0Iza", "...")
+)
+while polling.pendente():
+    try: response = polling.aguardar()
+    # Tempo ao aguardar a extração demorou mais tempo que o esperado
+    except TimeoutError: raise
+    # Erro inesperado
+    except Exception: raise
+
+    tracking_code = response.extraction.trackingCode
+    if response.sucesso():
+        print("Sucesso", tracking_code, response.data, response.confidence)
+    elif response.erro_retry():
+        print("Erro passível de retentativa", tracking_code)
+    else:
+        print("Erro extração", response.extraction.errorMessage)
 ```
 
 ### `holmes`

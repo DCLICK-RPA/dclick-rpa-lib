@@ -9,4 +9,5 @@ from dclick import (
     holmes,
     nbs,
     dealernet,
+    nora,
 )
