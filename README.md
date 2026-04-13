@@ -4,12 +4,12 @@
 ⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==5.0</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.0/dclick-2.0-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.0-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.1-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
@@ -22,6 +22,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.
 - Criado pacote `nora`
 
 </details>
+<details>
 <summary>v2.0</summary>
 
 - Migração para a versão do `bot==5.0`
