@@ -141,15 +141,20 @@ class PollingExtracao:
         self.polling = bot.configfile.obter_opcao_ou("nora", "polling", 10.0)
         self.timeout = bot.configfile.obter_opcao_ou("nora", "timeout", 300.0)
 
-    def pendente (self) -> bool:
-        """Checar se há algum `tracking_code` pendente na fila para ser aguardado"""
-        return not self.tracking_codes.empty()
-
     def adicionar (self, *tracking_code: str) -> Self:
         """Adicionar os `tracking_code` na fila"""
         for tc in tracking_code:
             self.tracking_codes.add(tc)
         return self
+
+    def pendente (self) -> bool:
+        """Checar se há algum `tracking_code` pendente na fila para ser aguardado"""
+        return not self.tracking_codes.empty()
+
+    def proximo_tracking_code (self) -> str:
+        """Obter o próximo `tracking_code` que será aguardado
+        - Necessário checar se há `self.pendente()` antes"""
+        return self.tracking_codes.peek()
 
     def aguardar (self) -> modelos.ResponseAcompanhar:
         """Aguardar pela próxima extração finalizar em `sucesso` ou `error`
