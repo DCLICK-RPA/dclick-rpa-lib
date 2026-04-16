@@ -4,16 +4,12 @@ from datetime import datetime as Datetime
 
 TStatus = Literal["pending", "processing", "success", "error"]
 
-class ResponseExecutar:
-
-    trackingCode: str
-    """Código para acompanhar o progresso da extração"""
-    extractionId: str
-    """UUID da extração criada."""
-    status: str
-    """Status inicial da extração
-    - `pending`"""
-    message: str
+class Agent:
+    id: str
+    code: str
+    name: str
+    description: str | None
+    isActive: bool
 
 class Extraction:
 
@@ -37,10 +33,23 @@ class Extraction:
     """Confiança da extração caso `status = success` no formato string de um Object json"""
     errorMessage: str | None
     """Mensagem de erro caso `status = error`"""
+    agent: Agent
+    """Informações sobre o Agente de extração"""
 
     @property
     def data_criacao (self) -> Datetime:
         return Datetime.fromisoformat(self.createdAt)
+
+class ResponseExecutar:
+
+    trackingCode: str
+    """Código para acompanhar o progresso da extração"""
+    extractionId: str
+    """UUID da extração criada."""
+    status: str
+    """Status inicial da extração
+    - `pending`"""
+    message: str
 
 class ResponseAcompanhar:
 
