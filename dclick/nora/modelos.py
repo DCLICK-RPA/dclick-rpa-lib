@@ -45,7 +45,7 @@ class ResponseExecutar:
     trackingCode: str
     """Código para acompanhar o progresso da extração"""
     extractionId: str
-    """UUID da extração criada."""
+    """UUID da extração criada"""
     status: str
     """Status inicial da extração
     - `pending`"""
