@@ -292,7 +292,7 @@ def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Do
         .get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
         .esperar_status_code(200, f"Falha ao consultar documento da tarefa({id_tarefa}) no Holmes")
     )
-    return modelos.Documento(response.conteudo, dict(response.headers))
+    return modelos.Documento(response.conteudo, response.headers_dict)
 
 def anexar_documento_tarefa (id_tarefa: str,
                              id_documento: str,
@@ -372,7 +372,7 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
         .get(f"/v1/documents/{id_documento}/download")
         .esperar_status_code(200, f"Falha ao consultar documento({id_documento}) no Holmes")
     )
-    return modelos.Documento(response.content, dict(response.headers))
+    return modelos.Documento(response.content, response.headers_dict)
 
 def consultar_classificacao_documento (id_documento: str) -> modelos.ClassificacaoDocumento:
     """Consultar a classificação do documento `id_documento`
