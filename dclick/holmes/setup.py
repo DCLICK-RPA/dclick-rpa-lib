@@ -280,7 +280,7 @@ def assumir_tarefa (id_tarefa: str) -> None:
             url = f"/v1/tasks/{id_tarefa}/assign",
             json = { "user_id": usuario }
         )
-        .esperar_status_code(200, f"Falha ao assumir tarefa({id_tarefa}) no Holmes")
+        .esperar_sucesso(f"Falha ao assumir tarefa({id_tarefa}) no Holmes")
     )
 
 def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
