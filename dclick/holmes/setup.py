@@ -33,7 +33,7 @@ class QueryTaskV2:
     terms: list[dict[str, str]]
 
     def __init__ (self) -> None:
-        dclick.logger.informar("Iniciando a QueryTask para buscar tarefas no Holmes")
+        dclick.logger.debug("Iniciando a QueryTask para buscar tarefas no Holmes")
         secao = "holmes.QueryTaskV2.termos"
         opcoes = bot.configfile.opcoes_secao(secao) if bot.configfile.possui_secao(secao) else []
         self.terms = [
@@ -144,7 +144,7 @@ class QueryDocumentV2:
     terms: list[dict[str, str]]
 
     def __init__ (self) -> None:
-        dclick.logger.informar("Iniciando a QueryDocument para buscar por documentos no Holmes")
+        dclick.logger.debug("Iniciando a QueryDocument para buscar por documentos no Holmes")
         secao = "holmes.QueryDocumentV2.termos"
         opcoes = bot.configfile.opcoes_secao(secao) if bot.configfile.possui_secao(secao) else []
         self.terms = [
@@ -238,7 +238,7 @@ class QueryDocumentV2:
 def consultar_tarefa (id_tarefa: str) -> modelos.Tarefa:
     """Consultar a tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Consultando tarefa({id_tarefa}) no Holmes")
     return (
         client_singleton()
         .get(f"/v1/tasks/{id_tarefa}")
@@ -254,7 +254,7 @@ def tomar_acao_tarefa (
     """Tomar `acao` na `tarefa`
     - `propriedades` caso seja necessário informar algum adicional (motivo de pendência)
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Tomando ação({id_acao}) na tarefa({id_tarefa}) no Holmes")
     (
         client_singleton()
         .post(
@@ -272,7 +272,7 @@ def tomar_acao_tarefa (
 def assumir_tarefa (id_tarefa: str) -> None:
     """Assumir a tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token, id_usuario`"""
-    dclick.logger.informar(f"Assumindo tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Assumindo tarefa({id_tarefa}) no Holmes")
     usuario = bot.configfile.obter_opcoes_obrigatorias("holmes", "id_usuario")[0]
     (
         client_singleton()
@@ -286,7 +286,7 @@ def assumir_tarefa (id_tarefa: str) -> None:
 def consultar_documento_tarefa (id_tarefa: str, id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento` da tarefa `id_tarefa`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Consultando documento({id_documento}) da tarefa({id_tarefa}) no Holmes")
     response = (
         client_singleton()
         .get(f"/v1/tasks/{id_tarefa}/documents/{id_documento}")
@@ -303,7 +303,7 @@ def anexar_documento_tarefa (id_tarefa: str,
     - `mime_type` para informar manualmente o tipo do conteúdo
     - `mime_type=None` feito o advinho do tipo com base na extensão com fallback para `application/octet-stream`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Anexando documento id({id_documento}) nome({documento[0]}) na tarefa({id_tarefa}) no Holmes")
     nome_extensao, conteudo = documento
     mime = (mime_type or mimetypes.guess_type(nome_extensao)[0]) or "application/octet-stream"
     (
@@ -319,7 +319,7 @@ def anexar_documento_tarefa (id_tarefa: str,
 def consultar_processo (id_processo: str) -> modelos.Processo:
     """Consultar o processo `id_processo`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando processo({id_processo}) no Holmes")
+    dclick.logger.debug(f"Consultando processo({id_processo}) no Holmes")
     return (
         client_singleton()
         .get(f"/v1/processes/{id_processo}")
@@ -331,7 +331,7 @@ def consultar_processo (id_processo: str) -> modelos.Processo:
 def consultar_detalhes_processo (id_processo: str) -> modelos.DetalhesProcesso:
     """Consultar os detalhes do processo `id_processo`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando detalhes do processo({id_processo}) no Holmes")
+    dclick.logger.debug(f"Consultando detalhes do processo({id_processo}) no Holmes")
     json = (
         client_singleton()
         .get(f"/v1/processes/{id_processo}/details")
@@ -352,7 +352,7 @@ def consultar_itens_tabela_tarefa (
     """Consultar itens da tabela `id_tabela` da tarefa `id_tarefa`
     - `page, per_page` realizar a paginação. Default: Primeiros 100
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
+    dclick.logger.debug(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
     return (
         client_singleton()
         .get(
@@ -366,7 +366,7 @@ def consultar_itens_tabela_tarefa (
 def consultar_documento (id_documento: str) -> modelos.Documento:
     """Consultar o documento `id_documento`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando documento({id_documento}) no Holmes")
+    dclick.logger.debug(f"Consultando documento({id_documento}) no Holmes")
     response = (
         client_singleton()
         .get(f"/v1/documents/{id_documento}/download")
@@ -377,7 +377,7 @@ def consultar_documento (id_documento: str) -> modelos.Documento:
 def consultar_classificacao_documento (id_documento: str) -> modelos.ClassificacaoDocumento:
     """Consultar a classificação do documento `id_documento`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Consultando classificação do documento({id_documento}) no Holmes")
+    dclick.logger.debug(f"Consultando classificação do documento({id_documento}) no Holmes")
     return (
         client_singleton()
         .get(f"/v1/documents/{id_documento}/classify")
@@ -397,7 +397,7 @@ def upload_documento (
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [] }`
         - `{ "nature_id": "60f862d9f5a395000da95cf2", "property_values": [{ "id": "cnpj", "value": "03095314000618" }] }`
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Realizando upload de documento({nome_extensao}) no Holmes")
+    dclick.logger.debug(f"Realizando upload de documento({nome_extensao}) no Holmes")
     return ( 
         client_singleton()
         .post(
@@ -422,7 +422,7 @@ def remover_documento (id_documento: str, descricao: str | None = None) -> None:
     """Remover o documento `id_documento`
     - `descricao` para informar o motivo da remoção
     - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.informar(f"Removendo documento({id_documento}) no Holmes")
+    dclick.logger.debug(f"Removendo documento({id_documento}) no Holmes")
     (
         client_singleton()
         .delete(
