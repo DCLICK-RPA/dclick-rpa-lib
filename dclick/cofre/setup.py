@@ -44,7 +44,7 @@ def consultar_segredo[T] (nome: str, fields: type[T] = DictNormalizado[str]) -> 
 
     - Variáveis utilizadas `[cofre] -> host, apikey, [x-real-ip: ""]`
         - `x-real-ip`: opcional `<IP da máquina>`, mas importante para a auditoria"""
-    dclick.logger.informar(f"Consultando segredo({nome}) no Cofre")
+    dclick.logger.debug(f"Consultando segredo({nome}) no Cofre")
 
     _segredo = (
         client_singleton()
