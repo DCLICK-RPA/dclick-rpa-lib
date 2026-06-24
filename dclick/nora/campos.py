@@ -1,7 +1,8 @@
 # std
 from typing import Any
+# externo
+from bot.tipagem import Numerico
 
-type Numerico = int | float
 type TiposValores = str | Numerico | bool | list[Any]
 
 class CampoObrigatorio[T: TiposValores]:
