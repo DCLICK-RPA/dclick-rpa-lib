@@ -3,9 +3,10 @@ from __future__ import annotations
 import typing
 from datetime import date as Date
 # interno
-import dclick
+from dclick import dealernet
 # externo
 import bot
+from bot.navegador import Navegador, Teclas
 from bot.estruturas import String, DictNormalizado
 
 NOME_MENU = "NFe"
@@ -41,7 +42,7 @@ class TabelaRegistro:
     """Classe especializada para obter e filtrar os registros na tabela
     - Acessado iframe do menu da janela"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     TABELA_FILTRO_REGISTROS         = "#TABLESEARCH"
     INPUT_FILTRO_NUMERO_NF          = "#vNOTAFISCALELETRONICA_NRONOTA"
@@ -51,14 +52,14 @@ class TabelaRegistro:
     TABELA_REGISTROS                = "#GridContainerTbl"
     TABELA_REFRESH_AUTOMATICO       = "#vREFRESHAUTOMATICO"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal Eletronica", NOME_MENU],
-            dclick.dealernet.menus.Menus.CADASTRO,
+            dealernet.menus.Menus.CADASTRO,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def desativar_refresh_automatico (self) -> typing.Self:
         """Clicar no botão para dsativar o refresh automático"""
@@ -79,7 +80,7 @@ class TabelaRegistro:
 
             for texto, localizador in itens:
                 if texto == None: continue
-                tabela_filtro.encontrar(localizador).limpar().clicar().digitar(bot.navegador.Teclas.BACKSPACE, texto)
+                tabela_filtro.encontrar(localizador).limpar().clicar().digitar(Teclas.BACKSPACE, texto)
             self.navegador.encontrar(self.BOTAO_FILTRO_CONSULTAR).clicar()
 
         return self
@@ -124,7 +125,7 @@ class ExtrairDadosRegistro:
     """Classe para extrair dados um registro
     - `clicar_primeiro_numero_registro()` para abrir a tela da extração"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     BOTAO_PRIMEIRO_NUMERO_REGISTRO  = "#GridContainerTbl > tbody > tr:nth-of-type(1) span[id *= 'NRONOTA' i] > a"
     TABELA_DADOS_VISAO_GERAL        = "table.DataTable .Table"
@@ -132,14 +133,14 @@ class ExtrairDadosRegistro:
     TD_CONTEUDO                     = "td.DataContentCellView"
     BOTAO_VOLTAR                    = "table.TitleTable a"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal Eletronica", NOME_MENU],
-            dclick.dealernet.menus.Menus.CADASTRO,
+            dealernet.menus.Menus.CADASTRO,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def clicar_primeiro_numero_registro (self) -> typing.Self:
         """Clicar no primeiro número da tabela dos registros

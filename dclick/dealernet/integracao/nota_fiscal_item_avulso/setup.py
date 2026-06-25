@@ -3,9 +3,11 @@ from __future__ import annotations
 import typing
 # interno
 import dclick
+from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.navegador import Navegador, Teclas
 
 NOME_MENU = "Nota Fiscal de Item Avulso"
 
@@ -20,20 +22,20 @@ class Localizadores:
     MENSAGEM_STATUS_UPLOAD  = "#TEXTBLOCKDOWNLOAD"
     MENSAGEM_ERRO           = ".ErrorViewer"
 
-def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -> None:
+def importar_nfe (navegador: Navegador, *nfe: bot.estruturas.Caminho) -> None:
     """Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`"""
     quantidade = len(nfe)
-    dclick.logger.informar(f"Importando '{quantidade}' NFe(s) de item avulso")
+    dclick.logger.debug(f"Importando '{quantidade}' NFe(s) de item avulso")
     assert quantidade >= 1, "Pelo menos 1 NFe deve ser informada"
     assert all(n.existe() for n in nfe), f"Algum caminho da NFe não foi encontrado\n\t{nfe}"
 
-    dclick.dealernet.menus.selecionar_opcao_menu(
+    dealernet.menus.selecionar_opcao_menu(
         navegador,
         ["XML - Importação", NOME_MENU],
-        dclick.dealernet.menus.Menus.INTEGRACAO,
+        dealernet.menus.Menus.INTEGRACAO,
     )
 
-    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+    dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
     navegador.encontrar(Localizadores.BOTAO_IMPORTAR_NFE).clicar()
     navegador.encontrar(Localizadores.BOTAO_PROCURAR_NFE).clicar()
 
@@ -43,7 +45,7 @@ def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -
                  .encontrar(Localizadores.BOTAO_UPLOAD_ARQUIVOS)\
                  .digitar(caminhos)
 
-    dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+    dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
     navegador.encontrar(Localizadores.BOTAO_CONFIRMAR_UPLOAD).clicar()
     status = navegador.encontrar(Localizadores.MENSAGEM_STATUS_UPLOAD)\
                       .aguardar_visibilidade()
@@ -55,7 +57,7 @@ def importar_nfe (navegador: bot.navegador.Edge, *nfe: bot.estruturas.Caminho) -
         raise
 
     navegador.encontrar(Localizadores.BOTAO_FECHAR_UPLOAD).clicar()
-    dclick.logger.informar(f"NFe(s) importada(s) com sucesso")
+    dclick.logger.debug(f"NFe(s) importada(s) com sucesso")
 
 class DadosRegistro:
 
@@ -81,7 +83,7 @@ class TabelaRegistro:
     """Classe especializada para obter e filtrar os registros na tabela
     - Acessado iframe do menu da janela"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     TABELA_REGISTROS            = "#GridintxmlContainerTbl"
     TABELA_FILTRO_REGISTROS     = "#TABLENF"
@@ -90,14 +92,14 @@ class TabelaRegistro:
     INPUT_FILTRO_NUMERO_NF      = "#vINTEGRACAOXMLNF_NUMERONF"
     INPUT_FILTRO_DATA_INICIAL   = "#vINTEGRACAOXMLNF_DATAEMISSAOINICIAL"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["XML - Importação", NOME_MENU],
-            dclick.dealernet.menus.Menus.INTEGRACAO,
+            dealernet.menus.Menus.INTEGRACAO,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def filtrar (
             self,
@@ -166,7 +168,7 @@ class AtualizarDadosRegistro:
     - `clicar_atualizar_dados(registro)` para iniciar a atualização
     - `clicar_botao_processar_atualizacao()` retorna classe para tratar o processamento dos dados do item avulso"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     BOTAO_ATUALIZAR_DADOS_REGISTRO  = "tbody > tr:nth-child(1) > td > a:has(> img[title *= 'atualizar' i])"
     # Usado `nth-child(1)` pois é feito o filtro pelo código do registro, logo esperado apenas 1
@@ -175,9 +177,9 @@ class AtualizarDadosRegistro:
     BOTAO_CONFIRMAR_ATUALIZACAO     = "#BTNCONFIRMAR"
     BOTAO_PROCESSAR_ATUALIZACAO     = "#BTNPROCESSAR"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.logger.informar("Iniciando atualização dos dados")
+        dclick.logger.debug("Iniciando atualização dos dados")
 
     def clicar_atualizar_dados (self, registro: DadosRegistro) -> typing.Self:
         """Clicar para atualizar os dados do item avulso para o `registro`
@@ -194,7 +196,7 @@ class AtualizarDadosRegistro:
         """Preencer o campo `Seleção Item Avulso` com o `código`"""
         self.navegador.encontrar(self.INPUT_SELECAO_ITEM_AVULSO)\
             .limpar()\
-            .digitar(codigo, bot.navegador.Teclas.TAB)
+            .digitar(codigo, Teclas.TAB)
         return self
 
     def clicar_botao_atualizar_selecao (self) -> typing.Self:
@@ -218,7 +220,7 @@ class ProcessarDadosRegistro:
     """Classe para tratar o processamento dos dados de um registro
     - `AtualizarDadosItemAvulso` para iniciar o processamento"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     # Tipo Documento
     BOTAO_TIPO_DOCUMENTO                = "#TIPODOC"
@@ -245,9 +247,9 @@ class ProcessarDadosRegistro:
     MENSAGEM_SUCESSO_E_ERRO             = ".ErrorViewer"
     BOTAO_FECHAR                        = "#TRN_CANCEL"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.logger.informar("Iniciando processamento dos dados")
+        dclick.logger.debug("Iniciando processamento dos dados")
 
     def selecionar_natureza_operacao (self, texto: str) -> typing.Self:
         """Selecionar a natureza da operação com o `texto`"""
@@ -262,7 +264,7 @@ class ProcessarDadosRegistro:
             self.navegador.encontrar(self.BOTAO_CONFIRMAR_NATUREZA_OPERACAO)\
                           .clicar()
 
-        dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         return self
 
     def selecionar_tipo_documento (self, texto: str) -> typing.Self:
@@ -278,7 +280,7 @@ class ProcessarDadosRegistro:
             self.navegador.encontrar(self.BOTAO_CONFIRMAR_TIPO_DOCUMENTO)\
                           .clicar()
 
-        dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         return self
 
     def selecionar_conta_gerencial (self, identificador: str) -> typing.Self:
@@ -300,7 +302,7 @@ class ProcessarDadosRegistro:
             botao = f"""./tbody/tr[contains(., "{identificador}")]//input"""
             tabela.encontrar(botao).clicar()
 
-        dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         return self
 
     def selecionar_departamento (self, texto: str) -> typing.Self:

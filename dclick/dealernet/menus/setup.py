@@ -6,6 +6,8 @@ from functools import cache
 import dclick
 # externo
 import bot
+from bot.estruturas import String
+from bot.navegador import Navegador
 from bot.estruturas import String, DictNormalizado
 
 Z_INDEX_FOCADO = 9999
@@ -44,7 +46,7 @@ def opcoes_empresa (chave: str) -> list[str] | None:
         - `chave = opcao1, opcao2, ...`"""
     return de_para_opcoes().get(chave)
 
-def fechar_janelas_menu_abertas (navegador: bot.navegador.Edge) -> None:
+def fechar_janelas_menu_abertas (navegador: Navegador) -> None:
     """Fechar todas as janelas de menu que estão abertas
     - Ao selecionar uma opção menu que não seja empresa, será aberto uma janela manu"""
     janelas = navegador.alterar_frame().procurar(Localizadores.JANELA_MENU)
@@ -54,7 +56,7 @@ def fechar_janelas_menu_abertas (navegador: bot.navegador.Edge) -> None:
             janela.encontrar(Localizadores.FECHAR_JANELA_MENU).clicar()
         except Exception: pass
 
-def checar_iframe_janela_menu_no_topo (navegador: bot.navegador.Edge, nome_menu: str) -> bool:
+def checar_iframe_janela_menu_no_topo (navegador: Navegador, nome_menu: str) -> bool:
     """Checar se a janela do `nome_menu` já está no topo dos demais menus"""
     try:
         maior_nome = navegador.driver.execute_script("""\
@@ -71,7 +73,7 @@ def checar_iframe_janela_menu_no_topo (navegador: bot.navegador.Edge, nome_menu:
         return String(maior_nome).normalizar() == String(nome_menu).normalizar()
     except Exception: return False
 
-def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -> None:
+def acessar_iframe_janela_menu (navegador: Navegador, nome_menu: str) -> None:
     """Acessar o iframe do menu aberto com o `nome_menu`
     - `nome_menu` observado ser a última parte das opções em `selecionar_opcao_menu()`
     - Menu é trago para frente dos demais menus"""
@@ -90,7 +92,7 @@ def acessar_iframe_janela_menu (navegador: bot.navegador.Edge, nome_menu: str) -
     navegador.alterar_frame(janela_encontrada.encontrar("iframe"))
 
 def selecionar_opcao_menu (
-        navegador: bot.navegador.Edge,
+        navegador: Navegador,
         opcoes: Iterable[str],
         menu: Menus = Menus.EMPRESA,
     ) -> None:
@@ -108,7 +110,7 @@ def selecionar_opcao_menu (
         return
 
     # abrir menu
-    dclick.logger.informar(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
+    dclick.logger.debug(f"Selecionando as opções [{" -> ".join(opcoes)}] no menu '{menu.name.capitalize()}' do Dealernet")
     elemento_menu.clicar()
 
     # navegar nas opções
@@ -138,7 +140,7 @@ def selecionar_opcao_menu (
         else:
             with opcao_ul.aguardar_invisibilidade(): opcao_ul.clicar()
 
-    dclick.logger.informar("Opções selecionadas com sucesso")
+    dclick.logger.debug("Opções selecionadas com sucesso")
 
 __all__ = [
     "Menus",

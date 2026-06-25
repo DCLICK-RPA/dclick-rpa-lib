@@ -2,10 +2,11 @@
 from __future__ import annotations
 import typing
 # interno
-import dclick
+from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.navegador import Navegador, ElementoNaoEncontrado
 
 NOME_MENU = "Título a Pagar"
 
@@ -37,7 +38,7 @@ class TabelaRegistro:
     """Classe especializada para obter e filtrar os registros na tabela
     - Acessado iframe do menu da janela"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     IFRAME_FILTRO_SELECAO       = "#gxp0_ifrm"
     FILTRO_SELECAO_EMPRESAS     = "//div[@id = 'GridselecaoContainerDiv']//a[contains(., 'Empresas')]"
@@ -50,14 +51,14 @@ class TabelaRegistro:
 
     TABELA_REGISTROS            = "#GridContainerTbl"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Contas a pagar", NOME_MENU],
-            dclick.dealernet.menus.Menus.FINANCEIRO,
+            dealernet.menus.Menus.FINANCEIRO,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def filtro_selecao_todas_empresas (self) -> typing.Self:
         """Tratar o `IFRAME_FILTRO_SELECAO` que aparece automaticamente quando não há nenhum filtro
@@ -76,10 +77,10 @@ class TabelaRegistro:
                 for localizador in localizadores:
                     self.navegador.encontrar(localizador).clicar().sleep(0.5)
 
-        except bot.navegador.ElementoNaoEncontrado: pass # iframe não visível
+        except ElementoNaoEncontrado: pass # iframe não visível
         finally:
             self.navegador.alterar_timeout()
-            dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+            dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
         return self
 
     def filtrar (

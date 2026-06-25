@@ -1,10 +1,11 @@
 # std
 import typing
 # interno
-import dclick
+from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.navegador import Navegador
 
 NOME_MENU = "NF Saída Produto"
 
@@ -37,7 +38,7 @@ class TabelaRegistro:
     """Classe especializada para obter e filtrar os registros na tabela
     - Acessado iframe do menu da janela"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     TABELA_FILTRO_REGISTROS = "#TABLESEARCH"
     INPUT_FILTRO_CODIGO     = "#vNOTAFISCAL_CODIGO"
@@ -45,14 +46,14 @@ class TabelaRegistro:
     BOTAO_FILTRO_CONSULTAR  = "#IMGREFRESH"
     TABELA_REGISTROS        = "#GridContainerTbl"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal", NOME_MENU],
-            dclick.dealernet.menus.Menus.PRODUTOS,
+            dealernet.menus.Menus.PRODUTOS,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def filtrar (
             self,

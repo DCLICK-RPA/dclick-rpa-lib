@@ -3,9 +3,11 @@ from __future__ import annotations
 import typing, datetime
 # interno
 import dclick
+from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.navegador import Navegador, Teclas, ElementoNaoEncontrado
 
 NOME_MENU = "NF Entrada Item Avulso"
 
@@ -38,7 +40,7 @@ class TabelaRegistro:
     """Classe especializada para obter e filtrar os registros na tabela
     - Acessado iframe do menu da janela"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     TABELA_FILTRO_REGISTROS = "#TABLESEARCH"
     INPUT_FILTRO_CODIGO     = "#vNOTAFISCAL_CODIGO"
@@ -46,14 +48,14 @@ class TabelaRegistro:
     BOTAO_FILTRO_CONSULTAR  = "#IMGREFRESH"
     TABELA_REGISTROS        = "#GridContainerTbl"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.selecionar_opcao_menu(
+        dealernet.menus.selecionar_opcao_menu(
             navegador,
             ["Nota Fiscal", NOME_MENU],
-            dclick.dealernet.menus.Menus.PRODUTOS,
+            dealernet.menus.Menus.PRODUTOS,
         )
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
 
     def filtrar (
             self,
@@ -113,7 +115,7 @@ class ModificarDadosRegistro:
     """Classe para tratar a modificação dos dados de um registro
     - `clicar_modificar_dados(registro)` para iniciar a modificação"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     BOTAO_MODIFICAR_DADOS_REGISTRO  = "tbody > tr:nth-child(1) > td > input[title *= 'modifica' i]"
     # Usado `nth-child(1)` pois é feito o filtro pelo código do registro, logo esperado apenas 1
@@ -128,10 +130,10 @@ class ModificarDadosRegistro:
     BOTAO_RODAPE                    = "#RODAPE"
     BOTAO_EDITAR_PRIMEIRO_ITEM      = "table#GriditemContainerTbl > tbody > tr:nth-of-type(1) input[name *= 'vUPDATE' i]"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
-        dclick.logger.informar("Iniciando modificação dos dados")
+        dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
+        dclick.logger.debug("Iniciando modificação dos dados")
 
     def clicar_modificar_dados (self, registro: DadosRegistro) -> typing.Self:
         """Clicar para modificar os dados do item avulso para o `registro`
@@ -155,14 +157,14 @@ class ModificarDadosRegistro:
         self.navegador.encontrar(self.INPUT_DATA_CHEGADA)\
             .limpar()\
             .clicar()\
-            .digitar(bot.navegador.Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
+            .digitar(Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
         return self
 
     def alterar_data_movimento (self, data: datetime.date) -> typing.Self:
         self.navegador.encontrar(self.INPUT_DATA_MOVIMENTO)\
             .limpar()\
             .clicar()\
-            .digitar(bot.navegador.Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
+            .digitar(Teclas.BACKSPACE, data.strftime("%d/%m/%Y"))
         return self
 
     def clicar_botao_confirmar (self) -> typing.Self:
@@ -212,7 +214,7 @@ class ModificarParcelasRegistro:
     - Esperado estar na tela de modificação das parcelas
     - Obtido a partir do `ModificarDadosRegistro().clicar_botao_parcelas()` para iniciar a modificação"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     IFRAME_PARCELAS         = "#gxp0_ifrm"
     BOTAO_INSERIR_PARCELA   = "#INSERT"
@@ -222,9 +224,9 @@ class ModificarParcelasRegistro:
     SELECAO_TIPO_TITULO     = "select[id *= 'TIPOTITULO' i]"
     BOTAO_CONFIRMAR         = "#BTNCONFIRMAR"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.logger.informar("Iniciando modificação das parcelas")
+        dclick.logger.debug("Iniciando modificação das parcelas")
 
     def clicar_botao_inserir_parcela (self) -> typing.Self:
         """Clicar no botão para inserir uma nova parcela"""
@@ -248,7 +250,7 @@ class ModificarParcelasRegistro:
             ultimo_registro.encontrar(localizador)\
                            .limpar()\
                            .clicar()\
-                           .digitar(bot.navegador.Teclas.BACKSPACE, texto)
+                           .digitar(Teclas.BACKSPACE, texto)
 
         if tipo_titulo: ultimo_registro.encontrar(self.SELECAO_TIPO_TITULO)\
                                        .select\
@@ -262,22 +264,22 @@ class ModificarParcelasRegistro:
         - Retornado ao iframe do menu"""
         with self.navegador.encontrar(self.BOTAO_CONFIRMAR).aguardar_invisibilidade() as botao:
             botao.clicar()
-        dclick.dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+        dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
 
 class ModificarRodapeRegistro:
     """Classe para tratar a modificação do rodapé dentro do registro
     - Esperado estar na tela de modificação do rodapé
     - Obtido a partir do `ModificarDadosRegistro().clicar_botao_rodape()` para iniciar a modificação"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     SELECAO_TIPO_FRETE  = "select#vNOTAFISCAL_TIPOFRETE"
     BOTAO_CONFIRMAR     = "#BTNCONFIRMA"
     BOTAO_FECHAR        = "#TRN_CANCEL"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.logger.informar("Iniciando modificação do rodapé")
+        dclick.logger.debug("Iniciando modificação do rodapé")
 
     def selecionar_tipo_frete (self, texto: str) -> typing.Self:
         """Selecionar o tipo de frete de acordo com o `texto`"""
@@ -301,7 +303,7 @@ class ModificarRodapeRegistro:
             with self.navegador.encontrar(self.BOTAO_FECHAR).aguardar_invisibilidade() as botao:
                 botao.clicar()
         # tela rodapé fechada
-        except bot.navegador.ElementoNaoEncontrado: return
+        except ElementoNaoEncontrado: return
         finally: self.navegador.alterar_timeout()
 
 class EditarItemRegistro:
@@ -309,15 +311,15 @@ class EditarItemRegistro:
     - Esperado estar na tela de edição do item
     - Obtido a partir do `ModificarDadosRegistro().clicar_botao_editar_primeiro_item()` para iniciar a edição"""
 
-    navegador: bot.navegador.Edge
+    navegador: Navegador
 
     SELECAO_PROCEDENCIA = "select#vNOTAFISCALITEM_PROCEDENCIACOD"
     INPUT_DESCRICAO     = "textarea#vNOTAFISCALITEM_OBSERVACAO"
     BOTAO_CONFIRMAR     = "#CONFIRMAR"
 
-    def __init__ (self, navegador: bot.navegador.Edge) -> None:
+    def __init__ (self, navegador: Navegador) -> None:
         self.navegador = navegador
-        dclick.logger.informar("Iniciando edição do item")
+        dclick.logger.debug("Iniciando edição do item")
 
     def alterar_descricao (self, texto: str) -> typing.Self:
         """Alterar a descrição de acordo com o `texto`"""

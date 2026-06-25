@@ -2,13 +2,14 @@
 import dclick
 # externo
 import bot
+from bot.navegador import Navegador
 
 class Localizadores:
     USUARIO     = "input#vUSUARIO_IDENTIFICADORALTERNATIVO"
     SENHA       = "input#vUSUARIOSENHA_SENHA"
     CONFIRMAR   = "input#IMAGE3"
 
-def login (navegador: bot.navegador.Edge) -> None:
+def login (navegador: Navegador) -> None:
     """Realizar o login no dealernet
     - Recebe uma nova instância do `navegador` e realiza o login na aba aberta
     - Variáveis `[dealernet.login] -> url, usuario, senha`"""
@@ -28,7 +29,7 @@ def login (navegador: bot.navegador.Edge) -> None:
         timeout = 15
     ), "Falha ao realizar login, o título da página não foi alterado após o tempo configurado"
 
-    dclick.logger.informar(f"Login realizado com sucesso e página carregada '{navegador.titulo}'")
+    dclick.logger.debug(f"Login realizado com sucesso e página carregada '{navegador.titulo}'")
 
 __all__ = [
     "login"
