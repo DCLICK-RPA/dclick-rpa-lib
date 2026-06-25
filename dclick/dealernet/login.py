@@ -2,7 +2,12 @@
 import dclick
 # externo
 import bot
-from bot.navegador import Navegador
+# externo opcional
+try: from bot.navegador import Navegador
+except ImportError: raise ImportError(
+    "Dependência opcional 'dclick[dealernet]' necessária. "
+    "Instale como 'dclick[dealernet]' para utilizar o módulo 'dclick.dealernet'"
+)
 
 class Localizadores:
     USUARIO     = "input#vUSUARIO_IDENTIFICADORALTERNATIVO"
