@@ -1,12 +1,13 @@
 # std
-import re as regex
 from typing import Self
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 from bot.estruturas import String
 from bot.sistema.janela import ElementoW32
+from bot.imagem import Imagem, capturar_tela
 
 def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
                             xy_offset: tuple[float, float] = (0.3, 0.5)) -> None:
@@ -18,7 +19,7 @@ def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
 
     bot.mouse.mover(posicao)
     try: janela_entrada_nf.janela_processo(lambda j: String(j.titulo).normalizar() == "recalculo",
-                                           aguardar = 3)
+                                           aguardar = DEFAULT_TIMEOUT)
     except Exception: raise Exception("Mouse na posição inválida para clicar no botão 'Recálculo'")
     bot.mouse.clicar()
 
@@ -34,18 +35,20 @@ class AbaCapaNotaFiscal:
     NOME_ABA = "CapaNotaFiscal"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == self.NOME_ABA
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
         )
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Financeiro' da janela 'Entrada de Nota Fiscal'")
@@ -55,22 +58,24 @@ class AbaFinanceiro:
     janela: bot.sistema.JanelaW32
 
     NOME_ABA = "Financeiro"
-    IMAGEM_BOTAO_GERAR = bot.imagem.Imagem.from_base64("iVBORw0KGgoAAAANSUhEUgAAAEQAAAAdCAIAAACc8F3aAAABxUlEQVRYCd3BAW4cNxBFwfdPpr5ZkzcjT/YiEVhg5WQmARzDxlRF5Smi8hRReYqoPEVUniIqTxGVp4jKT5tzjtEwtfl9ovIT5pxjNF/mGHQ3v09Ubu29uVD1wZc5Bt0NzDk5upvvkvCi8gtE5dbeu+pjjFlVvKn6gDkGn7p7zsmb7uZNEpWXJCr/t6jc2ntXLegxZlVxVH3AHIOqWmvxprv5myQqv1hUbu2911pj9BiTY4yGOQZVBay1OLqbC0lU/kkSDhVIAqhAEg4VSAKoXIjKrb03UPUBjDHHaJhjUFXAWouju7mWRAWScKhAEpUjiZpE5bskahKVa1G5tfcGqhY0X+YYVBWw1uLobm4lUXlJogJJeKMmUTmS8KImUbkWlVt7b2CtNQafxuBTVa21eOlubiVReUmiAklU3iRRgSQqRxI1icq1qNzae3NUrTH4QVWttbqbW0lUjiSACiRROZKoSVQgicqRRE2ici0qt/bevFlr8VJVwFqru/k3STjUJCpHEg4VSKJyJOFFTaJyLSq39t58t9YCqopjrdXd/AGicm3OyX/Q3fwBovIUUXmKqDxFVJ4iKk8RlaeIylNE5Smi8hR/AZr8U9as1DM4AAAAAElFTkSuQmCC")
+    IMAGEM_BOTAO_GERAR = Imagem.from_base64("iVBORw0KGgoAAAANSUhEUgAAAEQAAAAdCAIAAACc8F3aAAABxUlEQVRYCd3BAW4cNxBFwfdPpr5ZkzcjT/YiEVhg5WQmARzDxlRF5Smi8hRReYqoPEVUniIqTxGVp4jKT5tzjtEwtfl9ovIT5pxjNF/mGHQ3v09Ubu29uVD1wZc5Bt0NzDk5upvvkvCi8gtE5dbeu+pjjFlVvKn6gDkGn7p7zsmb7uZNEpWXJCr/t6jc2ntXLegxZlVxVH3AHIOqWmvxprv5myQqv1hUbu2911pj9BiTY4yGOQZVBay1OLqbC0lU/kkSDhVIAqhAEg4VSAKoXIjKrb03UPUBjDHHaJhjUFXAWouju7mWRAWScKhAEpUjiZpE5bskahKVa1G5tfcGqhY0X+YYVBWw1uLobm4lUXlJogJJeKMmUTmS8KImUbkWlVt7b2CtNQafxuBTVa21eOlubiVReUmiAklU3iRRgSQqRxI1icq1qNzae3NUrTH4QVWttbqbW0lUjiSACiRROZKoSVQgicqRRE2ici0qt/bevFlr8VJVwFqru/k3STjUJCpHEg4VSKJyJOFFTaJyLSq39t58t9YCqopjrdXd/AGicm3OyX/Q3fwBovIUUXmKqDxFVJ4iKk8RlaeIylNE5Smi8hR/AZr8U9as1DM4AAAAAElFTkSuQmCC")
     """Imagem do botão `Gerar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == self.NOME_ABA
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
@@ -112,7 +117,7 @@ class AbaFinanceiro:
         painel = self.painel_condicao_pagamento
         coordenada = self.IMAGEM_BOTAO_GERAR.procurar_imagem(
             regiao = painel.coordenada,
-            segundos = 3
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, "Imagem do botão 'Gerar' não foi"
 
@@ -133,18 +138,20 @@ class AbaTotalNota:
     NOME_ABA = "TotalNota"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == self.NOME_ABA
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
@@ -177,25 +184,27 @@ class AbaLocacoes:
     NOME_ABA = "Locações"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == self.NOME_ABA
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_itens_lancados (self) -> ElementoW32:
         return self.painel_aba.encontrar(
             lambda e: "Itens Lançados" in e.texto and e.visivel,
-            aguardar = 5
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     @property
@@ -225,7 +234,7 @@ class AbaLocacoes:
         painel = self.painel_inputs
         elemento = painel.encontrar(
             lambda e: e.class_name == "TOvcPictureField" and e.profundidade - 2 == painel.profundidade,
-            aguardar = 5
+            aguardar = DEFAULT_TIMEOUT / 2
         )
         elemento.digitar(texto).apertar("tab")
         return self
@@ -249,9 +258,10 @@ class AbaLocacoes:
     def itens_lancados_nao_encontrar_cor_vermelha (self) -> Self:
         """Procurar no painel `Itens Lançados` se cor vermelha não existe
         - `AssertionError` caso seja encontrado"""
-        cor = (255, 0, 0)
-        posicao = self.painel_itens_lancados.imagem.encontrar_cor(cor)
-        assert posicao is None, "Cor vermelha detectada no painel 'Itens Lançados'"
+        RGB_VERMELHO = (255, 0, 0)
+        coordenada = self.painel_itens_lancados.coordenada
+        posicao = capturar_tela(coordenada).encontrar_cor(RGB_VERMELHO)
+        assert posicao is None, "Cor vermelha não detectada no painel 'Itens Lançados'"
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Entrada de Nota Fiscal'")
@@ -261,7 +271,7 @@ class Confirmar:
     janela: bot.sistema.JanelaW32
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Confirmando na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Confirmando na janela '{janela.titulo}'")
         self.janela = janela
 
     @property
@@ -278,8 +288,8 @@ class Confirmar:
         - Confirmar diálogos, exceto o `imprimir`
         - Confirmar diálogo `Número de Controle` e retornar o valor
         - Esperado que a janela feche"""
-        self.janela.aguardar()
         texto_dialogo = ""
+        self.janela.aguardar()
 
         for _ in range(5):
             dialogo = self.janela.dialogo(aguardar=1)
@@ -288,12 +298,12 @@ class Confirmar:
             if "imprimir" in texto_dialogo: dialogo.negar()
             else: dialogo.confirmar()
 
-        match = regex.search(r"\d+", texto_dialogo)
+        match = String(texto_dialogo).re_search(r"\d+")
         assert "sucesso" in texto_dialogo.lower() and match, f"Diálogo inesperado: '{texto_dialogo}'"
-        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=10),\
+        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=DEFAULT_TIMEOUT),\
             f"Janela '{self.janela.titulo}' não fechou conforme esperado"
 
-        return match.group()
+        return str(match)
 
 __all__ = [
     "clicar_botao_recalculo",

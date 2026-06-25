@@ -3,35 +3,37 @@ from datetime import date
 from typing import Self, Literal, Callable
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
+from bot.imagem import Imagem
 from bot.sistema.janela import ElementoW32, ElementoUIA, Dialogo, JanelaW32
 
-IMAGEM_BOTAO_INCLUIR_ENTRADA = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABuSURBVEhL7ZFBCsAwCAT9/6cthVpiWbcG482BPelOhIg2MnLIyCEluYi8QaTkQfecPHqA4Som+YtbJrjpKmBxywQ+fUh4IGl5RPlDGfvyezko7FCW5y836TeEVjkDN5NSuzp3udEqP8TIISMHqF5RR2cYX0l7YAAAAABJRU5ErkJggg==")
+IMAGEM_BOTAO_INCLUIR_ENTRADA = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAcCAYAAACK7SRjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABuSURBVEhL7ZFBCsAwCAT9/6cthVpiWbcG482BPelOhIg2MnLIyCEluYi8QaTkQfecPHqA4Som+YtbJrjpKmBxywQ+fUh4IGl5RPlDGfvyezko7FCW5y836TeEVjkDN5NSuzp3udEqP8TIISMHqF5RR2cYX0l7YAAAAABJRU5ErkJggg==")
 """Imagem do botão `Incluir Entrada` na resolução `1920x1080`"""
 
 @bot.erro.adicionar_prefixo("Falha ao abrir o menu 'Incluir Entrada'")
 @bot.erro.retry()
 def abrir_menu_incluir_entrada (janela_entrada: JanelaW32,
-                                imagem: bot.imagem.Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> JanelaW32:
+                                imagem: Imagem | None = IMAGEM_BOTAO_INCLUIR_ENTRADA) -> JanelaW32:
     """Clicar no botão para abrir o menu `Incluir Entrada`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada
     - Retornado a janela de `Entrada Diversas`"""
-    dclick.logger.informar(f"Abrindo o menu 'Incluir Entradas'")
+    dclick.logger.debug("Abrindo o menu 'Incluir Entradas'")
     painel = janela_entrada.elemento.focar()\
-        .encontrar(lambda e: e.visivel and e.class_name == "TPageControl", aguardar=10)\
-        .encontrar(lambda e: e.visivel and e.class_name == "TPanel")
+        .encontrar(lambda e: e.visivel and e.class_name == "TPageControl", aguardar=DEFAULT_TIMEOUT)\
+        .encontrar(lambda e: e.visivel and e.class_name == "TPanel",       aguardar=DEFAULT_TIMEOUT)
 
     if imagem is None:
         posicao_botao = painel.coordenada.transformar(0.05, 0.5)
     else:
         bot.mouse.mover((0, 0)) # Remover mouse da janela antes de procurar
-        posicao_botao = imagem.procurar_imagem(regiao=painel.coordenada, segundos=3)
+        posicao_botao = imagem.procurar_imagem(regiao=painel.coordenada, segundos=DEFAULT_TIMEOUT)
         assert posicao_botao, "Imagem do botão não foi encontrada"
 
     bot.mouse.mover(posicao_botao).clicar()
-    return JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=10).focar()
+    return JanelaW32(lambda j: "Entrada Diversas" in j.titulo and j.visivel, aguardar=DEFAULT_TIMEOUT).focar()
 
 @bot.erro.adicionar_prefixo_classe("Falha na janela 'Cálculo de tributos'")
 class CalculoTributos:
@@ -40,7 +42,7 @@ class CalculoTributos:
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
+        dclick.logger.debug("Aberto a janela 'Cálculo de tributos' da aba 'Capa'")
         self.janela = janela
 
     @bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao alterar o tributo '{args[0]}'")
@@ -51,21 +53,27 @@ class CalculoTributos:
         - `selecionar` para marcar o checkbox
         - `imposto` para alterar o valor do campo imposto
         - Confirmado diálogo de valor divergente, caso apareça"""
-        elemento = self.janela.elemento.encontrar(lambda e: e.class_name == "TCheckBox"
-                                                            and e.texto.upper() == nome_tributo.upper())
+        elemento = self.janela.elemento.encontrar(
+            lambda e: e.class_name == "TCheckBox"
+                      and e.texto.upper() == nome_tributo.upper(),
+            aguardar = DEFAULT_TIMEOUT
+        )
+
         if elemento.caixa_selecao.selecionado + selecionar == 1: # XOR
             elemento.clicar()
 
         if imposto is not None:
             assert elemento.parente, "Parente do elemento do checkbox não encontrado"
             elementos = self.janela.ordernar_elementos_coordenada(
-                elemento.parente.filhos(lambda e: e.class_name == "TOvcNumericField")
+                elemento.parente.filhos(
+                    lambda e: e.class_name == "TOvcNumericField",
+                    aguardar = DEFAULT_TIMEOUT / 2
+                )
             )
             assert len(elementos) == 2, f"Esperado 2 elementos de input, encontrado '{len(elementos)}'"
-            elementos[-1].digitar(str(imposto).replace(".", ","))\
-                         .apertar("tab")
+            elementos[-1].digitar(str(imposto).replace(".", ",")).apertar("tab")
 
-        if dialogo := self.janela.dialogo(aguardar=0.2):
+        if dialogo := self.janela.dialogo(aguardar=0.5):
             texto = dialogo.texto.lower()
             assert "divergente" in texto, f"Esperado diálogo de confirmação 'valor divergente' | Encontrado: {texto}"
             dialogo.confirmar()
@@ -75,16 +83,17 @@ class CalculoTributos:
     def clicar_ok (self) -> None:
         """Clicar em `OK` para fechar a tela
         - Erro caso apareça diálogo com mensagem ou a janela não feche corretamente"""
-        self.janela.elemento\
-            .encontrar(lambda e: e.class_name == "TBitBtn" and e.texto.lower() == "ok")\
-            .clicar()
+        self.janela.elemento.encontrar(
+            lambda e: e.class_name == "TBitBtn" and e.texto.lower() == "ok",
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
             dialogo.confirmar()
             raise Exception(f"Falha após clicar em 'OK' na janela 'Cácula de Tributos': '{mensagem}'")
 
-        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=5),\
+        assert bot.tempo.aguardar(lambda: self.janela.fechada, timeout=DEFAULT_TIMEOUT),\
             "Janela 'Cácula de Tributos' não foi fechada corretamente"
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Capa' da janela 'Entrada Diversas'")
@@ -94,40 +103,42 @@ class AbaCapa:
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
+        dclick.logger.debug("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
         self.janela = janela
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == "Capa" and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == "Capa" and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Capa"
+                      and e.texto == "Capa",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_nota_fiscal (self) -> ElementoW32:
         return self.painel_aba.encontrar(
             lambda e: e.class_name == "TGroupBox"
-                      and e.texto == "Nota Fiscal"
+                      and e.texto == "Nota Fiscal",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     @property
     def painel_valores_nota (self) -> ElementoW32:
         return self.painel_aba\
-            .encontrar(lambda e: e.class_name == "TTabSheet" and e.texto == "Valores da Nota")\
-            .encontrar(lambda e: e.class_name == "TGroupBox")
+            .encontrar(lambda e: e.class_name == "TTabSheet" and e.texto == "Valores da Nota", aguardar=DEFAULT_TIMEOUT)\
+            .encontrar(lambda e: e.class_name == "TGroupBox", aguardar=DEFAULT_TIMEOUT)
 
     def preencher_cnpj_cpf_fornecedor (self, texto: str) -> Self:
         """Preencher o campo `CNPJ/CPF` e apertado `TAB` para confirmar
         - Erro caso apareça diálogo com mensagem"""
         digitos = "".join(char for char in texto if char.isdigit())
         self.painel_aba\
-            .encontrar(lambda e: e.texto == "Fornecedor")\
-            .encontrar(lambda e: e.class_name == "TCPF_CGC")\
+            .encontrar(lambda e: e.texto == "Fornecedor", aguardar=DEFAULT_TIMEOUT)\
+            .encontrar(lambda e: e.class_name == "TCPF_CGC", aguardar=DEFAULT_TIMEOUT)\
             .apertar("backspace")\
             .digitar(digitos)\
             .apertar("enter")
@@ -141,52 +152,42 @@ class AbaCapa:
 
     def preencher_numero_nota_fiscal (self, numero: str) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_nota_fiscal.filhos()
+            self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
-        assert len(elementos) >= 1, "Elemento não foi encontrado"
-
-        elementos[1]\
-            .digitar(numero)\
-            .apertar("tab")
+        assert len(elementos) >= 2, "Elemento não foi encontrado"
+        elementos[1].digitar(numero).apertar("tab")
         return self
 
     def preencher_serie_nota_fiscal (self, serie: str) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_nota_fiscal.filhos()
+            self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
-        assert len(elementos) >= 2, "Elemento não foi encontrado"
-
-        elementos[2]\
-            .digitar(serie)\
-            .apertar("tab")
+        assert len(elementos) >= 3, "Elemento não foi encontrado"
+        elementos[2].digitar(serie).apertar("tab")
         return self
 
     def preencher_emissao_nota_fiscal (self, data: date) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_nota_fiscal.filhos()
+            self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
-        assert len(elementos) >= 3, "Elemento não foi encontrado"
-
-        elementos[3]\
-            .digitar(data.strftime(r"%d%m%Y"))\
-            .apertar("tab")
+        assert len(elementos) >= 4, "Elemento não foi encontrado"
+        elementos[3].digitar(data.strftime(r"%d%m%Y")).apertar("tab")
         return self
 
     def preencher_entrada_nota_fiscal (self, data: date) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_nota_fiscal.filhos()
+            self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
-        assert len(elementos) >= 4, "Elemento não foi encontrado"
-
-        elementos[4]\
-            .digitar(data.strftime(r"%d%m%Y"))\
-            .apertar("tab")
+        assert len(elementos) >= 5, "Elemento não foi encontrado"
+        elementos[4].digitar(data.strftime(r"%d%m%Y")).apertar("tab")
         return self
 
     def alterar_estado_nota_no_livro_fiscal (self, selecionar=False) -> Self:
-        caixa = self.painel_aba\
-            .encontrar(lambda e: e.class_name == "TCheckBox" and "livro fiscal" in e.texto.lower())\
-            .caixa_selecao
+        caixa = self.painel_aba.encontrar(
+            lambda e: e.class_name == "TCheckBox"
+                      and "livro fiscal" in e.texto.lower(),
+            aguardar = DEFAULT_TIMEOUT
+        ).caixa_selecao
 
         # XOR, apenas 1 True
         if caixa.selecionado + selecionar == 1: 
@@ -197,9 +198,12 @@ class AbaCapa:
     def preencher_base_iss_valores_nota (self, base_iss: int | float) -> Self:
         painel = self.painel_valores_nota.focar()
         elementos = self.janela.ordernar_elementos_coordenada(
-            painel.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            painel.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 7, "Elemento não foi encontrado"
+        assert len(elementos) >= 8, "Elemento não foi encontrado"
 
         elementos[7]\
             .apertar("backspace")\
@@ -209,9 +213,12 @@ class AbaCapa:
 
     def preencher_aliquota_iss_valores_nota (self, aliquota_iss: int | float) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_valores_nota.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 8, "Elemento não foi encontrado"
+        assert len(elementos) >= 9, "Elemento não foi encontrado"
 
         elementos[8]\
             .apertar("backspace")\
@@ -222,10 +229,12 @@ class AbaCapa:
     def obter_valor_iss_valores_nota (self) -> float:
         """Obtero valor atual do `Valor ISS`"""
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_valores_nota.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 9, "Elemento não foi encontrado"
-
+        assert len(elementos) >= 10, "Elemento não foi encontrado"
         valor = elementos[9].to_uia().texto
         return float(valor.replace(",", "."))
 
@@ -235,9 +244,12 @@ class AbaCapa:
         - `tratamento_dialogos` função utilizada para tratar os possíveis diálogos que serão abertos
         - Erro caso exista algum diálogo com mensagem"""
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_valores_nota.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 9, "Elemento não foi encontrado"
+        assert len(elementos) >= 10, "Elemento não foi encontrado"
 
         elementos[9]\
             .apertar("backspace")\
@@ -252,10 +264,12 @@ class AbaCapa:
 
     def preencher_codigo_servico_prefeitura_valores_nota (self, codigo: str) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_valores_nota.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 11, "Elemento não foi encontrado"
-
+        assert len(elementos) >= 12, "Elemento não foi encontrado"
         elementos[11].apertar("backspace").digitar(codigo).apertar("tab")
         return self
 
@@ -265,9 +279,12 @@ class AbaCapa:
         - `tratamento_dialogos` função utilizada para tratar os possíveis diálogos que serão abertos
         - Erro caso exista algum diálogo com mensagem"""
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_valores_nota.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_valores_nota.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
-        assert len(elementos) >= 12, "Elemento não foi encontrado"
+        assert len(elementos) >= 13, "Elemento não foi encontrado"
 
         elementos[12].apertar("backspace")\
                      .digitar(str(total).replace(".", ","))\
@@ -280,9 +297,11 @@ class AbaCapa:
         return self
 
     def alterar_estado_fisco_municipal_valores_nota (self, selecionar=True) -> Self:
-        caixa = self.painel_valores_nota\
-            .encontrar(lambda e: e.class_name == "TDBCheckBox" and e.texto == "Fisco Municipal")\
-            .caixa_selecao
+        caixa = self.painel_valores_nota.encontrar(
+            lambda e: e.class_name == "TDBCheckBox"
+                      and e.texto == "Fisco Municipal",
+            aguardar = DEFAULT_TIMEOUT / 2
+        ).caixa_selecao
 
         # XOR, apenas 1 True
         if caixa.selecionado + selecionar == 1: 
@@ -291,9 +310,11 @@ class AbaCapa:
         return self
 
     def preencher_observacao_operacao (self, texto: str) -> Self:
-        elementos = self.janela.ordernar_elementos_coordenada(self.painel_aba.filhos())
+        elementos = self.janela.ordernar_elementos_coordenada(
+            self.painel_aba.filhos(aguardar=DEFAULT_TIMEOUT / 2)
+        )
         assert elementos, "Elemento não foi encontrado"
-        elementos[-1].encontrar(lambda e: e.class_name == "TOvcDbPictureField")\
+        elementos[-1].encontrar(lambda e: e.class_name == "TOvcDbPictureField", aguardar=DEFAULT_TIMEOUT / 2)\
                      .digitar(texto)\
                      .apertar("tab")
         return self
@@ -314,8 +335,12 @@ class AbaCapa:
             raise Exception(mensagem)
 
         return CalculoTributos(
-            self.janela.janela_processo(lambda j: j.class_name == "TfrmCalculoTributos", aguardar=5)
-                       .focar()
+            self.janela
+            .janela_processo(
+                lambda j: j.class_name == "TfrmCalculoTributos",
+                aguardar = DEFAULT_TIMEOUT
+            )
+            .focar()
         )
 
     def preencher_cod_retencao_valores_nota (self, codigo: str) -> Self:
@@ -323,7 +348,10 @@ class AbaCapa:
         assert painel.parente
 
         elementos = self.janela.ordernar_elementos_coordenada(
-            painel.parente.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            painel.parente.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert len(elementos) >= 1, "Elemento não foi encontrado"
 
@@ -340,30 +368,33 @@ class AbaContabilizacao:
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
+        dclick.logger.debug("Abrindo a aba 'Contabilização' na janela 'Entrada Diversas'")
         self.janela = janela
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == "Contabilização" and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == "Contabilização"
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Contabilização"
+                      and e.texto == "Contabilização",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_contabilizacao_padrao (self) -> ElementoW32:
         return self.painel_aba.encontrar(
             lambda e: e.class_name == "TGroupBox"
-                      and e.texto == "Contabilização Padrão"
+                      and e.texto == "Contabilização Padrão",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     def preencher_codigo_contabilizacao_padrao (self, codigo: str) -> Self:
         self.painel_contabilizacao_padrao\
-            .encontrar(lambda e: e.class_name == "TOvcNumericField")\
+            .encontrar(lambda e: e.class_name == "TOvcNumericField", aguardar=DEFAULT_TIMEOUT / 2)\
             .digitar(codigo)\
             .apertar("tab")
         return self
@@ -390,38 +421,42 @@ class AbaFaturamento:
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
+        dclick.logger.debug("Abrindo a aba 'Faturamento' na janela 'Entrada Diversas'")
         self.janela = janela
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == "Faturamento" and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == "Faturamento"
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoUIA:
         return self.janela.to_uia().elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Faturamento"
+                      and e.texto == "Faturamento",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_condicao_pagamento (self) -> ElementoUIA:
         return self.janela.to_uia().elemento.encontrar(
             lambda e: e.class_name == "TGroupBox"
-                      and e.texto == "Condição de Pagamento"
+                      and e.texto == "Condição de Pagamento",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     @property
     def painel_alteracao_parcelas (self) -> ElementoUIA:
         return self.janela.to_uia().elemento.encontrar(
             lambda e: e.class_name == "TGroupBox"
-                      and e.texto == "Alteração das Parcelas"
+                      and e.texto == "Alteração das Parcelas",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     def selecionar_tipo_pagamento (self, descricao: str) -> Self:
         elemento = self.painel_aba\
-            .encontrar(lambda e: e.texto == "Tipo de Pagamento")\
-            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo")\
+            .encontrar(lambda e: e.texto == "Tipo de Pagamento", aguardar=DEFAULT_TIMEOUT)\
+            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
             .digitar(descricao, virtual=False)\
             .apertar("enter")\
@@ -433,8 +468,8 @@ class AbaFaturamento:
 
     def selecionar_natureza_despesa (self, descricao: str) -> Self:
         elemento = self.painel_aba\
-            .encontrar(lambda e: e.texto == "Natureza Despesa")\
-            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo")\
+            .encontrar(lambda e: e.texto == "Natureza Despesa", aguardar=DEFAULT_TIMEOUT)\
+            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
             .digitar(descricao, virtual=False)\
             .apertar("enter")\
@@ -446,7 +481,10 @@ class AbaFaturamento:
 
     def preencher_total_parcelas_condicao_pagamento (self, parcelas: str) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_condicao_pagamento.filhos(lambda e: e.class_name == "TOvcNumericField")
+            self.painel_condicao_pagamento.filhos(
+                lambda e: e.class_name == "TOvcNumericField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert len(elementos) >= 3, "Elemento não foi encontrado"
         elementos[2].digitar(parcelas).apertar("tab")
@@ -469,7 +507,10 @@ class AbaFaturamento:
 
     def preencher_vencimento_alteracao_parcelas (self, vencimento: date) -> Self:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_alteracao_parcelas.filhos(lambda e: e.class_name == "TOvcDbPictureField")
+            self.painel_alteracao_parcelas.filhos(
+                lambda e: e.class_name == "TOvcDbPictureField",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert len(elementos) >= 1, "Elemento não foi encontrado"
         elementos[1].apertar("backspace")\
@@ -484,12 +525,13 @@ class AbaRetencoesPJ:
     janela: JanelaW32
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
+        dclick.logger.debug("Abrindo a aba 'Retenções' na janela 'Entrada Diversas'")
         self.janela = janela
-        try: janela.to_uia()\
-                   .elemento\
-                   .encontrar(lambda e: e.texto == "Retenções PJ" and e.item_aba)\
-                   .clicar()
+        try: janela.to_uia().elemento.encontrar(
+                lambda e: e.texto == "Retenções PJ"
+                        and e.item_aba,
+                aguardar = DEFAULT_TIMEOUT
+        ).clicar()
         except Exception:
             raise Exception("Falha ao abrir a aba 'Retenções PJ'")
 
@@ -497,15 +539,17 @@ class AbaRetencoesPJ:
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Retenções PJ"
+                      and e.texto == "Retenções PJ",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def janela_retencoes_pj (self) -> bot.sistema.JanelaUIA:
         """Janela `Retenções PJ` aberta após utilizar o `clicar_incluir()`"""
-        return self.janela.janela_processo(lambda j: j.titulo == "Retenções PJ", aguardar=5)\
-            .focar()\
-            .to_uia()
+        return self.janela.janela_processo(
+            lambda j: j.titulo == "Retenções PJ",
+            aguardar = DEFAULT_TIMEOUT
+        ).focar().to_uia()
 
     @bot.erro.adicionar_prefixo("Falha ao abrir a janela interna 'Retenções PJ'")
     def clicar_incluir (self) -> Self:
@@ -513,7 +557,7 @@ class AbaRetencoesPJ:
         - Necessário para abrir a `janela_retencoes_pj`
         - TODO Posição alterada do botão após o primeiro click"""
         posicao = self.painel_aba\
-            .encontrar(lambda e: e.texto == "pnlBtnAcoesPJGeral")\
+            .encontrar(lambda e: e.texto == "pnlBtnAcoesPJGeral", aguardar=DEFAULT_TIMEOUT)\
             .coordenada\
             .transformar(yOffset=0.09)
         bot.mouse.mover(posicao).clicar()
@@ -524,7 +568,7 @@ class AbaRetencoesPJ:
     def alterar_codigo_natureza (self, codigo: str) -> Self:
         elemento = self.janela_retencoes_pj\
             .elemento\
-            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo")\
+            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
             .digitar(codigo, virtual=False)\
             .sleep(2)\
@@ -539,10 +583,11 @@ class AbaRetencoesPJ:
     def clicar_gravar (self) -> Self:
         """Clicar no botão `Gravar`
         - Erro caso apareça diálogo com mensagem"""
-        self.janela_retencoes_pj\
-            .elemento\
-            .encontrar(lambda e: e.texto.lower() == "gravar" and e.class_name == "TNBSWButton")\
-            .clicar()
+        self.janela_retencoes_pj.elemento.encontrar(
+            lambda e: e.texto.lower() == "gravar"
+                      and e.class_name == "TNBSWButton",
+            aguardar = DEFAULT_TIMEOUT / 2
+        ).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -558,21 +603,27 @@ class Confirmar:
     full_hd: bool
     janela: JanelaW32
 
-    IMAGEM_CONFIRMAR = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAAAdCAYAAADimZEAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVGhD7ZaBlYMgDEDZiW1Yho7CAg7BKE7CEQQMGNR4tvfORt9vAWOMX6RV0zQF4RjY1DzPQdhHZDEQWQxEFgORxeBWWSru1PhTuE0WiFKvBer4E7hFFhal1IuMeQK/ltWIEllj+KJ8sBriFoyjYs6y5jLWBq1t8GTcfVyWFcu8JEpbn/suGKWD9X3cSfxnBGEuyeKLihA3572L5LbVdcZVoXCOMVHqMq6My+eC6DymTHAld/qO8WnGlfHSh7yuzsZyDXzdmr/Pk665IyuGNX08zhYFOINutgOKq0WhGbcZXwtv5Jd2ikezFff7dpVbHiDK3+fJkLKqkLiT41xRwJ6s7pgzeT1rbgZe404EJavGD2KodplZvcySJ0PLwkKysNTC4xxRwKCAxF/JguuOZjTOk6FlRRGNmF4UwJVFLvC5D8UdFv0mWeUhJXEXZAEbYRi2qMIiqCyoq7h2oa1/KZqi3/EaonryD8l2Rq8MZQGksMui/j+7soBG2BeLAg5lAUnYl4sCTskSFkQWA5HFQGQxEFkMRBaDKgsawjFJVvqU7cQWwg8Fw9KgLVft2wAAAABJRU5ErkJggg==")
+    IMAGEM_CONFIRMAR = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAAAdCAYAAADimZEAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVGhD7ZaBlYMgDEDZiW1Yho7CAg7BKE7CEQQMGNR4tvfORt9vAWOMX6RV0zQF4RjY1DzPQdhHZDEQWQxEFgORxeBWWSru1PhTuE0WiFKvBer4E7hFFhal1IuMeQK/ltWIEllj+KJ8sBriFoyjYs6y5jLWBq1t8GTcfVyWFcu8JEpbn/suGKWD9X3cSfxnBGEuyeKLihA3572L5LbVdcZVoXCOMVHqMq6My+eC6DymTHAld/qO8WnGlfHSh7yuzsZyDXzdmr/Pk665IyuGNX08zhYFOINutgOKq0WhGbcZXwtv5Jd2ikezFff7dpVbHiDK3+fJkLKqkLiT41xRwJ6s7pgzeT1rbgZe404EJavGD2KodplZvcySJ0PLwkKysNTC4xxRwKCAxF/JguuOZjTOk6FlRRGNmF4UwJVFLvC5D8UdFv0mWeUhJXEXZAEbYRi2qMIiqCyoq7h2oa1/KZqi3/EaonryD8l2Rq8MZQGksMui/j+7soBG2BeLAg5lAUnYl4sCTskSFkQWA5HFQGQxEFkMRBaDKgsawjFJVvqU7cQWwg8Fw9KgLVft2wAAAABJRU5ErkJggg==")
     """Imagem do botão `Confirmar` na resolução `1920x1080`"""
-    IMAGEM_CANCELAR = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVFhH7ZQ9ksIwDIV9J2Yyw10oUuQg6ag4BS1dzkCdkhNwgK1TeC1HCpYsO94MFGRdfAPRj+X3Ysc8fyZbeVENEVRDBJsMscbY3gG/Wv6bUQ0hwbkcodV8M5EhTHDfp3NKfg/kDQlEbzPjYfvGuNaZ002r+QDjxR6ai71ruRWyVyYUL5+1Ps5sxuH8wOfBnszR9qOs+wDvNgSITCFKr4myqfs4OPD/+bicHNMOr562c8aJOOUobjp7pfit09fB2ck5jZvjT2+wliNpCOCqtxsCGw0FhTCz4OTgprxo2mAQF6fLi4S12TqTvbZ4LSmenaOf1qwhkRnvMgTwm8I3R5tjAuDKafGA8HQg/oqG9atzOH+/MkCJKZmhsxDl7bOeQkM006m+aA6n7KOqsWqK9lHF51CI3/SKIeLK+B6og/olPs9jV6ZoDicyRDXDiY9iGJf9nNkEdpxlHD+iTIivCQ3BHPUsb93hhdJaKH5Zp2QOhxniOpOic7k9kTdECGb5HZoBpA1JCPY1OzUDiL4hIHbPgteIDPnvVEME1RBBNURQDWFM9hfM9zt0FZHS5AAAAABJRU5ErkJggg==")
+    IMAGEM_CANCELAR = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVFhH7ZQ9ksIwDIV9J2Yyw10oUuQg6ag4BS1dzkCdkhNwgK1TeC1HCpYsO94MFGRdfAPRj+X3Ysc8fyZbeVENEVRDBJsMscbY3gG/Wv6bUQ0hwbkcodV8M5EhTHDfp3NKfg/kDQlEbzPjYfvGuNaZ002r+QDjxR6ai71ruRWyVyYUL5+1Ps5sxuH8wOfBnszR9qOs+wDvNgSITCFKr4myqfs4OPD/+bicHNMOr562c8aJOOUobjp7pfit09fB2ck5jZvjT2+wliNpCOCqtxsCGw0FhTCz4OTgprxo2mAQF6fLi4S12TqTvbZ4LSmenaOf1qwhkRnvMgTwm8I3R5tjAuDKafGA8HQg/oqG9atzOH+/MkCJKZmhsxDl7bOeQkM006m+aA6n7KOqsWqK9lHF51CI3/SKIeLK+B6og/olPs9jV6ZoDicyRDXDiY9iGJf9nNkEdpxlHD+iTIivCQ3BHPUsb93hhdJaKH5Zp2QOhxniOpOic7k9kTdECGb5HZoBpA1JCPY1OzUDiL4hIHbPgteIDPnvVEME1RBBNURQDWFM9hfM9zt0FZHS5AAAAABJRU5ErkJggg==")
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: JanelaW32) -> None:
-        dclick.logger.informar("Confirmando na janela 'Entrada Diversas'")
+        dclick.logger.debug("Confirmando na janela 'Entrada Diversas'")
         self.janela = janela
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)
 
     @property
     def painel_botao_confirmar (self) -> ElementoW32:
-        e = self.janela.elemento.encontrar(lambda e: e.texto.lower() == "dados")
-        painel = e.filhos(lambda e: e.class_name == "TPanel")
+        elemento = self.janela.elemento.encontrar(
+            lambda e: e.texto.lower() == "dados",
+            aguardar = DEFAULT_TIMEOUT
+        )
+        painel = elemento.filhos(
+            lambda e: e.class_name == "TPanel",
+            aguardar = DEFAULT_TIMEOUT
+        )
         assert painel, "Painel com o botão 'Confirmar' não foi encontrado"
         return painel[0]
 
@@ -580,10 +631,9 @@ class Confirmar:
         """Clicar no botão `Confirmar` procurando pela Imagem
         - Esperado resolução `1920x1080`"""
         assert self.full_hd, "Esperado resolução '1920x1080' para encontrar a imagem do botão 'Confirmar'"
-
         coordenada = self.IMAGEM_CONFIRMAR.procurar_imagem(
             regiao = self.painel_botao_confirmar.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, "Imagem do botão 'Confirmar' não foi encontrada"
         bot.mouse.mover(coordenada).clicar()
@@ -591,18 +641,20 @@ class Confirmar:
 
     def confirmar_dialogo_data_barreira (self) -> Self:
         """Checar pelo diálogo `Data de Barreira` e clicar em `Sim` caso apareça"""
-        dialogo = self.janela.dialogo(aguardar=5)
-        if not dialogo: return self
+        dialogo = self.janela.aguardar().dialogo(aguardar=5)
+        if not dialogo:
+            return self
 
         texto = dialogo.texto.lower()
-        if "data de barreira" not in texto: return self
+        if "data de barreira" not in texto:
+            return self
 
         dialogo.confirmar()
         return self
 
     def dialogo_confirmacao (self) -> str:
         """Diálogo de confirmação, clicado em `OK` e retornado a mensagem do diálogo"""
-        dialogo = self.janela.dialogo(aguardar=5)
+        dialogo = self.janela.aguardar().dialogo(aguardar=5)
         assert dialogo, "Diálogo de confirmação não encontrado"
 
         texto = dialogo.texto.lower()
@@ -613,19 +665,22 @@ class Confirmar:
         """Fechar a janela 'Ficha de Controle de Pagamento'"""
         assert self.full_hd, "Esperado resolução '1920x1080' para encontrar a imagem do botão 'Cancelar'"
 
-        titulo = 'Ficha de Controle de Pagamento'
-        try: janela = self.janela.janela_processo(lambda j: j.titulo == titulo).focar()
+        titulo = "Ficha de Controle de Pagamento"
+        try: janela = self.janela.janela_processo(
+                lambda j: j.titulo == titulo,
+                aguardar = DEFAULT_TIMEOUT
+        ).focar()
         except Exception:
             raise Exception(f"Janela '{titulo}' não foi encontrada")
 
         coordenada = self.IMAGEM_CANCELAR.procurar_imagem(
             regiao = janela.elemento.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, f"Coordenada do botão 'Cancelar' não encontrado na janela '{titulo}'"
 
         bot.mouse.mover(coordenada).clicar()
-        assert bot.tempo.aguardar(lambda: janela.fechada, timeout=5),\
+        assert bot.tempo.aguardar(lambda: janela.fechada, timeout=DEFAULT_TIMEOUT),\
             f"Janela '{titulo}' não foi fechada corretamente"
 
 __all__ = [

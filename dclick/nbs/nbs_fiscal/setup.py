@@ -2,11 +2,13 @@
 from typing import Self
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
+from bot.imagem import Imagem
 from bot.estruturas import String
 
-IMAGEM_MODULO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAvCAYAAACyoNkAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGVSURBVGhD7ZhtroQgDEVdOktzZ765ozdem6JoLM5DTkKE8lFOSubHDNNL6KKt0UWjSCktvZVhSN8WSbgoxTxBMEviG3uVsNNVbBzHpbelliQIyaBVhCRaMjI1JcHtWexTpShIaU5XWxKEZKLYt5IfYVYWPCEJbs9GIYDnqpKoKARzkqx4BLefjMvywny+YH226zzBeK7+fxL9iODSWlmvipBSQezLVfoObj8Zl7WiCuVqCZKQDLg4K2ahKL41BElYJj5hS60KWsIyek/4CUESmplPmP0nCc/+1FO1hN/gFyTBb9yiAl20Nbpoa3TR1uiirdFFW+PdovhL0qIxb76E+a/ObWP8LnJnZUXtBh1fvdjVfWfI5eii+gW2r03xYqQk7u1nrCRu15DLosrReoKYNsL+UQzYMcmtJ4c/Rt4B9rC9OSU3V3q2BXPaGPM4FAV6EPDmFTsmpXEdn92TXb98N3iHaMyb1y+wa4AXA3v77Z6zcVIkCjSGvjbFi5GSuLefsb045+wa4oq2SBdtjS7aGi8RnaY/CSKCTRQAu6YAAAAASUVORK5CYII=")
+IMAGEM_MODULO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAvCAYAAACyoNkAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGVSURBVGhD7ZhtroQgDEVdOktzZ765ozdem6JoLM5DTkKE8lFOSubHDNNL6KKt0UWjSCktvZVhSN8WSbgoxTxBMEviG3uVsNNVbBzHpbelliQIyaBVhCRaMjI1JcHtWexTpShIaU5XWxKEZKLYt5IfYVYWPCEJbs9GIYDnqpKoKARzkqx4BLefjMvywny+YH226zzBeK7+fxL9iODSWlmvipBSQezLVfoObj8Zl7WiCuVqCZKQDLg4K2ahKL41BElYJj5hS60KWsIyek/4CUESmplPmP0nCc/+1FO1hN/gFyTBb9yiAl20Nbpoa3TR1uiirdFFW+PdovhL0qIxb76E+a/ObWP8LnJnZUXtBh1fvdjVfWfI5eii+gW2r03xYqQk7u1nrCRu15DLosrReoKYNsL+UQzYMcmtJ4c/Rt4B9rC9OSU3V3q2BXPaGPM4FAV6EPDmFTsmpXEdn92TXb98N3iHaMyb1y+wa4AXA3v77Z6zcVIkCjSGvjbFi5GSuLefsb045+wa4oq2SBdtjS7aGi8RnaY/CSKCTRQAu6YAAAAASUVORK5CYII=")
 """Imagem do módulo `Nbs Fiscal` na resolução `1920x1080`"""
 
 class SelecaoEmpresaFilial:
@@ -18,9 +20,9 @@ class SelecaoEmpresaFilial:
     filial: str
 
     def __init__ (self) -> None:
-        dclick.logger.informar(f"Selecionando a empresa/filial")
+        dclick.logger.debug(f"Selecionando a empresa/filial")
         self.empresa = self.filial = ""
-        try: self.janela = bot.sistema.JanelaW32(lambda j: "Empresa/Filial" in j.titulo, aguardar=10).focar()
+        try: self.janela = bot.sistema.JanelaW32(lambda j: "Empresa/Filial" in j.titulo, aguardar=DEFAULT_TIMEOUT).focar()
         except Exception: raise Exception("Janela de seleção 'Empresa/Filial' não encontrada")
 
     def selecionar_empresa (self, empresa: str) -> Self:
@@ -55,7 +57,7 @@ class SelecaoEmpresaFilial:
         - Erro caso apareça diálogo
         - Utilizar `self.checar_selecao` para checar sucesso após
         - Retornado janela `Sistema Fiscal`"""
-        with bot.sistema.JanelaW32.aguardar_nova_janela() as nova_janela:
+        with bot.sistema.JanelaW32.aguardar_nova_janela(DEFAULT_TIMEOUT * 2) as nova_janela:
             self.janela.elemento\
                 .encontrar(lambda e: "confirma" in e.texto.lower())\
                 .clicar()
@@ -65,7 +67,7 @@ class SelecaoEmpresaFilial:
         if dialogo := self.janela.aguardar().dialogo():
             raise Exception(f"Diálogo inesperado: '{dialogo.texto}'")
 
-        try: return bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=5)
+        try: return bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=DEFAULT_TIMEOUT)
         except Exception:
             raise Exception("Janela 'Sistema Fiscal' não foi encontrada")
 
@@ -80,12 +82,12 @@ class SelecaoEmpresaFilial:
     @bot.erro.adicionar_prefixo("Falha ao obter a empresa/filial selecionada na janela 'Sistema Fiscal'")
     def obter_empresa_filial_selecionada (self) -> tuple[str, str]:
         """Obter a `(empresa, filial)` selecionada na janela `Sistema Fiscal`"""
-        barra_status = bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=3)\
+        barra_status = bot.sistema.JanelaW32(lambda j: j.titulo == "Sistema Fiscal", aguardar=DEFAULT_TIMEOUT)\
                                   .to_uia()\
                                   .elemento\
-                                  .encontrar(lambda e: e.class_name == "TStatusBar", aguardar=3)
+                                  .encontrar(lambda e: e.class_name == "TStatusBar", aguardar=DEFAULT_TIMEOUT / 2)
         empresa, filial = (
-            barra_status.encontrar(lambda e: e.texto.lower().startswith(texto), aguardar=3)
+            barra_status.encontrar(lambda e: e.texto.lower().startswith(texto), aguardar=DEFAULT_TIMEOUT)
                         .texto
                         .split(":")[-1]
                         .strip()
@@ -96,23 +98,23 @@ class SelecaoEmpresaFilial:
 @bot.erro.adicionar_prefixo("Falha ao selecionar o módulo 'ADM / NBS Fiscal'")
 @bot.erro.retry()
 def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
-                             imagem: bot.imagem.Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
+                             imagem: Imagem | None = IMAGEM_MODULO) -> SelecaoEmpresaFilial:
     """Abrir o módulo `Nbs Fiscal`
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
     - Retornado `SelecaoEmpresaFilial`"""
-    dclick.logger.informar(f"Abrindo o módulo 'NBS Fiscal'")
+    dclick.logger.debug(f"Abrindo o módulo 'NBS Fiscal'")
     abas = janela_shortcut.focar().elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn"
                          and elemento.visivel,
-        aguardar = 5
+        aguardar = DEFAULT_TIMEOUT
     )
     *_, aba_adm = janela_shortcut.ordernar_elementos_coordenada(abas)
     aba_adm.sleep().clicar()
 
     coordenada_painel = janela_shortcut.elemento\
         .focar()\
-        .encontrar(lambda e: e.visivel and e.class_name == "TfcOutlookPanel", aguardar=2)\
+        .encontrar(lambda e: e.visivel and e.class_name == "TfcOutlookPanel", aguardar=DEFAULT_TIMEOUT)\
         .coordenada
 
     if imagem is None:

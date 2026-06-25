@@ -3,22 +3,24 @@ from datetime import date
 from typing import Self
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 from bot.sistema.janela import ElementoW32
+from bot.imagem import Imagem, LeitorOCR, capturar_tela
 
 @bot.erro.adicionar_prefixo("Falha ao abrir o menu 'Impostos a Recolher'")
 @bot.erro.retry()
 def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Clicar no botão para abrir `Impostos a Recolher`
     - Retorna a janela `Impostos a Recolher`"""
-    dclick.logger.informar(f"Abrindo o menu 'Impostos a Recolher'")
+    dclick.logger.debug(f"Abrindo o menu 'Impostos a Recolher'")
     janela_sistema_fiscal\
         .to_uia()\
         .menu("Outros", "Impostos a Recolher")
 
     return janela_sistema_fiscal\
-        .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=10)\
+        .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=DEFAULT_TIMEOUT)\
         .focar()
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Lista' da janela 'Impostos a Recolher'")
@@ -28,15 +30,15 @@ class AbaLista:
     full_hd: bool
     janela: bot.sistema.JanelaW32
 
-    IMAGEM_OCULOS = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAUCAYAAACTQC2+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACJSURBVEhL7ZILCoAwDEN7/1PtZtWAK8W1NkwZIj4ofkjzBiq6iHeJRERba8fTHKUIEn9liA52ue3LWVF2sHR7CBIin6FEUWklGoor0RMScCmqCiPYg9kb/CUI+Dm/yzIMJrIi3O/TSz1MJsNSWOgFNoGoymRY6puiJd8IYMlPBJOJ4JM3+UWTqG75oDTOWTdCaAAAAABJRU5ErkJggg==")
+    IMAGEM_OCULOS = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAUCAYAAACTQC2+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACJSURBVEhL7ZILCoAwDEN7/1PtZtWAK8W1NkwZIj4ofkjzBiq6iHeJRERba8fTHKUIEn9liA52ue3LWVF2sHR7CBIin6FEUWklGoor0RMScCmqCiPYg9kb/CUI+Dm/yzIMJrIi3O/TSz1MJsNSWOgFNoGoymRY6puiJd8IYMlPBJOJ4JM3+UWTqG75oDTOWTdCaAAAAABJRU5ErkJggg==")
     """Imagem do botão `Procurar`, ícone de um Óculos, na resolução `1920x1080`"""
-    IMAGEM_SETA_ENVIAR_SELECIONADOS_COMPROMISSO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAWCAYAAADafVyIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABiSURBVEhL7Y0xDsAwCAP5/6cpquQMcZDjoVM5yQyB+CI/ZgSSHwki4o2LJahhi2wBciuiC3w8pQZl7Rpo0xWpdCJ6weEpNShr19BvNnaBKga24LYYWAKnGPg/TEYgGYEg8wEHi4vXA0x4ogAAAABJRU5ErkJggg==")
+    IMAGEM_SETA_ENVIAR_SELECIONADOS_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAWCAYAAADafVyIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABiSURBVEhL7Y0xDsAwCAP5/6cpquQMcZDjoVM5yQyB+CI/ZgSSHwki4o2LJahhi2wBciuiC3w8pQZl7Rpo0xWpdCJ6weEpNShr19BvNnaBKga24LYYWAKnGPg/TEYgGYEg8wEHi4vXA0x4ogAAAABJRU5ErkJggg==")
     """Imagem do botão `Enviar apenas selecionados para compromisso`, ícone de uma seta vermelha, na resolução `1920x1080`"""
-    IMAGEM_SETA_ENVIAR_TODOS_COMPROMISSO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACESURBVEhL7dDtCoQwDETRvHl982qwgzSd9MPoD8ELA7tue2CV/EIfReX4povWEIAjeBe9i9MrDNbN5h5lKDbKPcIwO6/OTy3izVY/YjdWVro+kUS2qaWUyo0zF2WX7SyGKKqHGYJ5GKIog3QjDDVoBEMVav/2KoYqNIoh+k6j/ejT5bwD5EybQbbvwc0AAAAASUVORK5CYII=")
+    IMAGEM_SETA_ENVIAR_TODOS_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACESURBVEhL7dDtCoQwDETRvHl982qwgzSd9MPoD8ELA7tue2CV/EIfReX4povWEIAjeBe9i9MrDNbN5h5lKDbKPcIwO6/OTy3izVY/YjdWVro+kUS2qaWUyo0zF2WX7SyGKKqHGYJ5GKIog3QjDDVoBEMVav/2KoYqNIoh+k6j/ejT5bwD5EybQbbvwc0AAAAASUVORK5CYII=")
     """Imagem do botão `Enviar todos para compromisso`, ícone de uma seta azul, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Lista' na janela 'Impostos a Recolher'")
+        dclick.logger.debug("Abrindo a aba 'Lista' na janela 'Impostos a Recolher'")
         self.janela = janela
         janela.to_uia()\
               .elemento\
@@ -49,13 +51,17 @@ class AbaLista:
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Lista"
+                      and e.texto == "Lista",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_superior_aba (self) -> ElementoW32:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_aba.filhos(lambda e: e.class_name == "TPanel")
+            self.painel_aba.filhos(
+                lambda e: e.class_name == "TPanel",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert elementos, "Painel com elementos não encontrado"
         return elementos[0]
@@ -63,7 +69,8 @@ class AbaLista:
     @property
     def painel_grid (self) -> ElementoW32:
         return self.painel_aba.encontrar(
-            lambda e: e.class_name == "TwwDBGrid"
+            lambda e: e.class_name == "TwwDBGrid",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     def preencher_fornecedor (self, texto: str) -> Self:
@@ -72,7 +79,7 @@ class AbaLista:
         - Erro caso apareça diálogo com mensagem"""
         digitos = "".join(char for char in texto if char.isdigit())
         self.painel_superior_aba\
-            .encontrar(lambda e: e.class_name == "TCPF_CGC")\
+            .encontrar(lambda e: e.class_name == "TCPF_CGC", DEFAULT_TIMEOUT / 2)\
             .apertar("backspace")\
             .digitar(digitos)\
             .apertar("tab")
@@ -86,8 +93,10 @@ class AbaLista:
     def preencher_data_inicio (self, data: date) -> Self:
         """Preencher o campo data início"""
         elemento, *_ = self.janela.ordernar_elementos_coordenada(
-            self.painel_superior_aba
-                .filhos(lambda e: e.class_name == "TDateTimePicker")
+            self.painel_superior_aba.filhos(
+                lambda e: e.class_name == "TDateTimePicker",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         ) or [None]
         assert elemento, "Elemento 'Data Início' não encontrado"
 
@@ -108,8 +117,10 @@ class AbaLista:
     def preencher_data_fim (self, data: date) -> Self:
         """Preencher o campo data fim"""
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_superior_aba
-                .filhos(lambda e: e.class_name == "TDateTimePicker")
+            self.painel_superior_aba.filhos(
+                lambda e: e.class_name == "TDateTimePicker",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert len(elementos) >= 2, "Elemento 'Data Fim' não encontrado"
         elemento = elementos[1]
@@ -135,7 +146,7 @@ class AbaLista:
 
         coordenada = self.IMAGEM_OCULOS.procurar_imagem(
             regiao = self.painel_superior_aba.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
@@ -149,11 +160,11 @@ class AbaLista:
 
         return self
 
-    def obter_linhas_registro_grid_via_ocr (self, leitor: bot.imagem.LeitorOCR) -> list[tuple[str, bot.estruturas.Coordenada]]:
+    def obter_linhas_registro_grid_via_ocr (self, leitor: LeitorOCR) -> list[tuple[str, bot.estruturas.Coordenada]]:
         """Obter `(texto.upper() separado por espaço, Coordenada na tela)` dos registros no elemento `painel_grid`"""
-        painel = self.painel_grid
-        imagem = painel.imagem
-        x, y, *_ = painel.coordenada
+        coordenada = self.painel_grid.coordenada
+        imagem = capturar_tela(coordenada)
+        x, y, *_ = coordenada
         return [
             (
                 texto.upper(),
@@ -178,7 +189,7 @@ class AbaLista:
 
         coordenada = self.IMAGEM_SETA_ENVIAR_SELECIONADOS_COMPROMISSO.procurar_imagem(
             regiao = self.painel_superior_aba.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
@@ -200,7 +211,7 @@ class AbaLista:
 
         coordenada = self.IMAGEM_SETA_ENVIAR_TODOS_COMPROMISSO.procurar_imagem(
             regiao = self.painel_superior_aba.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 
@@ -221,16 +232,16 @@ class AbaCompromisso:
     full_hd: bool
     janela: bot.sistema.JanelaW32
 
-    IMAGEM_GERAR_COMPROMISSO = bot.imagem.Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACHSURBVDhP5Y+BCsAgCAX9/59uqHvmQq0xgkEHZqvX1aht4AApEVmN/Eta8Um6/NLqt0ZK6VOE0Jo4QqVcTugvicrguf++kRUeenjeLbsmRUA7XjbWDEmIzsJxj2TZJbLCg24ioB2HooNMticrPPQAQr1n0gxJ+xsx9xVR7b97gmOLtOJoaWsX3JgHTiCw/GYAAAAASUVORK5CYII=")
+    IMAGEM_GERAR_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACHSURBVDhP5Y+BCsAgCAX9/59uqHvmQq0xgkEHZqvX1aht4AApEVmN/Eta8Um6/NLqt0ZK6VOE0Jo4QqVcTugvicrguf++kRUeenjeLbsmRUA7XjbWDEmIzsJxj2TZJbLCg24ioB2HooNMticrPPQAQr1n0gxJ+xsx9xVR7b97gmOLtOJoaWsX3JgHTiCw/GYAAAAASUVORK5CYII=")
     """Imagem do botão `Procurar`, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar("Abrindo a aba 'Compromisso' na janela 'Impostos a Recolher'")
+        dclick.logger.debug("Abrindo a aba 'Compromisso' na janela 'Impostos a Recolher'")
         self.janela = janela
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == "Compromisso" and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == "Compromisso" and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
         resolucao_atual, _ = bot.sistema.informacoes_resolucao()
         self.full_hd = resolucao_atual == (1920, 1080)
 
@@ -238,13 +249,17 @@ class AbaCompromisso:
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
-                      and e.texto == "Compromisso"
+                      and e.texto == "Compromisso",
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def painel_superior_aba (self) -> ElementoW32:
         elementos = self.janela.ordernar_elementos_coordenada(
-            self.painel_aba.filhos(lambda e: e.class_name == "TPanel")
+            self.painel_aba.filhos(
+                lambda e: e.class_name == "TPanel",
+                aguardar = DEFAULT_TIMEOUT / 2
+            )
         )
         assert elementos, "Painel com elementos não encontrado"
         return elementos[0]
@@ -252,13 +267,15 @@ class AbaCompromisso:
     @property
     def painel_grid (self) -> ElementoW32:
         return self.painel_aba.encontrar(
-            lambda e: e.class_name == "TwwDBGrid"
+            lambda e: e.class_name == "TwwDBGrid",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
     def preencher_vencimento (self, data: date) -> Self:
         """Preencher o campo vencimento"""
         elemento = self.painel_aba.encontrar(
-            lambda e: e.class_name == "TDateTimePicker"
+            lambda e: e.class_name == "TDateTimePicker",
+            aguardar = DEFAULT_TIMEOUT / 2
         )
 
         data_formatada = data.strftime(r"%d/%m/%Y")
@@ -284,7 +301,7 @@ class AbaCompromisso:
 
         coordenada = self.IMAGEM_GERAR_COMPROMISSO.procurar_imagem(
             regiao = self.painel_superior_aba.coordenada,
-            segundos = 5
+            segundos = DEFAULT_TIMEOUT
         )
         assert coordenada, f"Coordenada do botão não encontrado na janela '{self.janela.titulo}'"
 

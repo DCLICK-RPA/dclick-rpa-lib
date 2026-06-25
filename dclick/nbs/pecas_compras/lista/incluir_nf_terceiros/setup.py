@@ -1,3 +1,5 @@
+# interno
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 
@@ -14,14 +16,16 @@ class OpcoesInclusaoNfTerceiros:
         self.janela_compras = janela_compras.focar()
         self.janela = janela_compras.janela_processo(
             lambda j: j.class_name == "TForm_EntradaOpcao" and j.visivel,
-            aguardar = 10
+            aguardar = DEFAULT_TIMEOUT
         ).focar()
 
     @property
     def janela_entrada_nf (self) -> bot.sistema.JanelaW32:
-        try: return self.janela_compras.janela_processo(lambda j: j.class_name == "TFormEntradaNota" and j.visivel,
-                                                        aguardar = 10)\
-                                       .focar()
+        try: return self.janela_compras.janela_processo(
+                lambda j: j.class_name == "TFormEntradaNota"
+                          and j.visivel,
+                aguardar = DEFAULT_TIMEOUT
+            ).focar()
         except Exception:
             raise Exception("Janela 'Entrada de Nota Fiscal' não abriu conforme esperado")
 
@@ -30,13 +34,14 @@ class OpcoesInclusaoNfTerceiros:
         - Caso a janela `Conhecimento de Transporte` apareça, será cliado em `Entrada Sem Frete`
         - Retornado janela `Entrada de Nota Fiscal`"""
         with bot.sistema.JanelaW32.aguardar_nova_janela() as janela:
-            self.janela.to_uia().elemento\
-                .encontrar(lambda e: e.botao and e.texto == "Compra")\
-                .clicar()
+            self.janela.to_uia().elemento.encontrar(
+                lambda e: e.botao and e.texto == "Compra",
+                aguardar = DEFAULT_TIMEOUT
+            ).clicar()
 
         if janela.class_name == self.CLASSNAME_JANELA_ENTRADA_FRETE:
-            janela.elemento.encontrar(lambda e: e.texto == "Entrada Sem Frete" and e.visivel).clicar()
-            janela.elemento.encontrar(lambda e: e.texto == "OK").clicar()
+            janela.elemento.encontrar(lambda e: e.texto == "Entrada Sem Frete" and e.visivel, DEFAULT_TIMEOUT).clicar()
+            janela.elemento.encontrar(lambda e: e.texto == "OK", DEFAULT_TIMEOUT).clicar()
 
         return self.janela_entrada_nf
 

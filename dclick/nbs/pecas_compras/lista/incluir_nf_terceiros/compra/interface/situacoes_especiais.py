@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Self, Literal
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 from bot.sistema.janela import ElementoW32
@@ -18,21 +19,24 @@ class AbaSituacoesEspeciaisSuframa:
     NOME_ABA = "SUFRAMA"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
-        self.aba.janela.to_uia()\
-                       .elemento\
-                       .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-                       .clicar()
+        self.aba.janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
         if dialogo := self.aba.janela.dialogo(aguardar=0.5):
             raise Exception(f"Diálogo encontrado ao abrir a aba: '{dialogo.texto}'")
 
     @property
     def painel_aba (self) -> ElementoW32:
-        return self.aba.painel_aba\
-            .encontrar(lambda e: e.class_name == "TTabSheet"
-                                 and e.texto == self.NOME_ABA)
+        return self.aba.painel_aba.encontrar(
+            lambda e: e.class_name == "TTabSheet"
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
+        )
 
 @bot.erro.adicionar_prefixo_classe("Falha nas abas 'Situações Especiais / ICMS' da janela 'Interface de Compra'")
 class AbaSituacoesEspeciaisICMS:
@@ -43,21 +47,24 @@ class AbaSituacoesEspeciaisICMS:
     NOME_ABA = "ICMS"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
-        self.aba.janela.to_uia()\
-                       .elemento\
-                       .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-                       .clicar()
+        self.aba.janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
         if dialogo := self.aba.janela.dialogo(aguardar=0.5):
             raise Exception(f"Diálogo encontrado ao abrir a aba: '{dialogo.texto}'")
 
     @property
     def painel_aba (self) -> ElementoW32:
-        return self.aba.painel_aba\
-            .encontrar(lambda e: e.class_name == "TTabSheet"
-                                 and e.texto == self.NOME_ABA)
+        return self.aba.painel_aba.encontrar(
+            lambda e: e.class_name == "TTabSheet"
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
+        )
 
     def selecionar_base_icms (self, texto: str | Literal["Considerar desconto sobre item",
                                                          "Não considerar desconto"]) -> Self:
@@ -86,21 +93,24 @@ class AbaSituacoesEspeciaisIcmsSt:
     NOME_ABA = "ICMS-ST"
 
     def __init__ (self, aba: AbaSituacoesEspeciais) -> None:
-        dclick.logger.informar(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba 'Situações Especiais / {self.NOME_ABA}' na janela '{aba.janela.titulo}'")
         self.aba = aba
-        self.aba.janela.to_uia()\
-                       .elemento\
-                       .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-                       .clicar()
+        self.aba.janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
         if dialogo := self.aba.janela.dialogo(aguardar=0.5):
             raise Exception(f"Diálogo encontrado ao abrir a aba: '{dialogo.texto}'")
 
     @property
     def painel_aba (self) -> ElementoW32:
-        return self.aba.painel_aba\
-            .encontrar(lambda e: e.class_name == "TTabSheet"
-                                 and e.texto == self.NOME_ABA)
+        return self.aba.painel_aba.encontrar(
+            lambda e: e.class_name == "TTabSheet"
+                      and e.texto == self.NOME_ABA,
+            aguardar = DEFAULT_TIMEOUT
+        )
 
     def selecionar_base_icms_st (self, texto: str | Literal["Considerar desconto item + Desconto Suframa",
                                                             "Não considerar desconto",
@@ -130,12 +140,13 @@ class AbaSituacoesEspeciais:
     NOME_ABA = "Situações Especiais"
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA
+                      and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             raise Exception(f"Diálogo encontrado ao abrir a aba: '{dialogo.texto}'")
@@ -145,7 +156,8 @@ class AbaSituacoesEspeciais:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
                       and e.texto == self.NOME_ABA
-                      and e.visivel
+                      and e.visivel,
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
@@ -166,19 +178,22 @@ class AbaSituacoesEspeciais:
     def clicar_botao_alterar_situacoes_especiais (self) -> Self:
         """Clicar no botão `Alterar Situações Especiais`
         - Erro caso apareça diálogo"""
-        self.painel_aba.to_uia()\
-            .encontrar(lambda e: e.botao and e.visivel and e.texto == "Alterar Situações Especiais")\
-            .clicar()
+        nome = "Alterar Situações Especiais"
+        self.painel_aba.to_uia().encontrar(
+            lambda e: e.botao and e.visivel and e.texto == nome,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
         if dialogo := self.janela.dialogo(aguardar=0.5):
-            raise Exception(f"Diálogo encontrado ao clicar no botão 'Alterar Situações Especiais': '{dialogo.texto}'")
+            raise Exception(f"Diálogo encontrado ao clicar no botão '{nome}': '{dialogo.texto}'")
         return self
 
     def clicar_botao_ok (self) -> Self:
         """Clicar no botão `OK`
         - Erro caso apareça diálogo"""
-        self.painel_aba.to_uia()\
-            .encontrar(lambda e: e.botao and e.visivel and e.texto == "OK")\
-            .clicar()
+        self.painel_aba.to_uia().encontrar(
+            lambda e: e.botao and e.visivel and e.texto == "OK",
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
         if dialogo := self.janela.dialogo(aguardar=0.5):
             raise Exception(f"Diálogo encontrado ao clicar no botão 'OK': '{dialogo.texto}'")
         return self

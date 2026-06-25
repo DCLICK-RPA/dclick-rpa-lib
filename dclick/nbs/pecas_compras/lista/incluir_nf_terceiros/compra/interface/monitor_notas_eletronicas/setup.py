@@ -2,10 +2,12 @@
 from typing import Self
 # interno
 import dclick
+from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 from bot.estruturas import String
 from bot.sistema.janela import ElementoW32
+from bot.imagem import Imagem, capturar_tela
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Pesquisar' da janela 'Monitor Notas Eletrônicas'")
 class AbaPesquisar:
@@ -14,28 +16,32 @@ class AbaPesquisar:
     janela: bot.sistema.JanelaW32
 
     NOME_ABA = "Pesquisar"
-    IMAGEM_COLUNA_EMISSAO = bot.imagem.Imagem.from_base64("iVBORw0KGgoAAAANSUhEUgAAADAAAAATCAIAAABZWBlIAAACWElEQVRIDc3BIZLdOBQF0Pv2Igf8ygqsFcghRk3FLCiTYR82C7GgzEQbmcRagbyC1AeRNtEruOOuzDToTFWGTI3PEZK4EiGJKxGSuBIhiSsRkvjvZCfD96Um2K+fSjT4PSGJU3YyrPhLv9TiFf5ZC9oiFa/we9npH38k2G7+vDMa/AtCEqfsZBsZDf5vQhKn7GQbGQ3etaDt4zPW9UC/7E8vw3ygX2r58k1bpPLlm+7mA6d+qcUroAXdzQdO/VKLVwBa0N184DTtjAZAC7qbDwD9UotX+IWQxCk7GVb81C+1eNWC7l6eavEIunt5qsUjaIuUYC3S/dFtI6MBspNtZDTZyTYyGiA72UZG04K2SMUrZCfbyGha0N3jzmiQnTzfavEKHwhJnLKTbWQ0eNeCtkjFqxa0RSpetaAtUoK1SAm2mw8A085ocGpBd/MBYNoZDX5qQXfzgVO/1OKrk21kNACyk21kNPhASOKUnWwjo8G7FrRFKl61oC1S8aoFbZESrEUqXgFoQXfzAUw7o8GbFnQ3H8C0M8LJgJ3RIDt5vtXiq5NtZDQAspNtZDT4QEjilJ1sI6PBuxa0RSpetaAtUvGqBW2REqzF/elleNwZDYDs5PlWE2z3uDMaANnJ862WT19lGxkNspPh+1KLR9Dd485okJ0832rxCh8ISZyyk2HF36adsQvaIhWvWtAWqXjVgrZICdYiFV+dDCve9EstXgHZybDiTb/U4hWyk2EFME3TumJnNGhBd/MBYNoZDX4lJHElQhJXIiRxJUISVyIkcSVC8vX1FZfxJ0EIY73AjKTzAAAAAElFTkSuQmCC")
+    IMAGEM_COLUNA_EMISSAO = Imagem.from_base64("iVBORw0KGgoAAAANSUhEUgAAADAAAAATCAIAAABZWBlIAAACWElEQVRIDc3BIZLdOBQF0Pv2Igf8ygqsFcghRk3FLCiTYR82C7GgzEQbmcRagbyC1AeRNtEruOOuzDToTFWGTI3PEZK4EiGJKxGSuBIhiSsRkvjvZCfD96Um2K+fSjT4PSGJU3YyrPhLv9TiFf5ZC9oiFa/we9npH38k2G7+vDMa/AtCEqfsZBsZDf5vQhKn7GQbGQ3etaDt4zPW9UC/7E8vw3ygX2r58k1bpPLlm+7mA6d+qcUroAXdzQdO/VKLVwBa0N184DTtjAZAC7qbDwD9UotX+IWQxCk7GVb81C+1eNWC7l6eavEIunt5qsUjaIuUYC3S/dFtI6MBspNtZDTZyTYyGiA72UZG04K2SMUrZCfbyGha0N3jzmiQnTzfavEKHwhJnLKTbWQ0eNeCtkjFqxa0RSpetaAtUoK1SAm2mw8A085ocGpBd/MBYNoZDX5qQXfzgVO/1OKrk21kNACyk21kNPhASOKUnWwjo8G7FrRFKl61oC1S8aoFbZESrEUqXgFoQXfzAUw7o8GbFnQ3H8C0M8LJgJ3RIDt5vtXiq5NtZDQAspNtZDT4QEjilJ1sI6PBuxa0RSpetaAtUvGqBW2REqzF/elleNwZDYDs5PlWE2z3uDMaANnJ862WT19lGxkNspPh+1KLR9Dd485okJ0832rxCh8ISZyyk2HF36adsQvaIhWvWtAWqXjVgrZICdYiFV+dDCve9EstXgHZybDiTb/U4hWyk2EFME3TumJnNGhBd/MBYNoZDX4lJHElQhJXIiRxJUISVyIkcSVC8vX1FZfxJ0EIY73AjKTzAAAAAElFTkSuQmCC")
     """Imagem da coluna `Emissão` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
-        dclick.logger.informar(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
+        dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
-        janela.to_uia()\
-              .elemento\
-              .encontrar(lambda e: e.texto == self.NOME_ABA and e.item_aba)\
-              .clicar()
+        janela.to_uia().elemento.encontrar(
+            lambda e: e.texto == self.NOME_ABA and e.item_aba,
+            aguardar = DEFAULT_TIMEOUT
+        ).clicar()
 
     @property
     def painel_aba (self) -> ElementoW32:
         return self.janela.elemento.encontrar(
             lambda e: e.class_name == "TTabSheet"
                       and e.texto == self.NOME_ABA
-                      and e.visivel
+                      and e.visivel,
+            aguardar = DEFAULT_TIMEOUT
         )
 
     @property
     def grid (self) -> ElementoW32:
-        return self.painel_aba.encontrar(lambda e: e.class_name == "TwwDBGrid" and e.visivel)
+        return self.painel_aba.encontrar(
+            lambda e: e.class_name == "TwwDBGrid" and e.visivel,
+            aguardar = DEFAULT_TIMEOUT / 2
+        )
 
     def alternar_inicio_emissao (self) -> Self:
         """Alternar o estado do checkbox `Emissao` de início"""
@@ -78,8 +84,8 @@ class AbaPesquisar:
         grid = self.grid
         coordenada = self.IMAGEM_COLUNA_EMISSAO.procurar_imagem(
             regiao = grid.coordenada,
-            segundos = 3,
             cinza = True,
+            segundos = DEFAULT_TIMEOUT,
         )
         assert coordenada, "Coordenada da coluna 'Emissão' no grid não foi encontrado"
 
@@ -91,7 +97,7 @@ class AbaPesquisar:
         """Selecionar o último registro através de atalhos
         - Erro caso não tenha nenhum registro (Feito via imagem)"""
         grid = self.grid
-        imagem_antes_selecionar = bot.imagem.capturar_tela(grid.coordenada)
+        imagem_antes_selecionar = capturar_tela(grid.coordenada)
         grid.apertar("end", "space").aguardar()
 
         nao_encontrado = imagem_antes_selecionar.procurar_imagem(confianca=1.0, regiao=grid.coordenada) is None
@@ -107,7 +113,10 @@ class AbaPesquisar:
         botao = (
             self.painel_aba[-1]
             .to_uia()
-            .encontrar(lambda e: e.botao and e.texto == "Salvar" and e.visivel)
+            .encontrar(
+                lambda e: e.botao and e.texto == "Salvar" and e.visivel,
+                aguardar = DEFAULT_TIMEOUT
+            )
         )
         assert botao.ativo, "Botão para Salvar não está ativo para ser pressionado"
         botao.clicar()
