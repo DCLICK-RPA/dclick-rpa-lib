@@ -1,21 +1,30 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==5.0</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==6.0</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.1/dclick-2.1-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.1-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.2-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
 
 ## Changelog 🔧
 
+<details>
+<summary>v2.2</summary>
+
+- Migração para a versão do `bot==6.0`
+- Alterado níveis de logs internos para debug
+- Removido pacote `dclick.webhook` pois deve-se usar a central de processamento
+- Transformado os pacotes `dealernet` e `nbs` para serem depedências opcionais
+
+</details>
 <details>
 <summary>v2.1</summary>
 
@@ -102,9 +111,10 @@ Configurar a seção `github` no .ini e executar o script `build_upload.py`
 ## Descrição breve dos pacotes com algumas funcionalidades
 Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e classes disponíveis para um melhor contexto
 
-### `email`
+# `email`
 Pacote destinado ao envio de e-mail
 > Realizado logs de `erros.comunicacao` automaticamente de acordo com possíveis erros
+
 ```python
 # Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - status`
 notificar_email_simples (
@@ -117,8 +127,9 @@ notificar_email_simples (
 ) -> None:
 ```
 
-### `cofre`
+# `cofre`
 Pacote destinado ao cofre de senhas do `Runner`
+
 ```python
 # Consultar o segredo `nome` e retornar uma classe modelo de resposta.
 # Exemplo com fields sendo um `dict`
@@ -132,9 +143,10 @@ segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS", Fields)
 print(segredo.fields.username, segredo.fields.password)
 ```
 
-### `http`
+# `http`
 Pacote destinado ao protocolo http
 > Realizado logs de `erros.api` automaticamente para o `request e response` dos métodos novos/modificados
+
 ```python
 # Enviar um request conforme parâmetros
 # Retorna um `ResponseHttp` com métodos adicionais ao `httpx.Response`
@@ -167,11 +179,12 @@ ClienteHttp(
 )
 ```
 
-### `erros`
+# `erros`
 Pacote com erros e suas codificações separadas por categorias.  
 > Possível de realizar log de `alerta` e `erro`, com o `dclick.logger`, para cada erro existente
 
 > A mensagem é no formato `[Código] - Descrição` e, na propriedade `extra`, é passado as informações sobre o erro
+
 ```python
 # Gerar um log ERROR, da categoria arquivo
 # Falha ao gerar/baixar PDF
@@ -182,8 +195,9 @@ dclick.erros.arquivo.FalhaPDF.erro()
 dclick.erros.execucao.ValorNuloOuInexistente.alertar()
 ```
 
-### `logger`
+# `logger`
 Pacote para realizar e tratar Logs
+
 ```python
 # Log para diferentes níveis com o nome `DCLICK`
 # Utilizado pelos pacotes da lib
@@ -214,17 +228,20 @@ logger.inicializar_logger()
 # Obter o `TracerLogger` utilizado para realizar o rastreamento de um processo
 # Possível de se realizar os logs com a mesma interface que o `MainLogger`
 from dclick.logger.setup import TracerLogger
-tracer: TracerLogger = logger.obter_tracer()
+tracer: TracerLogger = logger.obter_tracer(informacao_util="xpto")
 # Sinalizar o encerramento do tracer
 tracer.encerrar("SUCCESS", "Sucesso ao se realizar determinada Ação")
 tracer.encerrar("ERROR", "Falha ao realizar determinada Ação")
+# Utilizar om o with para encerramento automático
+with logger.obter_tracer(informacao_util="xpto") as tracer: ...
 
 # Loggar o tempo de execução de uma função
 @logger.tempo_execucao
 ```
 
-### `nora`
+# `nora`
 Pacote destinado a `Nora AI`, agente de extração via IA
+
 ```python
 import dclick
 from bot.sistema import Caminho
@@ -266,7 +283,7 @@ while polling.pendente():
         print("Erro extração", response.extraction.errorMessage)
 ```
 
-### `holmes`
+# `holmes`
 Pacote destinado a API do Holmes  
 Retorna classes com propriedades esperadas do endpoint
 ```python
@@ -292,44 +309,25 @@ QueryTaskV2()
 consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
 ```
 
-### `holmes.webhook`
-Pacote destinado a consulta e manipulação dos processos no [Webhook do Holmes](https://github.com/DCLICK-RPA/dclick-webhook-notificacao-holmes)
-
-> Veja a descrição das classes para um melhor contexto
-
-```python
-# Os processos terão as `properties` como `dict`
-query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'")
-
-# Os processos terão as `properties` como `PropertiesServico`
-class PropertiesServico:
-    filial: str
-    empresa: str
-    nota_de_servicos: typing.Literal["Sim"]
-    iss_aliquota: int | float
-    campo_opcional: str | None
-query = QueryProcessosWebhook("properties.Nota de Serviços = 'Sim'", PropertiesServico)
-
-# Procurar por processos
-processos = query.procurar(limite=50)
-# Processos do Webhook que falharam na validação das properties
-for processo in query.itens_webhook_com_properties_invalida:
-    print(f"{processo!r} apresentou falha na validação das properties")
-```
-
-### `dealernet`
+# `dealernet`
 Pacote destinado ao **Sistema Web Dealer-Net**  
+### Dependência `dclick[dealernet]` necessária para utilizar `dclick.dealernet`
+
 ```Python
+from bot.navegador import Navegador, Edge, Chrome
+
 # Realizar o login no dealernet
-def login (navegador: bot.navegador.Edge) -> None:
+# Utilizar alguma implementação do Navegador como o Edge ou Chrome
+def login (navegador: Navegador) -> None:
 ```
 
-#### Descrição sobre alguns pacotes internos
+### Descrição sobre alguns pacotes internos
 
 > Existem mais pacotes internos especializados para uma tela do **Menu**
 
 `menus`  
 Pacote para tratar a seleção da opção desejada nos menus, como Empresa e Produto, presentes no rodapé e cabeçalho do sistema
+
 ```Python
 # Classe com os Localizadores dos menus suportados
 class Menus (Enum): ...
@@ -337,7 +335,7 @@ class Menus (Enum): ...
 # Clicar no localizador do `menu` e navegar pelas `opcoes` clicando em cada opção do menu de acordo com o texto
 # Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Menus.PRODUTOS)`
 selecionar_opcao_menu(
-    navegador: bot.navegador.Edge,
+    navegador: Navegador,
     opcoes: Iterable[str],
     menu: Menus = Menus.EMPRESA,
 ) -> None
@@ -345,17 +343,18 @@ selecionar_opcao_menu(
 # Acessar o iframe do menu aberto com o `nome_menu`
 # `nome_menu` observado ser a última parte das opções em `selecionar_opcao_menu()`
 def acessar_iframe_janela_menu (
-    navegador: bot.navegador.Edge,
+    navegador: Navegador,
     nome_menu: str
 ) -> None:
 ```
 
 `integracao.nota_fiscal_item_avulso`  
 Pacote para tratar o menu **Integração -> XML - Importação -> Nota Fiscal de Item Avulso**
+
 ```Python
 # Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`
 def importar_nfe (
-    navegador: bot.navegador.Edge,
+    navegador: Navegador,
     *nfe: bot.estruturas.Caminho
 ) -> None:
 
@@ -370,9 +369,10 @@ class AtualizarDadosRegistro: ...
 class ProcessarDadosRegistro: ...
 ```
 
-### `nbs`
-Pacote destinado ao sistema NBSi
-> Necessário instalar a dependência adicional `dclick[ocr]` caso seja usado o `LeitorOCR` da biblioteca `bot`
+# `nbs`
+Pacote destinado ao sistema `NBSi`
+### Dependência `dclick[nbs]` necessária para utilizar `dclick.nbs`
+### Dependência `dclick[ocr]` caso seja usado o `LeitorOCR` da biblioteca `bot`
 
 ```Python
 # Abrir o NBS e realizar o login
@@ -388,6 +388,7 @@ nbs.fechar_janelas_nbs()
 > Cada pacote fica responsável pela sua manipulação
 
 Exemplo com o pacote `nbs.nbs_fiscal`
+
 ```Python
 # Abrir o módulo `Nbs Fiscal`
 # Retornado `SelecaoEmpresaFilial
