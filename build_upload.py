@@ -24,7 +24,7 @@ def obter_descricao_release () -> str:
     requer_python = toml.obter("project.requires-python")
     dependencias = toml.obter("project.dependencies", list[str])
     pacotes = [caminho.nome
-               for caminho in bot.sistema.Caminho("./bot")
+               for caminho in bot.sistema.Caminho("./dclick")
                if caminho.diretorio() and not caminho.nome.startswith("__")]
     opcionais = toml.obter("project.optional-dependencies", dict[str, list[str]])
 
