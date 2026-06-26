@@ -47,23 +47,27 @@ def abrir_e_login (usuario:  str | None = None,
     senha      = senha    or bot.configfile.obter_opcao_obrigatoria("nbs", "senha")
     servidor   = servidor or bot.configfile.obter_opcao_ou("nbs", "servidor", "")
 
+    # abrir
     dclick.logger.informar("Abrindo o NBS", usuario=usuario)
     janela_login = JanelaW32.iniciar(executavel, aguardar=DEFAULT_TIMEOUT * 2)
-    elementos = JanelaW32.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=DEFAULT_TIMEOUT))
 
+    # digitar inputs
+    elementos = JanelaW32.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=DEFAULT_TIMEOUT))
     input_usuario, input_senha = (elemento for elemento in elementos if elemento.class_name == "TOvcPictureField")
     input_usuario.digitar(usuario)
     input_senha.digitar(senha)
     if servidor: janela_login.elemento["TButtonedEdit"].digitar(servidor)
 
+    # clicar confirmar
     *_, input_confirmar = (filho for filho in elementos if filho.class_name == "TfcImageBtn")
     input_confirmar.sleep(0.5).clicar()
 
-    assert bot.tempo.aguardar(
-        lambda: janela_login.fechada,
-        timeout = DEFAULT_TIMEOUT
-    ), "Janela de login não fechou conforme o esperado"
+    # aguardar fechar janela de login
+    if not bot.tempo.aguardar(lambda: janela_login.fechada, timeout=DEFAULT_TIMEOUT):
+        dclick.erros.sistema.TimeoutResposta.erro()
+        raise TimeoutError("Janela de login não fechou conforme o esperado")
 
+    # aguardar abrir
     def janela_ou_erro () -> JanelaW32 | str | None:
         if janela_esperada is not None:
             try: return janela_esperada(0)
@@ -90,6 +94,7 @@ def abrir_e_login (usuario:  str | None = None,
             raise AssertionError(f"Diálogo de erro encontrado após login no NBS: '{erro}'")
         case _:
             encerrar_processos_nbs()
+            dclick.erros.sistema.TimeoutResposta.erro()
             raise Exception("Janela do NBS não aberta após login")
 
 def encerrar_processos_nbs (*nome_processo: str) -> None:
