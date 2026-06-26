@@ -2,7 +2,7 @@
 from typing import Self
 # interno
 import dclick
-from dclick.nbs import DEFAULT_TIMEOUT
+from dclick.nbs import DEFAULT_TIMEOUT, janela_empresa_filial
 # externo
 import bot
 from bot.imagem import Imagem
@@ -22,7 +22,7 @@ class SelecaoEmpresaFilial:
     def __init__ (self) -> None:
         dclick.logger.debug(f"Selecionando a empresa/filial")
         self.empresa = self.filial = ""
-        try: self.janela = bot.sistema.JanelaW32(lambda j: "Empresa/Filial" in j.titulo, aguardar=DEFAULT_TIMEOUT).focar()
+        try: self.janela = janela_empresa_filial().focar()
         except Exception: raise Exception("Janela de seleção 'Empresa/Filial' não encontrada")
 
     def selecionar_empresa (self, empresa: str) -> Self:
@@ -99,7 +99,7 @@ def abrir_modulo_nbs_fiscal (janela_shortcut: bot.sistema.JanelaW32,
     - `imagem` para procurar via imagem
     - `imagem=None` é feito o click em posição esperada na aba `ADM`
     - Retornado `SelecaoEmpresaFilial`"""
-    dclick.logger.debug(f"Abrindo o módulo 'NBS Fiscal'")
+    dclick.logger.debug("Abrindo o módulo 'NBS Fiscal'")
     abas = janela_shortcut.focar().elemento.descendentes(
         lambda elemento: elemento.class_name == "TfcShapeBtn"
                          and elemento.visivel,
