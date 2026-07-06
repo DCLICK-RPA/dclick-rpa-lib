@@ -23,6 +23,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.
 - Alterado níveis de logs internos para debug
 - Removido pacote `dclick.webhook` pois deve-se usar a central de processamento
 - Transformado os pacotes `dealernet` e `nbs` para serem depedências opcionais
+- Removido pacote `erros`
 
 </details>
 <details>
@@ -177,22 +178,6 @@ ClienteHttp(
     timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
     ...
 )
-```
-
-# `erros`
-Pacote com erros e suas codificações separadas por categorias.  
-> Possível de realizar log de `alerta` e `erro`, com o `dclick.logger`, para cada erro existente
-
-> A mensagem é no formato `[Código] - Descrição` e, na propriedade `extra`, é passado as informações sobre o erro
-
-```python
-# Gerar um log ERROR, da categoria arquivo
-# Falha ao gerar/baixar PDF
-dclick.erros.arquivo.FalhaPDF.erro()
-
-# Gerar um log WARNING, da categoria execução
-# Tentativa de acessar valor nulo/inexistente
-dclick.erros.execucao.ValorNuloOuInexistente.alertar()
 ```
 
 # `logger`
