@@ -1,13 +1,11 @@
 # std
 import typing
-# interno
-from dclick.erros import api as Erros
 # externo
 import httpx
 import httpx._types as types
-from bot.estruturas import DictNormalizado
-from bot.formatos import Json, ElementoXML
 from httpx._client import USE_CLIENT_DEFAULT, UseClientDefault
+from bot.estruturas import DictNormalizado
+from bot.formatos import ElementoXML, Unmarshaller, validar
 
 type METODOS_HTTP = typing.Literal["HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"]
 
@@ -53,7 +51,7 @@ class ResponseHttp (httpx.Response):
             erro.add_note(msg_status)
         else: erro = AssertionError(msg_status)
 
-        Erros.RetornoInesperado.erro(erro)
+        # Erros.RetornoInesperado.erro(erro) TODO
         raise erro
 
     def esperar_status_code (self, status: int, mensagem: str | None = None) -> typing.Self:
@@ -68,7 +66,7 @@ class ResponseHttp (httpx.Response):
             erro.add_note(msg_status)
         else: erro = AssertionError(msg_status)
 
-        Erros.RetornoInesperado.erro(erro)
+        # Erros.RetornoInesperado.erro(erro) TODO
         raise erro
 
     def esperar_tipo_conteudo (self, tipo: str, mensagem: str | None = None) -> typing.Self:
@@ -84,7 +82,7 @@ class ResponseHttp (httpx.Response):
             erro.add_note(msg_conteudo)
         else: erro = AssertionError(msg_conteudo)
 
-        Erros.RetornoInesperado.erro(erro)
+        # Erros.RetornoInesperado.erro(erro) TODO
         raise erro
 
     @property
@@ -102,51 +100,71 @@ class ResponseHttp (httpx.Response):
         - `ValueError` caso ocorra erro de parse"""
         try: return ElementoXML.parse(self.texto)
         except Exception as erro:
-            Erros.RetornoInesperado.erro(erro)
+            # Erros.RetornoInesperado.erro(erro) TODO
             raise ValueError("Erro ao realizar o parse para XML da Resposta HTTP") from erro
 
-    def json[T] (self, esperar: type[T] | typing.Any = typing.Any) -> T: # type: ignore
+    @typing.overload
+    def json (self) -> typing.Any: ... # type: ignore
+    @typing.overload
+    def json[T] (self, esperar: type[T]) -> T: ... # type: ignore
+    @typing.override
+    def json[T] (self, esperar: type[T] = typing.Any) -> T | typing.Any: # type: ignore
         """Realizar o parse do conteúdo de resposta como o tipo `esperar`
         - `esperar`: `dict[str, str | int]`, `list[dict[str, str]]`
         - `ValueError` caso ocorra erro de parse"""
-        try: json = Json.parse(self.texto)
+        try: json = super().json()
         except Exception as erro:
-            Erros.RetornoInesperado.erro(erro)
+            # Erros.RetornoInesperado.erro(erro) TODO
             raise ValueError("Erro ao realizar o parse para JSON da Resposta HTTP") from erro
 
-        try: return json.obter(esperar)
-        except Exception as erro:
-            Erros.RespostaJson.erro(erro)
-            raise ValueError(f"Erro ao realizar a validação do JSON da Resposta HTTP para o tipo esperado '{esperar}'") from erro
+        if validar(json, esperar):
+            return json
 
-    def unmarshal[T] (self, cls: type[T]) -> T:
-        """Realizar o unmarshal do conteúdo `json` conforme a classe anotada `cls` ou `list[cls]`
-        - Resposta deve ser um json `dict` ou `list[dict]`
-        - `ValueError` caso ocorra erro
-        - Exemplo
+        # Erros.RespostaJson.erro(erro) TODO
+        raise ValueError(f"Erro ao realizar a validação do JSON da Resposta HTTP para o tipo esperado '{esperar}'")
+
+    def unmarshal[T: Unmarshaller] (self, cls: type[T]) -> T:
+        """Realizar o Unmarshal do conteúdo `json` conforme a classe anotada `cls`
+        - Resposta deve ser um json `dict`
+        - `ValueError`
+
+        ### Exemplo
         ```
-        from typing import Any
-        from dclick.http import request
+        from bot.http import request
+        from bot.formatos import Unmarshaller
 
-        class Slideshow:
-            date: str
-            author: str
-            slides: list[dict[str, Any]]
-        class Root:
-            slideshow: Slideshow
-        root = request("GET", "https://httpbin.org/json").unmarshal(Root)
-        print(root.slideshow.author)
+        class Dimensions (Unmarshaller):
+            width: float
+            height: float
+            depth: float
+        class Product (Unmarshaller):
+            id: int
+            title: str
+            category: str
+            price: float
+            tags: list[str]
+            dimensions: Dimensions
+
+        produto = request("GET", "https://dummyjson.com/products/1").unmarshal(Product)
+        print(produto.id)
+        print(produto.stringify(indent=True))
         ```
         """
-        try: json = Json.parse(self.texto)
+        json = self.json()
+        try: return cls.Unmarshal(json)
         except Exception as erro:
-            Erros.RetornoInesperado.erro(erro)
-            raise ValueError("Erro ao realizar o parse para JSON da Resposta HTTP") from erro
+            # Erros.RespostaJson.erro(erro) TODO
+            raise ValueError(f"Erro ao realizar o Unmarshal da Resposta HTTP para '{cls}'") from erro
 
-        try: return json.unmarshal(cls)
+    def unmarshal_many[T: Unmarshaller] (self, cls: type[T]) -> list[T]:
+        """Realizar o Unmarshal do conteúdo `json` conforme a classe anotada `cls`
+        - Resposta deve ser um json `list[dict]`
+        - `ValueError`"""
+        json = self.json()
+        try: return cls.UnmarshalMany(json)
         except Exception as erro:
-            Erros.RespostaJson.erro(erro)
-            raise ValueError(f"Erro ao realizar o Unmarshal do JSON da Resposta HTTP para '{cls}'") from erro
+            # Erros.RespostaJson.erro(erro) TODO
+            raise ValueError(f"Erro ao realizar o Unmarshal da Resposta HTTP para '{cls}'") from erro
 
 class ClienteHttp (httpx.Client):
     """Criar um cliente `HTTP` para realizar requests. Extensão do `httpx.Client`
@@ -222,17 +240,18 @@ class ClienteHttp (httpx.Client):
                 follow_redirects=follow_redirects, timeout=timeout
             )
 
-            if response.is_success: pass
-            elif response.is_server_error: Erros.Conexao.alertar()
-            elif response.status_code in (401, 403): Erros.Autenticacao.alertar()
+            #  TODO
+            # if response.is_success: pass
+            # elif response.is_server_error: Erros.Conexao.alertar()
+            # elif response.status_code in (401, 403): Erros.Autenticacao.alertar()
 
             return ResponseHttp.new(response)
 
         except httpx.TimeoutException:
-            Erros.Timeout.erro()
+            # Erros.Timeout.erro() TODO
             raise
         except httpx.ConnectError:
-            Erros.Conexao.erro()
+            # Erros.Conexao.erro() TODO
             raise
 
     @typing.override

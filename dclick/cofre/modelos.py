@@ -1,4 +1,7 @@
-class _Segredo:
+# externo
+from bot.formatos import Unmarshaller
+
+class _Segredo (Unmarshaller):
     key: str
     description: str
     category: str | None

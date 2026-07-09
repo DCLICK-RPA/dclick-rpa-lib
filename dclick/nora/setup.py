@@ -12,7 +12,7 @@ from bot.estruturas.filas import Queue
 def client_singleton () -> dclick.http.ClienteHttp:
     """Criar o http `Client` configurado com o `host`, `token` e timeout
     - O Client ficará aberto após a primeira chamada na função devido ao `@cache`"""
-    host, apikey = bot.configfile.obter_opcoes_obrigatorias("nora", "host", "apikey")
+    host, apikey = bot.config.nora.obter("host", "apikey")
     return dclick.http.ClienteHttp(
         base_url = host,
         headers  = { "x-api-key": apikey },
@@ -57,7 +57,7 @@ def executar_extracao (agente: str, mime_type: str, file_name: str, content: str
 def acompanhar_extracao (tracking_code: str) -> modelos.ResponseAcompanhar:
     """Acompanhar uma extração via `tracking_code`
     - Variáveis utilizadas `[nora] -> host, apikey`"""
-    dclick.logger.informar(f"Acompanhando uma extração no Nora", tracking_code=tracking_code)
+    dclick.logger.debug(f"Acompanhando uma extração no Nora", tracking_code=tracking_code)
     response = (
         client_singleton()
         .get(f"/extractions/track/{tracking_code}")
@@ -80,7 +80,7 @@ def acompanhar_extracao (tracking_code: str) -> modelos.ResponseAcompanhar:
 def consultar_extracao (extraction_id: str) -> modelos.ResponseConsultar:
     """Consultar a extração `extraction_id`
     - Variáveis utilizadas `[nora] -> host, apikey`"""
-    dclick.logger.informar(f"Consultando uma extração no Nora", extraction_id=extraction_id)
+    dclick.logger.debug(f"Consultando uma extração no Nora", extraction_id=extraction_id)
     response = (
         client_singleton()
         .get(f"/extractions/{extraction_id}")
@@ -138,8 +138,8 @@ class PollingExtracao:
 
     def __init__ (self) -> None:
         self.tracking_codes = Queue()
-        self.polling = bot.configfile.obter_opcao_ou("nora", "polling", 10.0)
-        self.timeout = bot.configfile.obter_opcao_ou("nora", "timeout", 300.0)
+        self.polling = bot.config.nora.obter_ou("polling", 10.0)
+        self.timeout = bot.config.nora.obter_ou("timeout", 300.0)
 
     def adicionar (self, *tracking_code: str) -> Self:
         """Adicionar os `tracking_code` na fila"""

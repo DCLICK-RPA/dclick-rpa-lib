@@ -4,17 +4,19 @@ from datetime import datetime as Datetime
 from typing import Literal, TypeAliasType, get_args, get_origin
 # interno
 from dclick.nora.campos import CampoObrigatorio, CampoOpcional, TiposValores, Numerico
+# externo
+from bot.formatos import Unmarshaller
 
 type TStatus = Literal["pending", "processing", "success", "error"]
 
-class Agent:
+class Agent (Unmarshaller):
     id: str
     code: str
     name: str
     description: str | None
     isActive: bool
 
-class Extraction:
+class Extraction (Unmarshaller):
 
     id: str
     """UUID da extração criada"""
@@ -43,7 +45,7 @@ class Extraction:
     def data_criacao (self) -> Datetime:
         return Datetime.fromisoformat(self.createdAt)
 
-class ResponseExecutar:
+class ResponseExecutar (Unmarshaller):
 
     trackingCode: str
     """Código para acompanhar o progresso da extração"""
@@ -54,7 +56,7 @@ class ResponseExecutar:
     - `pending`"""
     message: str
 
-class ResponseConsultar:
+class ResponseConsultar (Unmarshaller):
 
     extraction: Extraction
 
@@ -66,7 +68,7 @@ class ResponseConsultar:
         """Checar se o `extraction.status = success`"""
         return self.extraction.status == "success"
 
-class ResponseAcompanhar:
+class ResponseAcompanhar (Unmarshaller):
 
     extraction: Extraction
     data: dict[str, TiposValores | None] | None

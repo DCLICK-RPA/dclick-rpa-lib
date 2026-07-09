@@ -5,8 +5,6 @@ from smtplib import (
     SMTPRecipientsRefused,
     SMTPResponseException,
 )
-# interno
-import dclick.erros as Erros
 # externo
 import bot
 
@@ -19,20 +17,20 @@ def mapear_erro (erro: Exception) -> None:
                 if isinstance(erro, SMTPResponseException)
                 else 0)
         if code in (251, 252) or isinstance(erro, (SMTPRecipientsRefused, SMTPSenderRefused)):
-            Erros.comunicacao.EnderecoEmailInvalido.erro(erro)
+            # Erros.comunicacao.EnderecoEmailInvalido.erro(erro) TODO
             return
 
         # Limite
         if "limit" in bot.estruturas.String(str(erro)).normalizar():
-            Erros.comunicacao.LimiteEnvioEmail.erro(erro)
+            # Erros.comunicacao.LimiteEnvioEmail.e TODOrro(erro)
             return
 
         # Demais erros
-        Erros.comunicacao.EnvioEmailComResultados.erro(erro)
+        # Erros.comunicacao.EnvioEmailComResultados.erro(erro) TODO
 
     except Exception as e:
         erro = e.with_traceback(erro.__traceback__)
-        Erros.sustentacao.FalhaTratativaErro.erro(erro)
+        # Erros.sustentacao.FalhaTratativaErro.erro(erro) TODO
 
 def separar_destinatarios (destinatarios: str) -> list[bot.tipagem.email]:
     """Separar um ou mais `destinatarios` concatenados por vírgula no configfile para uma lista"""
@@ -60,12 +58,11 @@ def notificar_email_simples (
     - Variáveis utilizadas `[email.enviar] -> user, password, host, [port: 587, ssl: False, ]`"""
     assunto = f"{nome_bot} - {status.capitalize()}"
     mensagem_email = "<br>".join(mensagem)
-    destinatarios = destinatarios if destinatarios != None else separar_destinatarios(
-        bot.configfile.obter_opcoes_obrigatorias(
-            "email.destinatarios",
-            "sucesso" if status == "sucesso" else "erro"
-        )[0]
-    )
+
+    if destinatarios is None:
+        opcao = "sucesso" if status == "sucesso" else "erro"
+        d, *_ = bot.config.email_destinatarios.obter(opcao)
+        destinatarios = separar_destinatarios(d)
 
     anexos = anexos.copy() if anexos else []
     if anexar_log:
