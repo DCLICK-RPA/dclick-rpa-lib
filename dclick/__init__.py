@@ -4,7 +4,6 @@
 
 from dclick.logger.setup import logger
 from dclick import (
-    erros,
     http,
     cofre,
     email,
