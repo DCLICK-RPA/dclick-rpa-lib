@@ -12,7 +12,7 @@ except ImportError: raise ImportError(
     "Instale como 'dclick[nbs]' para utilizar o módulo 'dclick.nbs'"
 )
 
-DEFAULT_TIMEOUT = bot.configfile.obter_opcao_ou("nbs", "timeout", 10)
+DEFAULT_TIMEOUT = bot.config.nbs.obter_ou("timeout", 10)
 """TIMEOUT default utilizado nas esperas do NBS
 - Default `10`
 - Unidade `segundos`
@@ -42,10 +42,11 @@ def abrir_e_login (usuario:  str | None = None,
     - Variáveis .ini `[nbs] -> executavel, [usuario, senha, servidor]`
     - `janela_esperada: (timeout) -> JanelaW32` uma função para indicar a janela aberta do `executável`
     - Default `janela_esperada` procurado por `NBS ShortCut` ou `Empresa/Filial`"""
-    executavel = bot.configfile.obter_opcao_obrigatoria("nbs", "executavel")
-    usuario    = usuario  or bot.configfile.obter_opcao_obrigatoria("nbs", "usuario")
-    senha      = senha    or bot.configfile.obter_opcao_obrigatoria("nbs", "senha")
-    servidor   = servidor or bot.configfile.obter_opcao_ou("nbs", "servidor", "")
+    secao = bot.config.nbs
+    executavel = secao.executavel
+    usuario    = usuario  or secao.usuario
+    senha      = senha    or secao.senha
+    servidor   = servidor or secao.obter_ou("servidor")
 
     # abrir
     dclick.logger.informar("Abrindo o NBS", usuario=usuario)
@@ -64,7 +65,7 @@ def abrir_e_login (usuario:  str | None = None,
 
     # aguardar fechar janela de login
     if not bot.tempo.aguardar(lambda: janela_login.fechada, timeout=DEFAULT_TIMEOUT):
-        dclick.erros.sistema.TimeoutResposta.erro()
+        # dclick.erros.sistema.TimeoutResposta.erro() TODO
         raise TimeoutError("Janela de login não fechou conforme o esperado")
 
     # aguardar abrir
@@ -90,11 +91,11 @@ def abrir_e_login (usuario:  str | None = None,
             dclick.logger.debug(f"Login no NBS realizado | Aberto {janela}")
             return janela.focar()
         case str() as erro:
-            dclick.erros.sistema.FalhaLogin.erro()
+            # dclick.erros.sistema.FalhaLogin.erro() TODO
             raise AssertionError(f"Diálogo de erro encontrado após login no NBS: '{erro}'")
         case _:
             encerrar_processos_nbs()
-            dclick.erros.sistema.TimeoutResposta.erro()
+            # dclick.erros.sistema.TimeoutResposta.erro() TODO
             raise Exception("Janela do NBS não aberta após login")
 
 def encerrar_processos_nbs (*nome_processo: str) -> None:
