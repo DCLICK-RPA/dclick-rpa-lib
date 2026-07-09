@@ -1,89 +1,30 @@
 # std
 from email.message import Message
 from email.parser import HeaderParser
-from typing import Any, Callable, Literal, TypedDict
+from typing import Any, Callable, TypedDict
 # externo
 from bot.tipagem import SupportsBool
+from bot.formatos import Unmarshaller
 from bot.estruturas import String, Caminho
 
-class DocQueryTaskV2:
-    id: str
-    name: str
-    type: Literal["task"]
-    status: str
-    task_id: str
-    identifier: str
-    assignee_id: str
-    process_id: str
-    process_name: str
-    props: list[dict[str, Any]] | None
-
-    def __eq__ (self, other: object) -> bool:
-        return isinstance(other, type(self)) and self.id == other.id
-
-    def __hash__ (self) -> int:
-        return hash(self.id)
-
-    def obter_prop (self, filtro: Callable[[dict[str, Any]], SupportsBool]) -> dict[str, Any] | None:
-        """Obter o prop da `DoctTask` se estiver de acordo com o `filtro`
-        - `None` caso não encontre"""
-        for prop in (self.props or []):
-            try:
-                if filtro(prop): return prop
-            except Exception: pass
-
-class RaizQueryTaskV2:
-    total: int
-    type: Literal["task"]
-    docs: list[DocQueryTaskV2]
-
-class DocQueryDocumentV2:
-    document_id: str
-    type: Literal["document"]
-    nature_id: str
-    nature_name: str
-    file_name: str
-    ext: str
-    name: str
-    props: list[dict[str, Any]] | None
-
-    def __eq__ (self, other: object) -> bool:
-        return isinstance(other, type(self)) and self.document_id == other.document_id
-
-    def __hash__ (self) -> int:
-        return hash(self.document_id)
-
-    def obter_prop (self, filtro: Callable[[dict[str, Any]], SupportsBool]) -> dict[str, Any] | None:
-        """Obter o prop da `DoctTask` se estiver de acordo com o `filtro`
-        - `None` caso não encontre"""
-        for prop in (self.props or []):
-            try:
-                if filtro(prop): return prop
-            except Exception: pass
-
-class RaizQueryDocumentV2:
-    total: int
-    type: Literal["document"]
-    docs: list[DocQueryDocumentV2]
-
-class Action:
+class Action (Unmarshaller):
     id: str
     name: str
 
-class Property:
+class Property (Unmarshaller):
     id: str
     name: str
     value: Any
 
-class Document:
+class Document (Unmarshaller):
     id: str
     conditional: str
 
-class Table:
+class Table (Unmarshaller):
     id: str
     name: str
 
-class Tarefa:
+class Tarefa (Unmarshaller):
 
     id: str
     name: str
@@ -184,22 +125,22 @@ class Documento:
             writer.write(self.conteudo.decode(charset) if charset else self.conteudo)
         return destino
 
-class UploadDocumento:
+class UploadDocumento (Unmarshaller):
     id: str
     url: str
 
-class Assignee:
+class Assignee (Unmarshaller):
     id: str
     name: str
 
-class Activity:
+class Activity (Unmarshaller):
     id: str
     name: str
     task_id: str
     status: str
     assignee: Assignee | None
 
-class Processo:
+class Processo (Unmarshaller):
     id: str
     name: str
     status: str
@@ -224,22 +165,23 @@ class Processo:
 class PropertyRecursive (Property):
     property_values: list["PropertyRecursive"]
 
-class DetalhesProcesso:
+class DetalhesProcesso (Unmarshaller):
     id: str
+    name: str
     property_values: list[PropertyRecursive]
 
-class ItemTabelaTarefa:
+class ItemTabelaTarefa (Unmarshaller):
     id: str
     property_values: list[Property]
 
-class Meta:
+class Meta (Unmarshaller):
     count: int
 
-class ItensTabelaTarefa:
+class ItensTabelaTarefa (Unmarshaller):
     items: list[ItemTabelaTarefa]
     meta: Meta
 
-class ClassificacaoDocumento:
+class ClassificacaoDocumento (Unmarshaller):
     id: str
     nature_id: str | None
     file_name: str
