@@ -29,14 +29,13 @@ class Localizadores:
 
 @cache
 def de_para_opcoes () -> DictNormalizado[list[str]]:
-    secao = "dealernet.menu.opcoes_empresa"
     return DictNormalizado({
         opcao: [
             item.strip()
-            for item in bot.configfile.obter_opcao_ou(secao, opcao).split(",")
+            for item in valor.split(",")
             if item.strip()
         ]
-        for opcao in bot.configfile.opcoes_secao(secao)
+        for opcao, valor in bot.config.dealernet_menu_opcoes_empresa.as_dict()
     })
 
 def opcoes_empresa (chave: str) -> list[str] | None:

@@ -18,7 +18,7 @@ def login (navegador: Navegador) -> None:
     """Realizar o login no dealernet
     - Recebe uma nova instância do `navegador` e realiza o login na aba aberta
     - Variáveis `[dealernet.login] -> url, usuario, senha`"""
-    url, usuario, senha = bot.configfile.obter_opcoes_obrigatorias("dealernet.login", "url", "usuario", "senha")
+    url, usuario, senha = bot.config.dealernet_login.obter("url", "usuario", "senha")
     dclick.logger.informar(f"Realizando login no Dealernet '{url}'")
 
     navegador.pesquisar(url)
