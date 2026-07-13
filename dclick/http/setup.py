@@ -13,7 +13,7 @@ class ResponseHttp (httpx.Response):
     """Response extensão do `httpx.Response` com métodos para facilitar validação de uma resposta http"""
 
     @classmethod
-    def new (cls, response: httpx.Response) -> typing.Self:
+    def New (cls, response: httpx.Response) -> typing.Self:
         obj = super().__new__(cls)
         obj.__dict__ = response.__dict__
 
@@ -98,7 +98,7 @@ class ResponseHttp (httpx.Response):
     def xml (self) -> ElementoXML:
         """Realizar o parse do conteúdo de resposta como um `ElementoXML`
         - `ValueError` caso ocorra erro de parse"""
-        try: return ElementoXML.parse(self.texto)
+        try: return ElementoXML.Parse(self.texto)
         except Exception as erro:
             # Erros.RetornoInesperado.erro(erro) TODO
             raise ValueError("Erro ao realizar o parse para XML da Resposta HTTP") from erro
@@ -245,7 +245,7 @@ class ClienteHttp (httpx.Client):
             # elif response.is_server_error: Erros.Conexao.alertar()
             # elif response.status_code in (401, 403): Erros.Autenticacao.alertar()
 
-            return ResponseHttp.new(response)
+            return ResponseHttp.New(response)
 
         except httpx.TimeoutException:
             # Erros.Timeout.erro() TODO

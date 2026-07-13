@@ -14,7 +14,7 @@ janela_compras = lambda: bot.sistema.JanelaW32(
 )
 
 CLASS_NAME_JANELA_INFORMATIVA = "TFrmListaNfeRen"
-IMAGEM_MODULO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAAwCAIAAAA3ogXuAAAB/ElEQVRYCc3BAY7TCBAAwe6XD/PyvsWsRcLqTglGh6usuBkrbsaKm7HiZqy4GSt+i8q/qLjAipepPKh4pBZacYEVL1MrfqH8UAJacYEVL1MrpfiVAhZacYEVL1Mr5UPxSfmhBLTiAitepn779m1m+EoBC624wIqXqRQQD5QPBQhoxQVWvEO+iyfKp0ArLrDiHSoVPynFB4VAKy6w4h0qFT8pxQeFQCsusOIdKhU/KYXyXaAVF1jxDpUC4pPyKb7TiguseIdK8R+04gIr3qHygorfZcXvUiv+NCtuxoqbseJmrLgZK27Gipux4masuBkrbsaKm7HiZqy4GStuxooHupxq+BusOOnWcNKt4X9nxUm3hr/NipNuDV/ocqgBdDnU6AI1gC6nGkAXqAF0OdRw0AVqeGbFSbeGZ7o1HHRrdGsA3RpAt0a3hoNujW4Nz3RrdGsA3RoeWHHSreGZbg0H3RrdGkC3BtCt0a3hoFujW8NBl1MNoFvDF1acdGt4plvDQbdGtwbQrQF0a3RrOOjW6NYAujUcdGs46NbwzIqTbg0n3RrdGg66Nbo1gG4NoFujW8NBt0a3BtCt4aBbo1sD6NbwwIoHupxqOOhyqAF0awDdGkC3RpdTDaBbw0GXUw2gC9TwzIo/RLeGy6z4Q3RruMyKm7HiZqy4GStu5h8cwtCwMlN0DQAAAABJRU5ErkJggg==")
+IMAGEM_MODULO = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADEAAAAwCAIAAAA3ogXuAAAB/ElEQVRYCc3BAY7TCBAAwe6XD/PyvsWsRcLqTglGh6usuBkrbsaKm7HiZqy4GSt+i8q/qLjAipepPKh4pBZacYEVL1MrfqH8UAJacYEVL1MrpfiVAhZacYEVL1Mr5UPxSfmhBLTiAitepn779m1m+EoBC624wIqXqRQQD5QPBQhoxQVWvEO+iyfKp0ArLrDiHSoVPynFB4VAKy6w4h0qFT8pxQeFQCsusOIdKhU/KYXyXaAVF1jxDpUC4pPyKb7TiguseIdK8R+04gIr3qHygorfZcXvUiv+NCtuxoqbseJmrLgZK27Gipux4masuBkrbsaKm7HiZqy4GStuxooHupxq+BusOOnWcNKt4X9nxUm3hr/NipNuDV/ocqgBdDnU6AI1gC6nGkAXqAF0OdRw0AVqeGbFSbeGZ7o1HHRrdGsA3RpAt0a3hoNujW4Nz3RrdGsA3RoeWHHSreGZbg0H3RrdGkC3BtCt0a3hoFujW8NBl1MNoFvDF1acdGt4plvDQbdGtwbQrQF0a3RrOOjW6NYAujUcdGs46NbwzIqTbg0n3RrdGg66Nbo1gG4NoFujW8NBt0a3BtCt4aBbo1sD6NbwwIoHupxqOOhyqAF0awDdGkC3RpdTDaBbw0GXUw2gC9TwzIo/RLeGy6z4Q3RruMyKm7HiZqy4GStu5h8cwtCwMlN0DQAAAABJRU5ErkJggg==")
 """Imagem do botão do módulo na resolução `1920x1080`"""
 
 @bot.erro.adicionar_prefixo("Falha ao abrir o módulo 'Peças / Compras'")
@@ -50,7 +50,7 @@ def abrir_modulo (
         posicao = imagem.procurar_imagem(regiao=coordenada_painel, cinza=True, segundos=DEFAULT_TIMEOUT)
         assert posicao, "Imagem do módulo não foi encontrada"
 
-    with bot.sistema.JanelaW32.aguardar_nova_janela() as janela:
+    with bot.sistema.JanelaW32.AguardarNovaJanela() as janela:
         bot.mouse.mover(posicao).clicar()
 
     if janela.class_name == CLASS_NAME_JANELA_INFORMATIVA:

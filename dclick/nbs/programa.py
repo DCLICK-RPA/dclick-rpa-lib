@@ -50,7 +50,7 @@ def abrir_e_login (usuario:  str | None = None,
 
     # abrir
     dclick.logger.informar("Abrindo o NBS", usuario=usuario)
-    janela_login = JanelaW32.iniciar(executavel, aguardar=DEFAULT_TIMEOUT * 2)
+    janela_login = JanelaW32.Iniciar(executavel, aguardar=DEFAULT_TIMEOUT * 2)
 
     # digitar inputs
     elementos = JanelaW32.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=DEFAULT_TIMEOUT))

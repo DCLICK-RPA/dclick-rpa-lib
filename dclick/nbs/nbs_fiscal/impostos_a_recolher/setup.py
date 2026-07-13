@@ -30,11 +30,11 @@ class AbaLista:
     full_hd: bool
     janela: bot.sistema.JanelaW32
 
-    IMAGEM_OCULOS = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAUCAYAAACTQC2+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACJSURBVEhL7ZILCoAwDEN7/1PtZtWAK8W1NkwZIj4ofkjzBiq6iHeJRERba8fTHKUIEn9liA52ue3LWVF2sHR7CBIin6FEUWklGoor0RMScCmqCiPYg9kb/CUI+Dm/yzIMJrIi3O/TSz1MJsNSWOgFNoGoymRY6puiJd8IYMlPBJOJ4JM3+UWTqG75oDTOWTdCaAAAAABJRU5ErkJggg==")
+    IMAGEM_OCULOS = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAUCAYAAACTQC2+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACJSURBVEhL7ZILCoAwDEN7/1PtZtWAK8W1NkwZIj4ofkjzBiq6iHeJRERba8fTHKUIEn9liA52ue3LWVF2sHR7CBIin6FEUWklGoor0RMScCmqCiPYg9kb/CUI+Dm/yzIMJrIi3O/TSz1MJsNSWOgFNoGoymRY6puiJd8IYMlPBJOJ4JM3+UWTqG75oDTOWTdCaAAAAABJRU5ErkJggg==")
     """Imagem do botão `Procurar`, ícone de um Óculos, na resolução `1920x1080`"""
-    IMAGEM_SETA_ENVIAR_SELECIONADOS_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAWCAYAAADafVyIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABiSURBVEhL7Y0xDsAwCAP5/6cpquQMcZDjoVM5yQyB+CI/ZgSSHwki4o2LJahhi2wBciuiC3w8pQZl7Rpo0xWpdCJ6weEpNShr19BvNnaBKga24LYYWAKnGPg/TEYgGYEg8wEHi4vXA0x4ogAAAABJRU5ErkJggg==")
+    IMAGEM_SETA_ENVIAR_SELECIONADOS_COMPROMISSO = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAWCAYAAADafVyIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABiSURBVEhL7Y0xDsAwCAP5/6cpquQMcZDjoVM5yQyB+CI/ZgSSHwki4o2LJahhi2wBciuiC3w8pQZl7Rpo0xWpdCJ6weEpNShr19BvNnaBKga24LYYWAKnGPg/TEYgGYEg8wEHi4vXA0x4ogAAAABJRU5ErkJggg==")
     """Imagem do botão `Enviar apenas selecionados para compromisso`, ícone de uma seta vermelha, na resolução `1920x1080`"""
-    IMAGEM_SETA_ENVIAR_TODOS_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACESURBVEhL7dDtCoQwDETRvHl982qwgzSd9MPoD8ELA7tue2CV/EIfReX4povWEIAjeBe9i9MrDNbN5h5lKDbKPcIwO6/OTy3izVY/YjdWVro+kUS2qaWUyo0zF2WX7SyGKKqHGYJ5GKIog3QjDDVoBEMVav/2KoYqNIoh+k6j/ejT5bwD5EybQbbvwc0AAAAASUVORK5CYII=")
+    IMAGEM_SETA_ENVIAR_TODOS_COMPROMISSO = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAXCAYAAADk3wSdAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACESURBVEhL7dDtCoQwDETRvHl982qwgzSd9MPoD8ELA7tue2CV/EIfReX4povWEIAjeBe9i9MrDNbN5h5lKDbKPcIwO6/OTy3izVY/YjdWVro+kUS2qaWUyo0zF2WX7SyGKKqHGYJ5GKIog3QjDDVoBEMVav/2KoYqNIoh+k6j/ejT5bwD5EybQbbvwc0AAAAASUVORK5CYII=")
     """Imagem do botão `Enviar todos para compromisso`, ícone de uma seta azul, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
@@ -44,8 +44,7 @@ class AbaLista:
               .elemento\
               .encontrar(lambda e: e.texto == "Lista" and e.item_aba)\
               .clicar()
-        resolucao_atual, _ = bot.sistema.informacoes_resolucao()
-        self.full_hd = resolucao_atual == (1920, 1080)
+        self.full_hd = bot.sistema.Resolucao() == "1920x1080"
 
     @property
     def painel_aba (self) -> ElementoW32:
@@ -232,7 +231,7 @@ class AbaCompromisso:
     full_hd: bool
     janela: bot.sistema.JanelaW32
 
-    IMAGEM_GERAR_COMPROMISSO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACHSURBVDhP5Y+BCsAgCAX9/59uqHvmQq0xgkEHZqvX1aht4AApEVmN/Eta8Um6/NLqt0ZK6VOE0Jo4QqVcTugvicrguf++kRUeenjeLbsmRUA7XjbWDEmIzsJxj2TZJbLCg24ioB2HooNMticrPPQAQr1n0gxJ+xsx9xVR7b97gmOLtOJoaWsX3JgHTiCw/GYAAAAASUVORK5CYII=")
+    IMAGEM_GERAR_COMPROMISSO = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACHSURBVDhP5Y+BCsAgCAX9/59uqHvmQq0xgkEHZqvX1aht4AApEVmN/Eta8Um6/NLqt0ZK6VOE0Jo4QqVcTugvicrguf++kRUeenjeLbsmRUA7XjbWDEmIzsJxj2TZJbLCg24ioB2HooNMticrPPQAQr1n0gxJ+xsx9xVR7b97gmOLtOJoaWsX3JgHTiCw/GYAAAAASUVORK5CYII=")
     """Imagem do botão `Procurar`, na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
@@ -242,8 +241,7 @@ class AbaCompromisso:
             lambda e: e.texto == "Compromisso" and e.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
-        resolucao_atual, _ = bot.sistema.informacoes_resolucao()
-        self.full_hd = resolucao_atual == (1920, 1080)
+        self.full_hd = bot.sistema.Resolucao() == "1920x1080"
 
     @property
     def painel_aba (self) -> ElementoW32:

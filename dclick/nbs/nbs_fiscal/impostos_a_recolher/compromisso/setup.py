@@ -97,14 +97,13 @@ class Confirmar:
     full_hd: bool
     janela: bot.sistema.JanelaW32
 
-    IMAGEM_CANCELAR = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVFhH7ZQ9ksIwDIV9J2Yyw10oUuQg6ag4BS1dzkCdkhNwgK1TeC1HCpYsO94MFGRdfAPRj+X3Ysc8fyZbeVENEVRDBJsMscbY3gG/Wv6bUQ0hwbkcodV8M5EhTHDfp3NKfg/kDQlEbzPjYfvGuNaZ002r+QDjxR6ai71ruRWyVyYUL5+1Ps5sxuH8wOfBnszR9qOs+wDvNgSITCFKr4myqfs4OPD/+bicHNMOr562c8aJOOUobjp7pfit09fB2ck5jZvjT2+wliNpCOCqtxsCGw0FhTCz4OTgprxo2mAQF6fLi4S12TqTvbZ4LSmenaOf1qwhkRnvMgTwm8I3R5tjAuDKafGA8HQg/oqG9atzOH+/MkCJKZmhsxDl7bOeQkM006m+aA6n7KOqsWqK9lHF51CI3/SKIeLK+B6og/olPs9jV6ZoDicyRDXDiY9iGJf9nNkEdpxlHD+iTIivCQ3BHPUsb93hhdJaKH5Zp2QOhxniOpOic7k9kTdECGb5HZoBpA1JCPY1OzUDiL4hIHbPgteIDPnvVEME1RBBNURQDWFM9hfM9zt0FZHS5AAAAABJRU5ErkJggg==")
+    IMAGEM_CANCELAR = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAXCAYAAACyCenrAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGmSURBVFhH7ZQ9ksIwDIV9J2Yyw10oUuQg6ag4BS1dzkCdkhNwgK1TeC1HCpYsO94MFGRdfAPRj+X3Ysc8fyZbeVENEVRDBJsMscbY3gG/Wv6bUQ0hwbkcodV8M5EhTHDfp3NKfg/kDQlEbzPjYfvGuNaZ002r+QDjxR6ai71ruRWyVyYUL5+1Ps5sxuH8wOfBnszR9qOs+wDvNgSITCFKr4myqfs4OPD/+bicHNMOr562c8aJOOUobjp7pfit09fB2ck5jZvjT2+wliNpCOCqtxsCGw0FhTCz4OTgprxo2mAQF6fLi4S12TqTvbZ4LSmenaOf1qwhkRnvMgTwm8I3R5tjAuDKafGA8HQg/oqG9atzOH+/MkCJKZmhsxDl7bOeQkM006m+aA6n7KOqsWqK9lHF51CI3/SKIeLK+B6og/olPs9jV6ZoDicyRDXDiY9iGJf9nNkEdpxlHD+iTIivCQ3BHPUsb93hhdJaKH5Zp2QOhxniOpOic7k9kTdECGb5HZoBpA1JCPY1OzUDiL4hIHbPgteIDPnvVEME1RBBNURQDWFM9hfM9zt0FZHS5AAAAABJRU5ErkJggg==")
     """Imagem do botão `Cancelar` na resolução `1920x1080`"""
 
     def __init__ (self, janela: bot.sistema.JanelaW32) -> None:
         dclick.logger.debug("Confirmando na janela 'Compromisso'")
         self.janela = janela
-        resolucao_atual, _ = bot.sistema.informacoes_resolucao()
-        self.full_hd = resolucao_atual == (1920, 1080)
+        self.full_hd = bot.sistema.Resolucao() == "1920x1080"
 
     def clicar_ok (self, tratamento_dialogos: Callable[[Dialogo], None] | None = None) -> Self:
         """Clicar no botão `OK`

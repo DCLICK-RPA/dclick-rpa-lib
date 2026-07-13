@@ -33,7 +33,7 @@ class OpcoesInclusaoNfTerceiros:
         """Clicar no botão `Compra`
         - Caso a janela `Conhecimento de Transporte` apareça, será cliado em `Entrada Sem Frete`
         - Retornado janela `Entrada de Nota Fiscal`"""
-        with bot.sistema.JanelaW32.aguardar_nova_janela() as janela:
+        with bot.sistema.JanelaW32.AguardarNovaJanela() as janela:
             self.janela.to_uia().elemento.encontrar(
                 lambda e: e.botao and e.texto == "Compra",
                 aguardar = DEFAULT_TIMEOUT

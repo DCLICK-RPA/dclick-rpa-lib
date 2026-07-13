@@ -8,7 +8,7 @@ import bot
 from bot.imagem import Imagem
 from bot.estruturas import String
 
-IMAGEM_MODULO = Imagem.from_base64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAvCAYAAACyoNkAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGVSURBVGhD7ZhtroQgDEVdOktzZ765ozdem6JoLM5DTkKE8lFOSubHDNNL6KKt0UWjSCktvZVhSN8WSbgoxTxBMEviG3uVsNNVbBzHpbelliQIyaBVhCRaMjI1JcHtWexTpShIaU5XWxKEZKLYt5IfYVYWPCEJbs9GIYDnqpKoKARzkqx4BLefjMvywny+YH226zzBeK7+fxL9iODSWlmvipBSQezLVfoObj8Zl7WiCuVqCZKQDLg4K2ahKL41BElYJj5hS60KWsIyek/4CUESmplPmP0nCc/+1FO1hN/gFyTBb9yiAl20Nbpoa3TR1uiirdFFW+PdovhL0qIxb76E+a/ObWP8LnJnZUXtBh1fvdjVfWfI5eii+gW2r03xYqQk7u1nrCRu15DLosrReoKYNsL+UQzYMcmtJ4c/Rt4B9rC9OSU3V3q2BXPaGPM4FAV6EPDmFTsmpXEdn92TXb98N3iHaMyb1y+wa4AXA3v77Z6zcVIkCjSGvjbFi5GSuLefsb045+wa4oq2SBdtjS7aGi8RnaY/CSKCTRQAu6YAAAAASUVORK5CYII=")
+IMAGEM_MODULO = Imagem.FromBase64("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAvCAYAAACyoNkAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGVSURBVGhD7ZhtroQgDEVdOktzZ765ozdem6JoLM5DTkKE8lFOSubHDNNL6KKt0UWjSCktvZVhSN8WSbgoxTxBMEviG3uVsNNVbBzHpbelliQIyaBVhCRaMjI1JcHtWexTpShIaU5XWxKEZKLYt5IfYVYWPCEJbs9GIYDnqpKoKARzkqx4BLefjMvywny+YH226zzBeK7+fxL9iODSWlmvipBSQezLVfoObj8Zl7WiCuVqCZKQDLg4K2ahKL41BElYJj5hS60KWsIyek/4CUESmplPmP0nCc/+1FO1hN/gFyTBb9yiAl20Nbpoa3TR1uiirdFFW+PdovhL0qIxb76E+a/ObWP8LnJnZUXtBh1fvdjVfWfI5eii+gW2r03xYqQk7u1nrCRu15DLosrReoKYNsL+UQzYMcmtJ4c/Rt4B9rC9OSU3V3q2BXPaGPM4FAV6EPDmFTsmpXEdn92TXb98N3iHaMyb1y+wa4AXA3v77Z6zcVIkCjSGvjbFi5GSuLefsb045+wa4oq2SBdtjS7aGi8RnaY/CSKCTRQAu6YAAAAASUVORK5CYII=")
 """Imagem do módulo `Nbs Fiscal` na resolução `1920x1080`"""
 
 class SelecaoEmpresaFilial:
@@ -53,7 +53,7 @@ class SelecaoEmpresaFilial:
         - Erro caso apareça diálogo
         - Utilizar `self.checar_selecao` para checar sucesso após
         - Retornado janela `Sistema Fiscal`"""
-        with bot.sistema.JanelaW32.aguardar_nova_janela(DEFAULT_TIMEOUT * 2) as nova_janela:
+        with bot.sistema.JanelaW32.AguardarNovaJanela(DEFAULT_TIMEOUT * 2) as nova_janela:
             self.janela.elemento\
                 .encontrar(lambda e: "confirma" in e.texto.lower(), aguardar=DEFAULT_TIMEOUT)\
                 .clicar()
