@@ -10,7 +10,7 @@ def abrir_menu_nf_entradas (janela_sistema_fiscal: bot.sistema.JanelaW32) -> bot
     """Abrir o menu `Nota Fiscal de Entradas`
     - Retorna a janela de `Entradas`"""
     dclick.logger.debug("Abrindo o menu 'Nota Fiscal de Entradas'")
-    janela_sistema_fiscal.to_uia().menu(
+    janela_sistema_fiscal.to_uia().abrir_menu(
         "Notas Fiscais",
         "Nota Fiscal de Entradas"
     )

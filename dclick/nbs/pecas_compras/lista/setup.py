@@ -21,7 +21,7 @@ class AbaLista:
         dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == self.NOME_ABA and e.item_aba,
+            lambda e: e.texto == self.NOME_ABA and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 

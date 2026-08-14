@@ -59,8 +59,8 @@ class CalculoTributos:
             aguardar = DEFAULT_TIMEOUT
         )
 
-        if elemento.caixa_selecao.selecionado + selecionar == 1: # XOR
-            elemento.clicar()
+        if selecionar: elemento.checkbox.selecionar()
+        else: elemento.checkbox.desmarcar()
 
         if imposto is not None:
             assert elemento.parente, "Parente do elemento do checkbox não encontrado"
@@ -71,7 +71,7 @@ class CalculoTributos:
                 )
             )
             assert len(elementos) == 2, f"Esperado 2 elementos de input, encontrado '{len(elementos)}'"
-            elementos[-1].digitar(str(imposto).replace(".", ",")).apertar("tab")
+            elementos[-1].digitar(str(imposto).replace(".", ",")).teclar("tab")
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             texto = dialogo.texto.lower()
@@ -106,7 +106,7 @@ class AbaCapa:
         dclick.logger.debug("Abrindo a aba 'Capa' na janela 'Entrada Diversas'")
         self.janela = janela
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == "Capa" and e.item_aba,
+            lambda e: e.texto == "Capa" and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -139,9 +139,9 @@ class AbaCapa:
         self.painel_aba\
             .encontrar(lambda e: e.texto == "Fornecedor", aguardar=DEFAULT_TIMEOUT)\
             .encontrar(lambda e: e.class_name == "TCPF_CGC", aguardar=DEFAULT_TIMEOUT)\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(digitos)\
-            .apertar("enter")
+            .teclar("enter")
 
         if dialogo := self.janela.dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -155,7 +155,7 @@ class AbaCapa:
             self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
         assert len(elementos) >= 2, "Elemento não foi encontrado"
-        elementos[1].digitar(numero).apertar("tab")
+        elementos[1].digitar(numero).teclar("tab")
         return self
 
     def preencher_serie_nota_fiscal (self, serie: str) -> Self:
@@ -163,7 +163,7 @@ class AbaCapa:
             self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
         assert len(elementos) >= 3, "Elemento não foi encontrado"
-        elementos[2].digitar(serie).apertar("tab")
+        elementos[2].digitar(serie).teclar("tab")
         return self
 
     def preencher_emissao_nota_fiscal (self, data: date) -> Self:
@@ -171,7 +171,7 @@ class AbaCapa:
             self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
         assert len(elementos) >= 4, "Elemento não foi encontrado"
-        elementos[3].digitar(data.strftime(r"%d%m%Y")).apertar("tab")
+        elementos[3].digitar(data.strftime(r"%d%m%Y")).teclar("tab")
         return self
 
     def preencher_entrada_nota_fiscal (self, data: date) -> Self:
@@ -179,19 +179,18 @@ class AbaCapa:
             self.painel_nota_fiscal.filhos(aguardar=DEFAULT_TIMEOUT)
         )
         assert len(elementos) >= 5, "Elemento não foi encontrado"
-        elementos[4].digitar(data.strftime(r"%d%m%Y")).apertar("tab")
+        elementos[4].digitar(data.strftime(r"%d%m%Y")).teclar("tab")
         return self
 
     def alterar_estado_nota_no_livro_fiscal (self, selecionar=False) -> Self:
-        caixa = self.painel_aba.encontrar(
+        checkbox = self.painel_aba.encontrar(
             lambda e: e.class_name == "TCheckBox"
                       and "livro fiscal" in e.texto.lower(),
             aguardar = DEFAULT_TIMEOUT
-        ).caixa_selecao
+        ).checkbox
 
-        # XOR, apenas 1 True
-        if caixa.selecionado + selecionar == 1: 
-            caixa.alternar()
+        if selecionar: checkbox.selecionar()
+        else: checkbox.desmarcar()
 
         return self
 
@@ -206,9 +205,9 @@ class AbaCapa:
         assert len(elementos) >= 8, "Elemento não foi encontrado"
 
         elementos[7]\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(str(base_iss).replace(".", ","))\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def preencher_aliquota_iss_valores_nota (self, aliquota_iss: int | float) -> Self:
@@ -221,9 +220,9 @@ class AbaCapa:
         assert len(elementos) >= 9, "Elemento não foi encontrado"
 
         elementos[8]\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(str(aliquota_iss).replace(".", ","))\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def obter_valor_iss_valores_nota (self) -> float:
@@ -252,9 +251,9 @@ class AbaCapa:
         assert len(elementos) >= 10, "Elemento não foi encontrado"
 
         elementos[9]\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(str(valor_iss).replace(".", ","))\
-            .apertar("tab")
+            .teclar("tab")
 
         try: self.janela.capturar_dialogos(tratamento_dialogos)
         except Exception as erro:
@@ -270,7 +269,7 @@ class AbaCapa:
             )
         )
         assert len(elementos) >= 12, "Elemento não foi encontrado"
-        elementos[11].apertar("backspace").digitar(codigo).apertar("tab")
+        elementos[11].teclar("backspace").digitar(codigo).teclar("tab")
         return self
 
     def preencher_total_nota_valores_nota (self, total: int | float,
@@ -286,9 +285,9 @@ class AbaCapa:
         )
         assert len(elementos) >= 13, "Elemento não foi encontrado"
 
-        elementos[12].apertar("backspace")\
+        elementos[12].teclar("backspace")\
                      .digitar(str(total).replace(".", ","))\
-                     .apertar("enter")
+                     .teclar("enter")
 
         try: self.janela.capturar_dialogos(tratamento_dialogos)
         except Exception as erro:
@@ -297,15 +296,14 @@ class AbaCapa:
         return self
 
     def alterar_estado_fisco_municipal_valores_nota (self, selecionar=True) -> Self:
-        caixa = self.painel_valores_nota.encontrar(
+        checkbox = self.painel_valores_nota.encontrar(
             lambda e: e.class_name == "TDBCheckBox"
                       and e.texto == "Fisco Municipal",
             aguardar = DEFAULT_TIMEOUT / 2
-        ).caixa_selecao
+        ).checkbox
 
-        # XOR, apenas 1 True
-        if caixa.selecionado + selecionar == 1: 
-            caixa.alternar()
+        if selecionar: checkbox.selecionar()
+        else: checkbox.desmarcar()
 
         return self
 
@@ -316,7 +314,7 @@ class AbaCapa:
         assert elementos, "Elemento não foi encontrado"
         elementos[-1].encontrar(lambda e: e.class_name == "TOvcDbPictureField", aguardar=DEFAULT_TIMEOUT / 2)\
                      .digitar(texto)\
-                     .apertar("tab")
+                     .teclar("tab")
         return self
 
     @bot.erro.adicionar_prefixo("Falha ao abrir a janela de 'Calculo de Tributos'")
@@ -335,12 +333,7 @@ class AbaCapa:
             raise Exception(mensagem)
 
         return CalculoTributos(
-            self.janela
-            .janela_processo(
-                lambda j: j.class_name == "TfrmCalculoTributos",
-                aguardar = DEFAULT_TIMEOUT
-            )
-            .focar()
+            (self.janela @ "TfrmCalculoTributos").focar()
         )
 
     def preencher_cod_retencao_valores_nota (self, codigo: str) -> Self:
@@ -356,9 +349,9 @@ class AbaCapa:
         assert len(elementos) >= 1, "Elemento não foi encontrado"
 
         elementos[0]\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(codigo)\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Contabilização' da janela 'Entrada Diversas'")
@@ -372,7 +365,7 @@ class AbaContabilizacao:
         self.janela = janela
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == "Contabilização"
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -396,7 +389,7 @@ class AbaContabilizacao:
         self.painel_contabilizacao_padrao\
             .encontrar(lambda e: e.class_name == "TOvcNumericField", aguardar=DEFAULT_TIMEOUT / 2)\
             .digitar(codigo)\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def confirmar_contabilizacao_padrao (self) -> Self:
@@ -425,7 +418,7 @@ class AbaFaturamento:
         self.janela = janela
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == "Faturamento"
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -458,8 +451,8 @@ class AbaFaturamento:
             .encontrar(lambda e: e.texto == "Tipo de Pagamento", aguardar=DEFAULT_TIMEOUT)\
             .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
-            .digitar(descricao, virtual=False)\
-            .apertar("enter")\
+            .digitar(descricao)\
+            .teclar("enter")\
             .sleep(0.5)
 
         valor = elemento.valor
@@ -471,8 +464,8 @@ class AbaFaturamento:
             .encontrar(lambda e: e.texto == "Natureza Despesa", aguardar=DEFAULT_TIMEOUT)\
             .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
-            .digitar(descricao, virtual=False)\
-            .apertar("enter")\
+            .digitar(descricao)\
+            .teclar("enter")\
             .sleep(0.5)
 
         valor = elemento.valor
@@ -487,7 +480,7 @@ class AbaFaturamento:
             )
         )
         assert len(elementos) >= 3, "Elemento não foi encontrado"
-        elementos[2].digitar(parcelas).apertar("tab")
+        elementos[2].digitar(parcelas).teclar("tab")
         return self
 
     def clicar_gerar_condicao_pagamento (self) -> Self:
@@ -513,9 +506,9 @@ class AbaFaturamento:
             )
         )
         assert len(elementos) >= 1, "Elemento não foi encontrado"
-        elementos[1].apertar("backspace")\
+        elementos[1].teclar("backspace")\
                     .digitar(vencimento.strftime(r"%d%m%Y"))\
-                    .apertar("tab")
+                    .teclar("tab")
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Retenções PJ' da janela 'Entrada Diversas'")
@@ -529,7 +522,7 @@ class AbaRetencoesPJ:
         self.janela = janela
         try: janela.to_uia().elemento.encontrar(
                 lambda e: e.texto == "Retenções PJ"
-                        and e.item_aba,
+                        and e.tipo.item_aba,
                 aguardar = DEFAULT_TIMEOUT
         ).clicar()
         except Exception:
@@ -546,10 +539,7 @@ class AbaRetencoesPJ:
     @property
     def janela_retencoes_pj (self) -> bot.sistema.JanelaUIA:
         """Janela `Retenções PJ` aberta após utilizar o `clicar_incluir()`"""
-        return self.janela.janela_processo(
-            lambda j: j.titulo == "Retenções PJ",
-            aguardar = DEFAULT_TIMEOUT
-        ).focar().to_uia()
+        return (self.janela @ "Retenções PJ").focar().to_uia()
 
     @bot.erro.adicionar_prefixo("Falha ao abrir a janela interna 'Retenções PJ'")
     def clicar_incluir (self) -> Self:
@@ -570,9 +560,9 @@ class AbaRetencoesPJ:
             .elemento\
             .encontrar(lambda e: e.class_name == "TwwDBLookupCombo", aguardar=DEFAULT_TIMEOUT)\
             .clicar()\
-            .digitar(codigo, virtual=False)\
+            .digitar(codigo)\
             .sleep(2)\
-            .apertar("tab")\
+            .teclar("tab")\
             .sleep(0.5)
 
         valor = elemento.valor
@@ -665,10 +655,7 @@ class Confirmar:
         assert self.full_hd, "Esperado resolução '1920x1080' para encontrar a imagem do botão 'Cancelar'"
 
         titulo = "Ficha de Controle de Pagamento"
-        try: janela = self.janela.janela_processo(
-                lambda j: j.titulo == titulo,
-                aguardar = DEFAULT_TIMEOUT
-        ).focar()
+        try: janela = (self.janela @ titulo).focar()
         except Exception:
             raise Exception(f"Janela '{titulo}' não foi encontrada")
 

@@ -111,13 +111,13 @@ class SelecaoEmpresaFilial:
                 aguardar = DEFAULT_TIMEOUT
             )
         )
-        elemento.digitar(self.nome_empresa, virtual=False).apertar("tab")
+        elemento.digitar(self.nome_empresa).teclar("tab")
         return self
 
     def clicar_bota_ok (self) -> Self:
         """Clicar no botão `OK` para alterar a empresa/filial"""
         self.janela.to_uia().elemento.encontrar(
-            lambda e: e.botao and e.texto == "OK",
+            lambda e: e.tipo.botao and e.texto == "OK",
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
         return self

@@ -14,15 +14,12 @@ def abrir_interface (janela: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     dclick.logger.debug(f"Abrindo a opção 'Interface' na {janela!r}")
 
     janela.to_uia().elemento.encontrar(
-        lambda e: e.botao and e.texto == "Interface"
+        lambda e: e.tipo.botao and e.texto == "Interface"
                   and e.visivel,
         aguardar = DEFAULT_TIMEOUT
     ).clicar()
 
-    try: return janela.janela_processo(
-            lambda j: j.class_name == "TForm_InterfaceCompra" and j.visivel,
-            aguardar = DEFAULT_TIMEOUT
-    ).focar()
+    try: return (janela @ "TForm_InterfaceCompra").focar()
     except Exception:
         raise Exception("Janela 'Interface de Compra' não abriu conforme esperado")
 
@@ -40,7 +37,7 @@ class AbaFila:
         dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == self.NOME_ABA and e.item_aba,
+            lambda e: e.texto == self.NOME_ABA and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -95,38 +92,38 @@ class InterfaceCompraCFOP:
     @property
     def campo_tributados_ativo (self) -> bool:
         """Checar se o campo `Tributados` está ativo para ser modificado"""
-        return self.janela.elemento["TwwDBLookupCombo", 0].ativo
+        return (self.janela.elemento  / "TwwDBLookupCombo[0]").ativo
 
     def campo_tributados_selecionar_primeiro (self) -> Self:
         """Selecionar a primeira opção no campo `Tributados`"""
-        elemento = self.janela.elemento["TwwDBLookupCombo", 0]\
+        elemento = (self.janela.elemento / "TwwDBLookupCombo[0]")\
             .atalho("alt", "down")\
-            .apertar("up", "tab", focar=False)
+            .teclar("up", "tab", focar=False)
         assert elemento.valor, "Nenhuma opção selecionada no campo 'Tributados'"
         return self
 
     @property
     def campo_fonte_ativo (self) -> bool:
         """Checar se o campo `Fonte` está ativo para ser modificado"""
-        return self.janela.elemento["TwwDBLookupCombo", 2].ativo
+        return (self.janela.elemento / "TwwDBLookupCombo[2]").ativo
 
     def campo_fonte_selecionar_primeiro (self) -> Self:
         """Selecionar a primeira opção no campo `Fonte`"""
-        elemento = self.janela.elemento["TwwDBLookupCombo", 2]\
+        elemento = (self.janela.elemento / "TwwDBLookupCombo[2]")\
             .atalho("alt", "down")\
-            .apertar("up", "tab", focar=False)
+            .teclar("up", "tab", focar=False)
         assert elemento.valor, "Nenhuma opção selecionada no campo 'Fonte'"
         return self
 
     @property
     def campo_combustivel_ativo (self) -> bool:
         """Checar se o campo `Combustível` está ativo para ser modificado"""
-        return self.janela.elemento["TwwDBLookupCombo", 3].ativo
+        return (self.janela.elemento / "TwwDBLookupCombo[3]").ativo
 
     def clicar_ok (self) -> None:
         """Clicar no botão `OK`
         - Erro caso algum diálogo apareça"""
-        self.janela.elemento["OK"].clicar()
+        (self.janela.elemento / "OK").clicar()
         if dialogo := self.janela.dialogo(aguardar=0.3):
             raise Exception(f"Diálogo encontrado ao clicar em OK: '{dialogo.texto}'")
         assert self.janela.fechar(), "Janela não fechada conforme esperado"
@@ -144,7 +141,7 @@ class AbaTributacaoCFOP:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -216,9 +213,7 @@ class Confirmar:
             raise Exception(f"Diálogo após clicar em `Aceitar` não esperado: {dialogo.texto}")
 
         try: (
-            self.janela
-            .aguardar()
-            .janela_processo(lambda j: j.class_name == "TMessageForm", aguardar=0.25)
+            (self.janela.aguardar() @ "TMessageForm")
             .elemento
             .encontrar(lambda e: e.texto.lower() == "sim", DEFAULT_TIMEOUT / 2)
             .clicar()

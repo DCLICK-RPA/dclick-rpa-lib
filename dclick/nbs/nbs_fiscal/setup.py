@@ -29,21 +29,16 @@ class SelecaoEmpresaFilial:
         """Selecionar a `empresa`
         - Não possível confirmar se foi selecionado corretamente"""
         self.empresa = empresa
-        self.janela.elemento\
-            .encontrar(lambda e: e.texto == "Empresa", aguardar=DEFAULT_TIMEOUT)\
-            .encontrar(lambda e: e.class_name == "TDBLookupComboBox")\
-            .digitar(empresa, virtual=False)
+        (self.janela // "Empresa" // "TDBLookupComboBox").digitar(empresa)
         return self
 
     def selecionar_filial (self, filial: str) -> Self:
         self.filial = filial
-        self.janela.to_uia().elemento\
-            .encontrar(lambda e: e.texto == "Filial", aguardar=DEFAULT_TIMEOUT)\
-            .encontrar(lambda e: e.class_name == "TwwDBLookupCombo")\
+        (self.janela.to_uia() // "Filial" // "TwwDBLookupCombo")\
             .clicar()\
-            .digitar(filial, virtual=False)\
+            .digitar(filial)\
             .sleep(0.25)\
-            .apertar("enter")
+            .enter()
         return self
 
     @bot.erro.adicionar_prefixo("Erro ao confirmar a seleção da Empresa/Filial")
@@ -53,7 +48,7 @@ class SelecaoEmpresaFilial:
         - Erro caso apareça diálogo
         - Utilizar `self.checar_selecao` para checar sucesso após
         - Retornado janela `Sistema Fiscal`"""
-        with bot.sistema.JanelaW32.AguardarNovaJanela(DEFAULT_TIMEOUT * 2) as nova_janela:
+        with bot.sistema.JanelaW32.AguardarNovaJanela(aguardar=DEFAULT_TIMEOUT * 2) as nova_janela:
             self.janela.elemento\
                 .encontrar(lambda e: "confirma" in e.texto.lower(), aguardar=DEFAULT_TIMEOUT)\
                 .clicar()

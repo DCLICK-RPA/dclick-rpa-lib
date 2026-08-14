@@ -15,13 +15,8 @@ def abrir_menu_impostos_a_recolher (janela_sistema_fiscal: bot.sistema.JanelaW32
     """Clicar no botão para abrir `Impostos a Recolher`
     - Retorna a janela `Impostos a Recolher`"""
     dclick.logger.debug(f"Abrindo o menu 'Impostos a Recolher'")
-    janela_sistema_fiscal\
-        .to_uia()\
-        .menu("Outros", "Impostos a Recolher")
-
-    return janela_sistema_fiscal\
-        .janela_processo(lambda j: j.titulo == "Impostos a Recolher", aguardar=DEFAULT_TIMEOUT)\
-        .focar()
+    janela_sistema_fiscal.to_uia().abrir_menu("Outros", "Impostos a Recolher")
+    return (janela_sistema_fiscal @ "Impostos a Recolher").focar()
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Lista' da janela 'Impostos a Recolher'")
 class AbaLista:
@@ -42,7 +37,7 @@ class AbaLista:
         self.janela = janela
         janela.to_uia()\
               .elemento\
-              .encontrar(lambda e: e.texto == "Lista" and e.item_aba)\
+              .encontrar(lambda e: e.texto == "Lista" and e.tipo.item_aba)\
               .clicar()
         self.full_hd = bot.sistema.Resolucao() == "1920x1080"
 
@@ -79,9 +74,9 @@ class AbaLista:
         digitos = "".join(char for char in texto if char.isdigit())
         self.painel_superior_aba\
             .encontrar(lambda e: e.class_name == "TCPF_CGC", DEFAULT_TIMEOUT / 2)\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(digitos)\
-            .apertar("tab")
+            .teclar("tab")
 
         if dialogo := self.janela.aguardar().dialogo(aguardar=0.5):
             mensagem = dialogo.texto
@@ -105,9 +100,9 @@ class AbaLista:
         # feito o mês primeiro devido a situação especial de mês sem dia 31
         posicao_mes = elemento.coordenada.transformar(0.4)
         bot.mouse.mover(posicao_mes).clicar()
-        elemento.digitar(mes, virtual=False, focar=False)\
-            .apertar("left").digitar(dia, virtual=False, focar=False)\
-            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
+        elemento.digitar(mes, focar=False)\
+            .teclar("left").digitar(dia, focar=False)\
+            .teclar("right").teclar("right").digitar(ano, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Data Início' | Esperado '{data_formatada}' | Encontrado '{texto}'"
@@ -130,9 +125,9 @@ class AbaLista:
         # feito o mês primeiro devido a situação especial de mês sem dia 31
         posicao_mes = elemento.coordenada.transformar(0.4)
         bot.mouse.mover(posicao_mes).clicar()
-        elemento.digitar(mes, virtual=False, focar=False)\
-            .apertar("left").digitar(dia, virtual=False, focar=False)\
-            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
+        elemento.digitar(mes, focar=False)\
+            .teclar("left").digitar(dia, focar=False)\
+            .teclar("right").teclar("right").digitar(ano, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Data Fim' | Esperado '{data_formatada}' | Encontrado '{texto}'"
@@ -238,7 +233,7 @@ class AbaCompromisso:
         dclick.logger.debug("Abrindo a aba 'Compromisso' na janela 'Impostos a Recolher'")
         self.janela = janela
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == "Compromisso" and e.item_aba,
+            lambda e: e.texto == "Compromisso" and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
         self.full_hd = bot.sistema.Resolucao() == "1920x1080"
@@ -283,9 +278,9 @@ class AbaCompromisso:
         posicao_dia = elemento.coordenada.transformar(0.1)
         bot.mouse.mover(posicao_dia).clicar()
         elemento\
-            .apertar("right").digitar(mes, virtual=False, focar=False)\
-            .apertar("left").digitar(dia, virtual=False, focar=False)\
-            .apertar("right").apertar("right").digitar(ano, virtual=False, focar=False)
+            .teclar("right").digitar(mes, focar=False)\
+            .teclar("left").digitar(dia, focar=False)\
+            .teclar("right").teclar("right").digitar(ano, focar=False)
 
         texto = elemento.to_uia().texto
         assert data_formatada == texto, f"Falha ao preencher a elemento 'Vencimento' | Esperado '{data_formatada}' | Encontrado '{texto}'"
@@ -310,9 +305,7 @@ class AbaCompromisso:
             dialogo.confirmar()
             raise Exception(f"Falha ao clicar na imagem do botão para gerar compromisso: '{mensagem}'")
 
-        try: return self.janela.janela_processo(
-            lambda j: j.titulo == "Compromisso", aguardar=10
-        )
+        try: return self.janela @ "Compromisso"
         except Exception:
             raise Exception("Janela 'Compromisso' não foi encontrada")
 

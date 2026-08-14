@@ -18,7 +18,7 @@ class AbaDocumento:
         dclick.logger.debug("Abrindo a aba 'Documento' na janela 'Compromisso'")
         self.janela = janela
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == "Documento" and e.item_aba,
+            lambda e: e.texto == "Documento" and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -46,9 +46,9 @@ class AbaDocumento:
         - Erro caso apareça diálogo com mensagem"""
         self.painel_inferior_aba\
             .encontrar(lambda e: e.class_name == "TCPF_CGC", DEFAULT_TIMEOUT)\
-            .apertar("backspace")\
+            .teclar("backspace")\
             .digitar(texto)\
-            .apertar("tab")
+            .teclar("tab")
 
         if dialogo := self.janela.dialogo(aguardar=1):
             mensagem = dialogo.texto
@@ -68,8 +68,8 @@ class AbaDocumento:
 
         elemento.encontrar(lambda e: e.class_name == "TBtnWinControl")\
                 .clicar()
-        elemento.digitar(descricao, virtual=False)\
-                .apertar("enter")\
+        elemento.digitar(descricao)\
+                .teclar("enter")\
                 .sleep(0.5)
 
         valor = elemento.valor
@@ -87,7 +87,7 @@ class AbaDocumento:
         ) or [None]
         assert elemento, "Elemento ComboBox 'Doc./Tipo' não foi encontrado"
 
-        elemento.digitar(texto, virtual=False)
+        elemento.digitar(texto)
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Compromisso'")
@@ -123,7 +123,7 @@ class Confirmar:
         assert self.full_hd, "Esperado resolução '1920x1080' para encontrar a imagem do botão 'Cancelar'"
 
         titulo = "Ficha de Controle de Pagamento"
-        try: janela = self.janela.janela_processo(lambda j: j.titulo == titulo, aguardar=DEFAULT_TIMEOUT).focar()
+        try: janela = (self.janela @ titulo).focar()
         except Exception:
             raise Exception(f"Janela '{titulo}' não foi encontrada")
 

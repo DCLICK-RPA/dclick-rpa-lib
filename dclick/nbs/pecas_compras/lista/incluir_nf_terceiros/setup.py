@@ -14,18 +14,11 @@ class OpcoesInclusaoNfTerceiros:
 
     def __init__ (self, janela_compras: bot.sistema.JanelaW32) -> None:
         self.janela_compras = janela_compras.focar()
-        self.janela = janela_compras.janela_processo(
-            lambda j: j.class_name == "TForm_EntradaOpcao" and j.visivel,
-            aguardar = DEFAULT_TIMEOUT
-        ).focar()
+        self.janela = (janela_compras @ "TForm_EntradaOpcao").focar()
 
     @property
     def janela_entrada_nf (self) -> bot.sistema.JanelaW32:
-        try: return self.janela_compras.janela_processo(
-                lambda j: j.class_name == "TFormEntradaNota"
-                          and j.visivel,
-                aguardar = DEFAULT_TIMEOUT
-            ).focar()
+        try: return (self.janela_compras @ "TFormEntradaNota").focar()
         except Exception:
             raise Exception("Janela 'Entrada de Nota Fiscal' não abriu conforme esperado")
 
@@ -35,7 +28,7 @@ class OpcoesInclusaoNfTerceiros:
         - Retornado janela `Entrada de Nota Fiscal`"""
         with bot.sistema.JanelaW32.AguardarNovaJanela() as janela:
             self.janela.to_uia().elemento.encontrar(
-                lambda e: e.botao and e.texto == "Compra",
+                lambda e: e.tipo.botao and e.texto == "Compra",
                 aguardar = DEFAULT_TIMEOUT
             ).clicar()
 

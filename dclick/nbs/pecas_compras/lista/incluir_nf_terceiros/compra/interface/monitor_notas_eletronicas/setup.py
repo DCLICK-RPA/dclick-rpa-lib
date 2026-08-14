@@ -23,7 +23,7 @@ class AbaPesquisar:
         dclick.logger.debug(f"Abrindo a aba '{self.NOME_ABA}' na janela '{janela.titulo}'")
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
-            lambda e: e.texto == self.NOME_ABA and e.item_aba,
+            lambda e: e.texto == self.NOME_ABA and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -45,16 +45,11 @@ class AbaPesquisar:
 
     def alternar_inicio_emissao (self) -> Self:
         """Alternar o estado do checkbox `Emissao` de início"""
-        self.painel_aba\
-            [0]["TDateTimePicker"]\
-            .apertar("space")
+        (self.painel_aba[0] / "TDateTimePicker[0]").teclar("space")
         return self
 
     def preencher_numero_nfe (self, texto: str) -> Self:
-        self.painel_aba\
-            [0]["TOvcPictureField"]\
-            .digitar(texto)\
-            .apertar("tab")
+        (self.painel_aba[0] / "TOvcPictureField[0]").digitar(texto).teclar("tab")
         return self
 
     def selecionar_fornecedor (self, fornecedor: str) -> Self:
@@ -63,9 +58,9 @@ class AbaPesquisar:
         elemento = self.painel_aba[-1].to_uia()\
             .encontrar(lambda e: e.class_name == "TwwDBLookupCombo" and e.visivel, aguardar=5)\
             .atalho("alt", "down")\
-            .digitar(fornecedor, virtual=False, focar=False)\
+            .digitar(fornecedor, focar=False)\
             .sleep(0.5)\
-            .apertar("tab", focar=False)
+            .teclar("tab", focar=False)
 
         valor = elemento.valor
         assert String(fornecedor).normalizar() in String(valor).normalizar(),\
@@ -98,7 +93,7 @@ class AbaPesquisar:
         - Erro caso não tenha nenhum registro (Feito via imagem)"""
         grid = self.grid
         imagem_antes_selecionar = capturar_tela(grid.coordenada)
-        grid.apertar("end", "space").aguardar()
+        grid.teclar("end", "space").aguardar()
 
         nao_encontrado = imagem_antes_selecionar.procurar_imagem(confianca=1.0, regiao=grid.coordenada) is None
         assert nao_encontrado, "Nenhum registro encontrado para ser selecionado"
@@ -114,7 +109,7 @@ class AbaPesquisar:
             self.painel_aba[-1]
             .to_uia()
             .encontrar(
-                lambda e: e.botao and e.texto == "Salvar" and e.visivel,
+                lambda e: e.tipo.botao and e.texto == "Salvar" and e.visivel,
                 aguardar = DEFAULT_TIMEOUT
             )
         )

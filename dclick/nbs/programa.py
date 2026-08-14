@@ -52,20 +52,24 @@ def abrir_e_login (usuario:  str | None = None,
     dclick.logger.informar("Abrindo o NBS", usuario=usuario)
     janela_login = JanelaW32.Iniciar(executavel, aguardar=DEFAULT_TIMEOUT * 2)
 
-    # digitar inputs
-    elementos = JanelaW32.ordernar_elementos_coordenada(janela_login.elemento.filhos(aguardar=DEFAULT_TIMEOUT))
-    input_usuario, input_senha = (elemento for elemento in elementos if elemento.class_name == "TOvcPictureField")
-    input_usuario.digitar(usuario)
-    input_senha.digitar(senha)
-    if servidor: janela_login.elemento["TButtonedEdit"].digitar(servidor)
+    # versão nova
+    try:
+        input_usuario, input_senha = janela_login >> "TNBSWCustomInnerTextEdit"
+        input_usuario.digitar(usuario)
+        input_senha.digitar(senha)
+        if servidor: (janela_login // "TNBSWCustomComboBoxInnerEdit[0]").digitar(servidor)
+        confirmar = janela_login // "Entrar"
+    # versão antiga
+    except Exception:
+        input_usuario, input_senha = janela_login >> "TOvcPictureField"
+        input_usuario.input(usuario)
+        input_senha.input(senha)
+        if servidor: (janela_login // "TButtonedEdit[0]").input(servidor)
+        confirmar = janela_login // "TfcImageBtn[0]"
 
-    # clicar confirmar
-    *_, input_confirmar = (filho for filho in elementos if filho.class_name == "TfcImageBtn")
-    input_confirmar.sleep(0.5).clicar()
-
-    # aguardar fechar janela de login
+    # clicar confirmar e aguardar fechar janela de login
+    confirmar.sleep(0.5).clicar()
     if not bot.tempo.aguardar(lambda: janela_login.fechada, timeout=DEFAULT_TIMEOUT):
-        # dclick.erros.sistema.TimeoutResposta.erro() TODO
         raise TimeoutError("Janela de login não fechou conforme o esperado")
 
     # aguardar abrir
@@ -91,11 +95,10 @@ def abrir_e_login (usuario:  str | None = None,
             dclick.logger.debug(f"Login no NBS realizado | Aberto {janela}")
             return janela.focar()
         case str() as erro:
-            # dclick.erros.sistema.FalhaLogin.erro() TODO
+            encerrar_processos_nbs()
             raise AssertionError(f"Diálogo de erro encontrado após login no NBS: '{erro}'")
         case _:
             encerrar_processos_nbs()
-            # dclick.erros.sistema.TimeoutResposta.erro() TODO
             raise Exception("Janela do NBS não aberta após login")
 
 def encerrar_processos_nbs (*nome_processo: str) -> None:

@@ -23,7 +23,7 @@ class AbaSituacoesEspeciaisSuframa:
         self.aba = aba
         self.aba.janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -51,7 +51,7 @@ class AbaSituacoesEspeciaisICMS:
         self.aba = aba
         self.aba.janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -69,19 +69,13 @@ class AbaSituacoesEspeciaisICMS:
     def selecionar_base_icms (self, texto: str | Literal["Considerar desconto sobre item",
                                                          "Não considerar desconto"]) -> Self:
         """Selecionar o `texto` no grupo de opções `Para a Base do ICMS`"""
-        self.painel_aba.aguardar()\
-            ["Para a Base do ICMS"]\
-            [texto]\
-            .clicar()
+        (self.painel_aba.aguardar() / "Para a Base do ICMS" / texto).clicar()
         return self
 
     def selecionar_modalidade_bc_icms (self, texto: str | Literal["Preço tabelado ou Máximo sugerido",
                                                                   "Valor da Operação"]) -> Self:
         """Selecionar o `texto` no grupo de opções `Modalidade de determinação da BC ICMS`"""
-        self.painel_aba.aguardar()\
-            ["Modalidade de determinação da BC ICMS"]\
-            [texto]\
-            .clicar()
+        (self.painel_aba.aguardar() / "Modalidade de determinação da BC ICMS" / texto).clicar()
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha nas abas 'Situações Especiais / ICMS-ST' da janela 'Interface de Compra'")
@@ -97,7 +91,7 @@ class AbaSituacoesEspeciaisIcmsSt:
         self.aba = aba
         self.aba.janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -116,19 +110,13 @@ class AbaSituacoesEspeciaisIcmsSt:
                                                             "Não considerar desconto",
                                                             "Considerar desconto sobre item"]) -> Self:
         """Selecionar o `texto` no grupo de opções `Para a Base do ICMS - ST`"""
-        self.painel_aba.aguardar()\
-            ["Para a Base do ICMS - ST"]\
-            [texto]\
-            .clicar()
+        (self.painel_aba.aguardar() / "Para a Base do ICMS - ST" / texto).clicar()
         return self
 
     def selecionar_modalidade_bc_icms_st (self, texto: str | Literal["Preço tabelado ou Máximo sugerido",
                                                                      "Margem de valor agregado (MVA)"]) -> Self:
         """Selecionar o `texto` no grupo de opções `Modalidade de determinação da BC ICMS-ST`"""
-        self.painel_aba.aguardar()\
-            ["Modalidade de determinação da BC ICMS-ST"]\
-            [texto]\
-            .clicar()
+        (self.painel_aba.aguardar() / "Modalidade de determinação da BC ICMS-ST" / texto).clicar()
         return self
 
 @bot.erro.adicionar_prefixo_classe("Falha na aba 'Situações Especiais' da janela 'Interface de Compra'")
@@ -144,7 +132,7 @@ class AbaSituacoesEspeciais:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -180,7 +168,7 @@ class AbaSituacoesEspeciais:
         - Erro caso apareça diálogo"""
         nome = "Alterar Situações Especiais"
         self.painel_aba.to_uia().encontrar(
-            lambda e: e.botao and e.visivel and e.texto == nome,
+            lambda e: e.tipo.botao and e.visivel and e.texto == nome,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
         if dialogo := self.janela.dialogo(aguardar=0.5):
@@ -191,7 +179,7 @@ class AbaSituacoesEspeciais:
         """Clicar no botão `OK`
         - Erro caso apareça diálogo"""
         self.painel_aba.to_uia().encontrar(
-            lambda e: e.botao and e.visivel and e.texto == "OK",
+            lambda e: e.tipo.botao and e.visivel and e.texto == "OK",
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
         if dialogo := self.janela.dialogo(aguardar=0.5):

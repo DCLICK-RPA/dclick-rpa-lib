@@ -18,7 +18,7 @@ def clicar_botao_recalculo (janela_entrada_nf: bot.sistema.JanelaW32,
     posicao = painel.coordenada.transformar(*xy_offset)
 
     bot.mouse.mover(posicao)
-    try: janela_entrada_nf.janela_processo(lambda j: String(j.titulo).normalizar() == "recalculo",
+    try: janela_entrada_nf.janelas_processo(lambda j: String(j.titulo).normalizar() == "recalculo",
                                            aguardar = DEFAULT_TIMEOUT)
     except Exception: raise Exception("Mouse na posição inválida para clicar no botão 'Recálculo'")
     bot.mouse.clicar()
@@ -39,7 +39,7 @@ class AbaCapaNotaFiscal:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -66,7 +66,7 @@ class AbaFinanceiro:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -80,32 +80,32 @@ class AbaFinanceiro:
 
     @property
     def painel_condicao_pagamento (self) -> ElementoW32:
-        return self.painel_aba["TGroupBox", 0]
+        return self.painel_aba / "TGroupBox[0]"
 
     def condicao_pagamento_preencher_entrada (self, dias: int) -> Self:
-        self.painel_condicao_pagamento["TOvcPictureField", 2]\
+        (self.painel_condicao_pagamento / "TOvcPictureField[2]")\
             .digitar(str(dias))\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def condicao_pagamento_preencher_intervalo (self, dias: int) -> Self:
-        self.painel_condicao_pagamento["TOvcPictureField", 3]\
+        (self.painel_condicao_pagamento / "TOvcPictureField[3]")\
             .digitar(str(dias))\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def condicao_pagamento_preencher_total_parcelas (self, total: int) -> Self:
-        self.painel_condicao_pagamento["TOvcPictureField", 4]\
+        (self.painel_condicao_pagamento / "TOvcPictureField[4]")\
             .digitar(str(total))\
-            .apertar("tab")
+            .teclar("tab")
         return self
 
     def condicao_pagamento_selecionar_tipo_pagamento (self, tipo: str) -> Self:
-        valor = self.painel_condicao_pagamento["Tipo de Pagamento"]["TwwDBLookupCombo"]\
+        valor = (self.painel_condicao_pagamento / "Tipo de Pagamento" / "TwwDBLookupCombo[0]")\
             .atalho("alt", "down")\
-            .digitar(tipo, virtual=False, focar=False)\
+            .digitar(tipo, focar=False)\
             .sleep(0.5)\
-            .apertar("tab", focar=False)\
+            .teclar("tab")\
             .to_uia().valor
         assert String(tipo).normalizar() == String(valor).normalizar(),\
             f"Tipo de Pagamento selecionado não foi o esperado | Esperado({tipo}) | Selecionado({valor})"
@@ -142,7 +142,7 @@ class AbaTotalNota:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -156,11 +156,11 @@ class AbaTotalNota:
 
     @property
     def painel_imposto_digitado (self) -> ElementoW32:
-        return self.painel_aba["TGroupBox", 0]
+        return self.painel_aba / "TGroupBox[0]"
 
     @property
     def painel_soma_imposto (self) -> ElementoW32:
-        return self.painel_aba["TGroupBox", 1]
+        return self.painel_aba / "TGroupBox[1]"
 
     def comparar_colunas (self) -> Self:
         """Comprar os campos do `painel_imposto_digitado` e `painel_soma_imposto`
@@ -188,7 +188,7 @@ class AbaLocacoes:
         self.janela = janela.focar()
         janela.to_uia().elemento.encontrar(
             lambda e: e.texto == self.NOME_ABA
-                      and e.item_aba,
+                      and e.tipo.item_aba,
             aguardar = DEFAULT_TIMEOUT
         ).clicar()
 
@@ -209,25 +209,25 @@ class AbaLocacoes:
 
     @property
     def painel_inputs (self) -> ElementoW32:
-        return self.painel_aba["TPanel"]
+        return self.painel_aba / "TPanel[0]"
 
     @property
     def painel_novas_locacoes (self) -> ElementoW32:
-        return self.painel_aba["Novas Locações"]
+        return self.painel_aba / "Novas Locações"
 
     def selecionar_local (self, local: str) -> Self:
-        valor = self.painel_inputs["TwwDBLookupCombo"]\
+        valor = (self.painel_inputs / "TwwDBLookupCombo[0]")\
             .atalho("alt", "down")\
-            .digitar(local, virtual=False, focar=False)\
+            .digitar(local, focar=False)\
             .sleep(0.5)\
-            .apertar("tab", focar=False)\
+            .teclar("tab", focar=False)\
             .to_uia().valor
         assert String(local).normalizar() == String(valor).normalizar(),\
             f"Local selecionado não foi o esperado | Esperado({local}) | Selecionado({valor})"
         return self
 
     def preencher_locacao (self, texto: str) -> Self:
-        self.painel_inputs["TEdit"].digitar(texto).apertar("tab")
+        (self.painel_inputs / "TEdit[0]").digitar(texto).teclar("tab")
         return self
 
     def preencher_locacao_padrao (self, texto: str) -> Self:
@@ -236,7 +236,7 @@ class AbaLocacoes:
             lambda e: e.class_name == "TOvcPictureField" and e.profundidade - 2 == painel.profundidade,
             aguardar = DEFAULT_TIMEOUT / 2
         )
-        elemento.digitar(texto).apertar("tab")
+        elemento.digitar(texto).teclar("tab")
         return self
 
     def clicar_botao_sugestao (self, xy_offset: tuple[float, float] = (0.58, 0.5)) -> Self:
@@ -247,7 +247,7 @@ class AbaLocacoes:
 
         posicao = self.painel_inputs.coordenada.transformar(*xy_offset)
         bot.mouse.mover(posicao)
-        assert "locacoes atuais" in self.janela.tooltips().lower(), "Mouse na posição inválida para clicar no botão 'Sugestão'"
+        assert "locacoes atuais" in (self.janela.tooltips() or "").lower(), "Mouse na posição inválida para clicar no botão 'Sugestão'"
         bot.mouse.clicar()
 
         dialogo = self.janela.focar().dialogo(aguardar=0.3)
@@ -280,7 +280,7 @@ class Confirmar:
 
     def clicar_botao_aceitar (self) -> Self:
         """Clicar no botão `Aceitar`"""
-        self.painel_botao_confirmar["Confirmar"].clicar()
+        (self.painel_botao_confirmar  / "Confirmar").clicar()
         return self
 
     def condicao_sucesso (self) -> str:
