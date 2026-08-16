@@ -9,4 +9,5 @@ from dclick import (
     email,
     holmes,
     nora,
+    central
 )
