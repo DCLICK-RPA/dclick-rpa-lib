@@ -68,6 +68,9 @@ class Solicitacao (Unmarshaller, rename="camel"):
     events: list[Evento] = []
     """Eventos (mais recente primeiro)"""
 
+    def __repr__ (self) -> str:
+        return f"<central.Solicitacao id={self.id!r} status={self.status!r}>"
+
     @classmethod
     def Consultar (cls, requestTypeCode: str | None = None,
                         status: STATUS | None = None,
@@ -152,6 +155,9 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
     retry_count: int
     events: list[Evento] = []
     """Eventos (mais recente primeiro)"""
+
+    def __repr__ (self) -> str:
+        return f"<central.SolicitacaoPendente id={self.id!r} status={self.status!r}>"
 
     @classmethod
     def Consultar (cls, requestTypeCode: str | None = None,
