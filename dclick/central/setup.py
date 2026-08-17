@@ -256,7 +256,7 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
 
         return self
 
-    def finalizar (self, evento: str, *, sucesso: bool = True) -> Solicitacao:
+    def Finalizar (self, evento: str, *, sucesso: bool = True) -> Solicitacao:
         """Finalizar a solicitação com `status = concluida | erro` com o `evento`
         - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente"""
         body = {
@@ -280,7 +280,7 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
 
         return solicitacao
 
-    def cancelar (self, motivo: str, *, evento: str | None = None) -> Solicitacao:
+    def Cancelar (self, motivo: str, *, evento: str | None = None) -> Solicitacao:
         """Cancelar a solicitação pelo `motivo` informado
         - `evento=None` usado a mensagem do `motivo`
         - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente"""
