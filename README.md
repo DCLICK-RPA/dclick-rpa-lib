@@ -1,15 +1,15 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==6.0</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==7.3</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.0/dclick-3.0-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.0/dclick-3.0-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v2.2/dclick-2.2-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.2-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.0/dclick-3.0-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-3.0-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
@@ -17,13 +17,23 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-2.
 ## Changelog 🔧
 
 <details>
+<summary>v3.0</summary>
+
+- Migração para a versão do `bot==7.3`
+- Adicionado funcionalidades de rastreamento e códigos no `logger`
+- Removido pacote `erros`
+- Removido classes inutilizadas do `holmes`
+- Alterado pacote `holmes` para funções estarem inclusas nas classes
+- Criado pacote `central` para tratar a Central de Processamento
+
+</details>
+<details>
 <summary>v2.2</summary>
 
 - Migração para a versão do `bot==6.0`
 - Alterado níveis de logs internos para debug
 - Removido pacote `dclick.webhook` pois deve-se usar a central de processamento
 - Transformado os pacotes `dealernet` e `nbs` para serem depedências opcionais
-- Removido pacote `erros`
 
 </details>
 <details>
@@ -114,7 +124,6 @@ Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e c
 
 # `email`
 Pacote destinado ao envio de e-mail
-> Realizado logs de `erros.comunicacao` automaticamente de acordo com possíveis erros
 
 ```python
 # Enviar a notificação padrão DClick via e-mail com o Assunto `nome_bot - status`
@@ -137,16 +146,16 @@ Pacote destinado ao cofre de senhas do `Runner`
 segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS")
 username: str | None = segredo.fields.get("username", default=None)
 # Exemplo com uma classe anotada e feito validação dos campos
-class Fields:
+from bot.formatos import Unmarshaller
+class Fields (Unmarshaller):
     username: str
     password: str
-segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS", Fields)
+segredo = dclick.cofre.consultar_segredo("EMAIL_CREDENTIALS", fields=Fields)
 print(segredo.fields.username, segredo.fields.password)
 ```
 
 # `http`
 Pacote destinado ao protocolo http
-> Realizado logs de `erros.api` automaticamente para o `request e response` dos métodos novos/modificados
 
 ```python
 # Enviar um request conforme parâmetros
@@ -188,8 +197,8 @@ Pacote para realizar e tratar Logs
 # Utilizado pelos pacotes da lib
 logger.debug (mensagem: str) -> MainLogger
 logger.informar (mensagem: str) -> MainLogger
-logger.alertar (mensagem: str) -> MainLogger
-logger.erro (mensagem: str, excecao: Exception | None = None) -> MainLogger
+logger.alertar (mensagem: str, codigo: str) -> MainLogger
+logger.erro (mensagem: str, codigo: str, excecao: Exception | None = None) -> MainLogger
 # Possível de se passar itens extra com os argumentos nomeados
 # Aparecerão na propriedade `extra`
 logger.informar (
@@ -202,26 +211,68 @@ logger.informar (
 
 # Criar um logger com nome próprio
 # Útil para identificar uma execução
-from dclick.logger.setup import MainLogger
-logger = MainLogger("MEU_LOG")                 # 1
-logger = dclick.logger.obter_logger("MEU_LOG") # 2
+from dclick.logger.interfaces import DclickLogger
+logger = DclickLogger("MEU_LOG")               # 1
+logger = dclick.logger.ObterLogger("MEU_LOG") # 2
 
 # Necessário inicializar manualmente para configurar os handlers e formatação
 # Possível de se usar no logger criado ou no da `dclick.logger`
-logger.inicializar_logger()
+logger.inicializar()
 
-# Obter o `TracerLogger` utilizado para realizar o rastreamento de um processo
+# Obter o `TracerDclick` utilizado para realizar o rastreamento de um processo
 # Possível de se realizar os logs com a mesma interface que o `MainLogger`
-from dclick.logger.setup import TracerLogger
-tracer: TracerLogger = logger.obter_tracer(informacao_util="xpto")
+from dclick.logger.interfaces import TracerDclick
+tracer: TracerDclick = logger.obter_tracer(chave: str, informacao_util="xpto")
 # Sinalizar o encerramento do tracer
 tracer.encerrar("SUCCESS", "Sucesso ao se realizar determinada Ação")
 tracer.encerrar("ERROR", "Falha ao realizar determinada Ação")
 # Utilizar om o with para encerramento automático
-with logger.obter_tracer(informacao_util="xpto") as tracer: ...
+with logger.obter_tracer(chave: str, informacao_util="xpto") as tracer: ...
 
 # Loggar o tempo de execução de uma função
 @logger.tempo_execucao
+```
+
+# `holmes`
+Pacote destinado a API do Holmes  
+Classes com propriedades esperadas do endpoint
+```python
+# Tarefa
+tarefa = Tarefa.Consultar (id_tarefa: str) -> Tarefa
+tarefa.TomarAcao(...) -> Self
+tarefa.AnexarDocumento(...) -> Self
+tarefa.Assumir(id_usuario: str | None = None) -> Self
+tarefa.Processo() -> Processo
+tarefa.Documento(id_ou_conditional: str) -> Documento
+
+# Processo
+processo = Processo.Consultar (id_processo: str) -> Processo
+processo.Detalhes() -> list[DetalhesProcesso]
+processo.Historico() -> list[HistoryItem]
+processo.Documentos() -> list[DocumentItem]
+
+# Documento
+Documento.Consultar (document_id: str) -> Documento
+Documento.Remover (document_id: str, descricao: str | None = None) -> None
+Documento.Classificacao (document_id: str) -> ClassificacaoDocumento
+Documento.Upload (...) -> UploadDocumento
+```
+
+# `central`
+Pacote destinado a `Central de Processamento` de solicitações da DClick  
+Classes com propriedades esperadas do endpoint
+```python
+# Modelo de uma solicitação na Cental de Processamento
+# Realiza a consulta com base nos filtros informados
+solicitacao = Solicitacao.Consultar (...) -> Solicitacao
+
+# Modelo de uma solicitação pendente na Cental de Processamento
+# Realiza a consulta com base nos filtros informados
+solicitacao = SolicitacaoPendente.Consultar (...) -> SolicitacaoPendente
+solicitacao.AdicionarEvento() -> Self
+solicitacao.AtualizarOutputData() -> Self
+solicitacao.Finalizar() -> Solicitacao
+solicitacao.Cancelar() -> Solicitacao
 ```
 
 # `nora`
@@ -266,32 +317,6 @@ while polling.pendente():
         print("Erro passível de retentativa", tracking_code)
     else:
         print("Erro extração", response.extraction.errorMessage)
-```
-
-# `holmes`
-Pacote destinado a API do Holmes  
-Retorna classes com propriedades esperadas do endpoint
-```python
-# Classe para realizar a construção da Query das tasks e iteração sobre os resultados obtidos
-# Customizável via arquivo .ini
-QueryTaskV2()
-    # Consultar a query e obter o resultado
-    .consultar() -> modelos.RaizQueryTaskV2
-    # Realizar a consulta da query com paginação até a quantidade `limite`
-    # Filtro para se obter apenas as tarefas desejadas
-    .paginar_query(
-        filtro = lambda item: bool,
-        limite = 50
-    ) -> Generator[modelos.DocQueryTaskV2]
-    # Realizar a consulta das tarefas da query com paginação até a quantidade `limite`
-    # Filtro para se obter apenas as tarefas desejadas
-    .paginar_tarefas_query(
-        filtro = lambda tarefa: bool,
-        limite = 50
-    ) -> Generator[modelos.Tarefa]
-
-# Consultar a tarefa `id_tarefa`
-consultar_tarefa (id_tarefa: str) -> modelos.Tarefa
 ```
 
 # `dealernet`
