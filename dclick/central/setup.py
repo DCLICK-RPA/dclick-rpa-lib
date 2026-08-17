@@ -204,10 +204,11 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
             for evento in self.events
         )
 
-    def adicionar_evento (self, evento: str, *, sucesso: bool = True) -> Self:
+    def AdicionarEvento (self, evento: str, *, sucesso: bool = True) -> Self:
         """Adicionar o `evento`, com status de sucesso ou erro, na solicitação
         - Utilizado o `status=pendente`
-        - Atualizado campos de `self` com o retorno"""
+        - Atualizado campos de `self` com o retorno
+        - Variáveis utilizadas `[central_processamento] -> host, apikey`"""
         body = {
             "status": "pendente",
             "event": {
@@ -231,10 +232,11 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
 
         return self
 
-    def atualizar_output_data (self, output_data: dict[str, Any] | None, *,
-                                     evento: tuple[STATUS_EVENTO, str] | None = None) -> Self:
+    def AtualizarOutputData (self, output_data: dict[str, Any] | None, *,
+                                   evento: tuple[STATUS_EVENTO, str] | None = None) -> Self:
         """Atualizar o campo `outputData` com opção para adicionar um `evento`
-        - Atualizado campos de `self` com o retorno"""
+        - Atualizado campos de `self` com o retorno
+        - Variáveis utilizadas `[central_processamento] -> host, apikey`"""
         body = { "outputData": output_data }
         if evento is not None: body["event"] = {
             "status": evento[0],
@@ -258,7 +260,8 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
 
     def Finalizar (self, evento: str, *, sucesso: bool = True) -> Solicitacao:
         """Finalizar a solicitação com `status = concluida | erro` com o `evento`
-        - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente"""
+        - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente
+        - Variáveis utilizadas `[central_processamento] -> host, apikey`"""
         body = {
             "status": "concluida" if sucesso else "erro",
             "event": {
@@ -283,7 +286,8 @@ class SolicitacaoPendente (Unmarshaller, rename="camel"):
     def Cancelar (self, motivo: str, *, evento: str | None = None) -> Solicitacao:
         """Cancelar a solicitação pelo `motivo` informado
         - `evento=None` usado a mensagem do `motivo`
-        - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente"""
+        - Retornado uma nova `Solicitacao` pois a solicitação não estará mais pendente
+        - Variáveis utilizadas `[central_processamento] -> host, apikey`"""
         body = {
             "status": "cancelada",
             "cancellationReason": motivo,
