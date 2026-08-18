@@ -1,8 +1,10 @@
 # std
 from datetime import datetime
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 # externo
 from bot.formatos import Unmarshaller
+
+type STATUS = Literal["opened", "closed", "canceled"]
 
 class Action (Unmarshaller):
     id: str
@@ -51,7 +53,7 @@ class Activity (Unmarshaller):
     id: str
     name: str
     task_id: str
-    status: str
+    status: STATUS
     created_at: datetime
     assignee: Assignee | None
 

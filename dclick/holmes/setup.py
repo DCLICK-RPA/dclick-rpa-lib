@@ -31,7 +31,7 @@ class Processo (Unmarshaller):
 
     id: str
     name: str
-    status: str
+    status: modelos.STATUS
     identifier: str
     solution_id: str
     created_at: datetime
@@ -232,7 +232,7 @@ class Tarefa (Unmarshaller):
 
     id: str
     name: str
-    status: str
+    status: modelos.STATUS
     task_id: str
     identifier: str
     template_id: str
