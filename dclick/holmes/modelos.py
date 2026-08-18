@@ -58,16 +58,11 @@ class Activity (Unmarshaller):
 class DetalhesProcesso (Property):
     property_values: list["DetalhesProcesso"]
 
-class ItemTabelaTarefa (Unmarshaller):
+class TableItem (Unmarshaller):
     id: str
+    created_at: datetime
+    updated_at: datetime | None
     property_values: list[Property]
-
-class Meta (Unmarshaller):
-    count: int
-
-class ItensTabelaTarefa (Unmarshaller):
-    items: list[ItemTabelaTarefa]
-    meta: Meta
 
 class ClassificacaoDocumento (Unmarshaller):
     id: str

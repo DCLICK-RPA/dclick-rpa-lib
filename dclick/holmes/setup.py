@@ -386,30 +386,31 @@ class Tarefa (Unmarshaller):
         )
         return self.Consultar(self.id)
 
-@bot.erro.adicionar_prefixo(lambda args, _: f"Falha ao consultar itens de tabela da tarefa({args[0]}) no Holmes")
-def consultar_itens_tabela_tarefa (
-        id_tarefa: str,
-        id_tabela: str,
-        page: int = 1,
-        per_page: int = 100
-    ) -> modelos.ItensTabelaTarefa:
-    """Consultar itens da tabela `id_tabela` da tarefa `id_tarefa`
-    - `page, per_page` realizar a paginação. Default: Primeiros 100
-    - Variáveis utilizadas `[holmes] -> host, token`"""
-    dclick.logger.debug(f"Consultando itens da tabela({id_tabela}) da tarefa({id_tarefa}) no Holmes")
-    return (
-        client_singleton()
-        .get(
-            url = f"/v1/tasks/{id_tarefa}/tables/{id_tabela}/table_items",
-            query = { "page": page, "per_page": per_page }
+    def ItensTabela (self, id_ou_name: str, *,
+                           page: int = 1,
+                           per_page: int = 100) -> list[modelos.TableItem]:
+        """Consultar itens da tabela pelo `id` ou `name` na tarefa `self.id`
+        - `page, per_page` realizar a paginação. Default: Primeiros 100
+        - Variáveis utilizadas `[holmes] -> host, token`"""
+        dclick.logger.debug(f"Consultando itens da tabela({id_ou_name}) da tarefa({self.id}) no Holmes")
+
+        tabela = self.obter_tabela(
+            lambda t: id_ou_name == t.id
+                      or id_ou_name.lower() in t.name.lower())
+        assert tabela is not None, f"Tabela {id_ou_name!r} não encontrada na tarefa({self.id})"
+
+        items = (
+            client_singleton()
+            .get(url = f"/v1/tasks/{self.id}/tables/{tabela.id}/table_items",
+                 query = { "page": page, "per_page": per_page })
+            .esperar_status_code(200, f"Falha ao consultar itens da tabela({id_ou_name}) da tarefa({self.id}) no Holmes")
+            .json(esperar=dict[str, Any])
+            .get("items", [])
         )
-        .esperar_status_code(200)
-        .unmarshal(modelos.ItensTabelaTarefa)
-    )
+        return modelos.TableItem.UnmarshalMany(items)
 
 __all__ = [
     "Tarefa",
     "Processo",
     "Documento",
-    "consultar_itens_tabela_tarefa",
 ]
