@@ -240,7 +240,7 @@ class Tarefa (Unmarshaller):
 
     process_id: str
     process_name: str
-    process_status: str
+    process_status: modelos.STATUS
     process_created_at: datetime
 
     tables: list[modelos.Table]
