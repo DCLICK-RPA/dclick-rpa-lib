@@ -31,8 +31,9 @@ class HistoricoTracers:
         """Obter as chaves dos tracers que encerraram com o `status`"""
         return self.dados[status].copy()
 
-    def estatisticas (self) -> None:
-        """Gerar um log sobre estatísticas do total e status dos Tracers"""
+    def estatisticas (self) -> typing.Literal["sucesso", "parcial", "erro"]:
+        """Gerar um log sobre estatísticas do total e status dos Tracers
+        - Retornado `status` para ser usado no email"""
         total = self.total()
         partes = [f"Estatísticas Tracers | Total({total})"]
 
@@ -42,7 +43,15 @@ class HistoricoTracers:
             porcentagem = 0 if total == 0 else (quantidade / total) * 100
             partes.append(f"{status}({quantidade}, {porcentagem:.1f}%)")
 
-        logger.informar(" | ".join(partes))
+        sucessos, _, erros = map(bool, self.dados.values())
+        status = (
+            "sucesso" if not erros else
+            "erro" if not sucessos else
+            "parcial"
+        )
+
+        logger.informar(" | ".join(partes), status=status)
+        return status
 
 class TracerDclick (TracerLogger):
     """Classe logger, obtida pelo `DclickLogger`, para realizar o rastreamento de itens relacionados
