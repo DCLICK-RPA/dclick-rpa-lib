@@ -17,7 +17,7 @@ class Property (Unmarshaller):
 
 class Document (Unmarshaller):
     id: str
-    conditional: str
+    conditional: str | None
 
 class Table (Unmarshaller):
     id: str

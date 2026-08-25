@@ -313,8 +313,12 @@ class Tarefa (Unmarshaller):
         dclick.logger.debug(f"Consultando documento({id_ou_conditional}) da tarefa({self.id}) no Holmes")
 
         documento = self.obter_documento(
-            lambda d: id_ou_conditional == d.id
-                      or id_ou_conditional.lower() in d.conditional.lower())
+            lambda d:
+                id_ou_conditional == d.id or (
+                    d.conditional is not None and
+                    id_ou_conditional.lower() in d.conditional.lower()   
+                )
+        )
         assert documento is not None, f"Documento {id_ou_conditional!r} não encontrado na tarefa({self.id})"
 
         response = (
