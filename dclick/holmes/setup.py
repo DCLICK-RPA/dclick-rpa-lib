@@ -32,7 +32,7 @@ class Processo (Unmarshaller):
     id: str
     name: str
     status: modelos.STATUS
-    identifier: str
+    identifier: str | None
     solution_id: str
     created_at: datetime
     current_activities: list[modelos.Activity]
