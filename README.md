@@ -25,6 +25,7 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-3.
 - Removido classes inutilizadas do `holmes`
 - Alterado pacote `holmes` para funções estarem inclusas nas classes
 - Criado pacote `central` para tratar a Central de Processamento
+- Adicionado nível `CRITICAL` no pacote do `logger`
 
 </details>
 <details>

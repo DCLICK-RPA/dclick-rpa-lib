@@ -146,7 +146,7 @@ class TracerDclick (TracerLogger):
 
     @typing.override
     def alertar (self, mensagem: SupportsStr,
-                       codigo: str = "BOT.ALERTA.000",
+                       codigo: str = "DCLICK.ALERTA.000",
                        **extra: object) -> typing.Self:
         """Log nível `WARNING`
         - `codigo` de erro para identificação pelo portal"""
@@ -168,12 +168,36 @@ class TracerDclick (TracerLogger):
     @typing.override
     def erro (self, mensagem: SupportsStr,
                     excecao: Exception | None = None,
-                    codigo: str = "BOT.ERRO.000",
+                    codigo: str = "DCLICK.ERRO.000",
                     **extra: object) -> typing.Self:
         """Log nível `ERROR`
         - `codigo` de erro para identificação pelo portal
         - `excecao=None` capturada automaticamente, caso esteja dentro do `except`"""
         self.logger.error(
+            f"[{codigo}] - {mensagem}",
+            stacklevel = 2,
+            exc_info = excecao or sys.exc_info(),
+            extra = {
+                "extra": extra | self.extra,
+                "trace": {
+                    "id": self.id,
+                    "chave": self.chave,
+                    "status": "PROCESSING",
+                    "seconds": self.cronometro()
+                }
+            }
+        )
+        return self
+
+    @typing.override
+    def critico (self, mensagem: SupportsStr,
+                       excecao: Exception | None = None,
+                       codigo: str = "DCLICK.CRITICO.000",
+                       **extra: object) -> typing.Self:
+        """Log nível `CRITICAL`
+        - `codigo` de erro para identificação pelo portal
+        - `excecao=None` capturada automaticamente, caso esteja dentro do `except`"""
+        self.logger.critical(
             f"[{codigo}] - {mensagem}",
             stacklevel = 2,
             exc_info = excecao or sys.exc_info(),
@@ -243,6 +267,22 @@ class DclickLogger (MainLogger):
         - `codigo` de erro para identificação pelo portal
         - `excecao=None` capturada automaticamente, caso esteja dentro do `except`"""
         self.logger.error(
+            f"[{codigo}] - {mensagem}",
+            stacklevel = 2,
+            extra = { "extra": extra },
+            exc_info = excecao or sys.exc_info()
+        )
+        return self
+
+    @typing.override
+    def critico (self, mensagem: SupportsStr,
+                       excecao: Exception | None = None,
+                       codigo: str = "DCLICK.CRITICO.000",
+                       **extra: object) -> typing.Self:
+        """Log nível `CRITICAL`
+        - `codigo` de erro para identificação pelo portal
+        - `excecao=None` capturada automaticamente, caso esteja dentro do `except`"""
+        self.logger.critical(
             f"[{codigo}] - {mensagem}",
             stacklevel = 2,
             extra = { "extra": extra },
