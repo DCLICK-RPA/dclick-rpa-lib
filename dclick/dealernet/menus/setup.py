@@ -35,7 +35,7 @@ def de_para_opcoes () -> DictNormalizado[list[str]]:
             for item in valor.split(",")
             if item.strip()
         ]
-        for opcao, valor in bot.config.dealernet_menu_opcoes_empresa.as_dict()
+        for opcao, valor in bot.config.dealernet_menu_opcoes_empresa.as_dict().items()
     })
 
 def opcoes_empresa (chave: str) -> list[str] | None:
