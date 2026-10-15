@@ -176,6 +176,18 @@ class AbaTributacaoCFOP:
 
         return InterfaceCompraCFOP()
 
+    def clicar_calcular_icms_antecipado_todos (self, xy_offset_grid: tuple[float, float] = (0.1, 0.09)) -> Self:
+        """Clicar na opção `Calcular ICMS Antecipado (TODOS)` de um registro no grid
+        - `xy_offset_grid` para mover o mouse para o registro correto. Default primeiro"""
+        posicao = self.grid.coordenada.transformar(*xy_offset_grid)
+        bot.mouse.mover(posicao).clicar(botao="right")
+
+        assert (popup := self.janela.popup(aguardar=3)), "Popup com a opção `Calcular ICMS Antecipado (TODOS)` não foi encontrado"
+        popup.clicar("Calcular ICMS Antecipado (TODOS)")
+        self.grid.aguardar()
+
+        return self
+
 @bot.erro.adicionar_prefixo_classe("Falha na confirmação da janela 'Interface de Compra'")
 class Confirmar:
     """Representação do processo de Confirmação na janela `Interface de Compra`"""
