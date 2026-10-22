@@ -6,7 +6,9 @@ from dclick.nbs import DEFAULT_TIMEOUT
 # externo
 import bot
 from bot.imagem import Imagem
-from bot.sistema.janela import ElementoW32
+from bot.sistema.janela import ElementoW32, Dialogo
+
+Dialogo.registrar_classname("TMessageForm")
 
 def abrir_interface (janela: bot.sistema.JanelaW32) -> bot.sistema.JanelaW32:
     """Abrir a opção `Interface` na janela `Entrada de Nota Fiscal`
@@ -63,10 +65,9 @@ class AbaFila:
         )
         assert coordenada, "Imagem do botão 'Carregar' não foi encontrado"
 
-        class_name_dialogo = "TMessageForm"
         bot.mouse.mover(coordenada).clicar()
         for texto in ("NF-e", "Monitor"):
-            dialogo = self.janela.dialogo(class_name_dialogo, aguardar=5)
+            dialogo = self.janela.dialogo(aguardar=5)
             assert dialogo, f"Diálogo contendo botão '{texto}' não foi encontrado"
             dialogo.clicar(texto)
 
