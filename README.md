@@ -1,15 +1,15 @@
 ## Biblioteca com pacotes padronizados para as ferramentas utilizadas recorrentemente pelos bots da DClick
 
 ⚠️ <span style="color: red;"><strong>Python</strong> <code>&gt;=3.12</code></span> ⚠️  
-⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==7.4</code></span> ⚠️
+⚠️ <span style="color: red;"><strong>Pacote dclick-rpa-python-bot-lib</strong> <code>==8.0</code></span> ⚠️
 
 > **Instalação via url do release no github:**  
-Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.1/dclick-3.1-py3-none-any.whl`  
-Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.1/dclick-3.1-py3-none-any.whl`
+Via pip `pip install https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.2/dclick-3.2-py3-none-any.whl`  
+Via uv `uv add https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.2/dclick-3.2-py3-none-any.whl`
 
 > **Para referenciar como dependência:**  
-Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.1/dclick-3.1-py3-none-any.whl`  
-Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-3.1-py3-none-any.whl`
+Utilizar o link para o arquivo **whl** do release `dclick @ https://github.com/DCLICK-RPA/dclick-rpa-lib/releases/download/v3.2/dclick-3.2-py3-none-any.whl`  
+Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-3.2-py3-none-any.whl`
 
 > Os pacotes podem ser encontrados diretamentes no namespace **dclick** após import da biblioteca **import dclick** ou importado diretamente o pacote desejado **from dclick import pacote**
 
@@ -17,12 +17,18 @@ Utilizar o caminho para o arquivo **whl** baixado `dclick @ file://.../dclick-3.
 ## Changelog 🔧
 
 <details>
+<summary>v3.2</summary>
+
+- Migração para a versão do `bot==8.0` e refatorado dependências
+- Pacote `http` utilizado como alias para o `bot.http`
+
+</details>
+<details>
 <summary>v3.1</summary>
 
 - Migração para a versão do `bot==7.4` e refatorado dependências
 
 </details>
-
 <details>
 <summary>v3.0</summary>
 
@@ -124,9 +130,6 @@ Utilizar o comando `uv build --wheel`.
 Irá ser criado no diretório `./dist` o arquivo **.whl** com a versão atual.  
 Abrir a página `releases` do github e realizar o upload do arquivo no release correto para a versão atual
 
-> **Automático**  
-Configurar a seção `github` no .ini e executar o script `build_upload.py`
-
 ## Descrição breve dos pacotes com algumas funcionalidades
 Veja a descrição dos pacotes para mais detalhes e inspecionar as funções e classes disponíveis para um melhor contexto
 
@@ -168,7 +171,6 @@ Pacote destinado ao protocolo http
 ```python
 # Enviar um request conforme parâmetros
 # Retorna um `ResponseHttp` com métodos adicionais ao `httpx.Response`
-# Realizado logs automáticos de erros de api para requests e responses com os métodos modificados
 request(
     metodo: Literal['HEAD', 'OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     url: str,
@@ -187,7 +189,6 @@ request(
 # Criar um cliente `HTTP` para realizar requests
 # Extensão do `httpx.Client`
 # Retorno dos métodos `request, get, post, put, ...` é um `ResponseHttp` com métodos adicionais ao `httpx.Response`
-# Realizado logs automáticos de erros de api para requests e responses com os métodos modificados
 ClienteHttp(
     base_url: URLTypes,
     headers: HeaderTypes | None = None,
