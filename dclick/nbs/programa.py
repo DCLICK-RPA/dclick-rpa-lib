@@ -5,6 +5,7 @@ import dclick
 # externo
 import bot
 from bot.sistema import JanelaW32
+from bot.tipagem import SupportsBool
 # externo opcional
 try: from bot import imagem
 except ImportError: raise ImportError(
@@ -89,7 +90,7 @@ def abrir_e_login (usuario:  str | None = None,
             except Exception: pass
             return texto
 
-    resultado = bot.tempo.esperar(janela_ou_erro, timeout=DEFAULT_TIMEOUT * 2, delay=0.25)
+    resultado = bot.tempo.aguardar(janela_ou_erro, timeout=DEFAULT_TIMEOUT * 2, delay=0.25)
     match resultado.valor_ou(None):
         case JanelaW32() as janela:
             dclick.logger.debug(f"Login no NBS realizado | Aberto {janela}")
@@ -107,7 +108,7 @@ def encerrar_processos_nbs (*nome_processo: str) -> None:
     n = bot.sistema.encerrar_processos_usuario("nbs", *nome_processo)
     dclick.logger.debug(f"Encerrado {n} processos do NBS")
 
-def fechar_janelas_nbs (filtro: Callable[[JanelaW32], bot.tipagem.SupportsBool] | None = None) -> None:
+def fechar_janelas_nbs (filtro: Callable[[JanelaW32], SupportsBool] | None = None) -> None:
     """Fechar as janelas do NBS de acordo com o `filtro`
     - Default: Começar com `NBS` no titulo"""
     filtro = filtro or (lambda j: j.titulo.lower().startswith("nbs"))

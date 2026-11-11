@@ -6,6 +6,7 @@ from datetime import date as Date
 from dclick import dealernet
 # externo
 import bot
+from bot.tipagem import SupportsBool
 from bot.navegador import Navegador, Teclas
 from bot.estruturas import String, DictNormalizado
 
@@ -86,7 +87,7 @@ class TabelaRegistro:
         return self
 
     @bot.erro.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""

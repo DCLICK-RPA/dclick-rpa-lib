@@ -48,7 +48,8 @@ def opcoes_empresa (chave: str) -> list[str] | None:
 def fechar_janelas_menu_abertas (navegador: Navegador) -> None:
     """Fechar todas as janelas de menu que estão abertas
     - Ao selecionar uma opção menu que não seja empresa, será aberto uma janela manu"""
-    janelas = navegador.alterar_frame().procurar(Localizadores.JANELA_MENU)
+    navegador.driver.switch_to.default_content()
+    janelas = navegador.procurar(Localizadores.JANELA_MENU)
     for janela in reversed(janelas):
         try:
             navegador.driver.execute_script("arguments[0].style.zIndex = 9999;", janela.elemento)
@@ -79,7 +80,8 @@ def acessar_iframe_janela_menu (navegador: Navegador, nome_menu: str) -> None:
     janela_encontrada = None
     nome_menu = String(nome_menu).normalizar()
 
-    for janela in navegador.alterar_frame().procurar(Localizadores.JANELA_MENU):
+    navegador.driver.switch_to.default_content()
+    for janela in navegador.procurar(Localizadores.JANELA_MENU):
         texto = janela.encontrar(Localizadores.TEXTO_JANELA_MENU).texto
         if String(texto).normalizar() == nome_menu: janela_encontrada = janela
         else: navegador.driver.execute_script("arguments[0].style.zIndex = arguments[1];", janela.elemento, Z_INDEX_NAO_FOCADO)
@@ -88,7 +90,7 @@ def acessar_iframe_janela_menu (navegador: Navegador, nome_menu: str) -> None:
         raise Exception(f"Nenhum menu encontrado com nome '{nome_menu}'")
 
     navegador.driver.execute_script(f"arguments[0].style.zIndex = arguments[1];", janela_encontrada.elemento, Z_INDEX_FOCADO)
-    navegador.alterar_frame(janela_encontrada.encontrar("iframe"))
+    navegador.driver.switch_to.frame(janela_encontrada.encontrar("iframe").elemento)
 
 def selecionar_opcao_menu (
         navegador: Navegador,
@@ -100,7 +102,9 @@ def selecionar_opcao_menu (
     - Exemplo: `selecionar_opcao_menu(navegador, ["Nota Fiscal", "NF Entrada Item Avulso"], Menus.PRODUTOS)`"""
     assert opcoes, "Nenhuma opção informada"
     opcoes = [String(opcao).normalizar() for opcao in opcoes]
-    elemento_menu = navegador.alterar_frame().encontrar(menu)
+
+    navegador.driver.switch_to.default_content()
+    elemento_menu = navegador.encontrar(menu)
 
     # checar se já se encontra selecionado
     if menu is Menus.EMPRESA and opcoes[-1] == String(elemento_menu.texto).normalizar():

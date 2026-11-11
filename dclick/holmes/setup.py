@@ -9,7 +9,7 @@ import dclick
 from dclick.holmes import modelos
 # externo
 import bot
-from bot.estruturas import Caminho
+from bot.sistema import Caminho
 from bot.tipagem import SupportsBool
 from bot.formatos import Unmarshaller
 

@@ -7,6 +7,7 @@ from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.tipagem import SupportsBool
 from bot.navegador import Navegador, Teclas
 
 NOME_MENU = "Nota Fiscal de Item Avulso"
@@ -22,7 +23,7 @@ class Localizadores:
     MENSAGEM_STATUS_UPLOAD  = "#TEXTBLOCKDOWNLOAD"
     MENSAGEM_ERRO           = ".ErrorViewer"
 
-def importar_nfe (navegador: Navegador, *nfe: bot.estruturas.Caminho) -> None:
+def importar_nfe (navegador: Navegador, *nfe: bot.sistema.Caminho) -> None:
     """Importar todas as `nfe` em `["XML - Importação", "Nota Fiscal de Item Avulso"]`"""
     quantidade = len(nfe)
     dclick.logger.debug(f"Importando '{quantidade}' NFe(s) de item avulso")
@@ -39,11 +40,11 @@ def importar_nfe (navegador: Navegador, *nfe: bot.estruturas.Caminho) -> None:
     navegador.encontrar(Localizadores.BOTAO_IMPORTAR_NFE).clicar()
     navegador.encontrar(Localizadores.BOTAO_PROCURAR_NFE).clicar()
 
-    with navegador.encontrar(Localizadores.IFRAME_UPLOAD).aguardar_invisibilidade() as iframe_upload:
-        caminhos = "\n".join(n.string for n in nfe)
-        navegador.alterar_frame(iframe_upload)\
-                 .encontrar(Localizadores.BOTAO_UPLOAD_ARQUIVOS)\
-                 .digitar(caminhos)
+    with navegador.encontrar(Localizadores.IFRAME_UPLOAD).aguardar_invisibilidade() as iframe_upload,\
+         navegador.com_frame(iframe_upload):
+
+        navegador.encontrar(Localizadores.BOTAO_UPLOAD_ARQUIVOS)\
+                 .digitar("\n".join(n.string for n in nfe))
 
     dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
     navegador.encontrar(Localizadores.BOTAO_CONFIRMAR_UPLOAD).clicar()
@@ -128,7 +129,7 @@ class TabelaRegistro:
         return self
 
     @bot.erro.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""
@@ -255,10 +256,10 @@ class ProcessarDadosRegistro:
         """Selecionar a natureza da operação com o `texto`"""
         self.navegador.encontrar(self.BOTAO_NATUREZA_OPERACAO).clicar()
 
-        with self.navegador.encontrar(self.IFRAME_SELECAO_NATUREZA_OPERACAO)\
-                           .aguardar_invisibilidade() as iframe:
-            self.navegador.alterar_frame(iframe)\
-                          .encontrar("select")\
+        with self.navegador.encontrar(self.IFRAME_SELECAO_NATUREZA_OPERACAO).aguardar_invisibilidade() as iframe,\
+             self.navegador.com_frame(iframe):
+
+            self.navegador.encontrar("select")\
                           .select\
                           .select_by_visible_text(texto)
             self.navegador.encontrar(self.BOTAO_CONFIRMAR_NATUREZA_OPERACAO)\
@@ -271,10 +272,10 @@ class ProcessarDadosRegistro:
         """Selecionar o tipo de documento com o `texto`"""
         self.navegador.encontrar(self.BOTAO_TIPO_DOCUMENTO).clicar()
 
-        with self.navegador.encontrar(self.IFRAME_SELECAO_TIPO_DOCUMENTO)\
-                           .aguardar_invisibilidade() as iframe:
-            self.navegador.alterar_frame(iframe)\
-                          .encontrar("select")\
+        with self.navegador.encontrar(self.IFRAME_SELECAO_TIPO_DOCUMENTO).aguardar_invisibilidade() as iframe,\
+             self.navegador.com_frame(iframe):
+
+            self.navegador.encontrar("select")\
                           .select\
                           .select_by_visible_text(texto)
             self.navegador.encontrar(self.BOTAO_CONFIRMAR_TIPO_DOCUMENTO)\
@@ -288,7 +289,7 @@ class ProcessarDadosRegistro:
         self.navegador.encontrar(self.BOTAO_CONTA_GERENCIAL).clicar()
 
         iframe = self.navegador.encontrar(self.IFRAME_SELECAO_CONTA_GERENCIAL)
-        self.navegador.alterar_frame(iframe)
+        self.navegador.driver.switch_to.frame(iframe.elemento)
         tabela = self.navegador.encontrar(self.TABELA_SELECAO_CONTA_GERENCIAL)
 
         with tabela.aguardar_staleness():

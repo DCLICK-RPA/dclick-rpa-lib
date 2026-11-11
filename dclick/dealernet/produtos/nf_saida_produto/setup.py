@@ -6,6 +6,7 @@ from dclick import dealernet
 import bot
 from bot.estruturas import String
 from bot.navegador import Navegador
+from bot.tipagem import SupportsBool
 
 NOME_MENU = "NF Saída Produto"
 
@@ -74,7 +75,7 @@ class TabelaRegistro:
         return self
 
     @bot.erro.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""

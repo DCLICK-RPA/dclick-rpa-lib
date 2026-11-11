@@ -7,6 +7,7 @@ from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.tipagem import SupportsBool
 from bot.navegador import Navegador, Teclas, ElementoNaoEncontrado
 
 NOME_MENU = "NF Entrada Item Avulso"
@@ -76,7 +77,7 @@ class TabelaRegistro:
         return self
 
     @bot.erro.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""
@@ -191,7 +192,8 @@ class ModificarDadosRegistro:
         - Acessado iframe das parcelas"""
         self.navegador.encontrar(self.BOTAO_PARCELAS).clicar()
         iframe = self.navegador.encontrar(ModificarParcelasRegistro.IFRAME_PARCELAS)
-        return ModificarParcelasRegistro(self.navegador.alterar_frame(iframe))
+        self.navegador.driver.switch_to.frame(iframe.elemento)
+        return ModificarParcelasRegistro(self.navegador)
 
     def clicar_botao_rodape (self) -> ModificarRodapeRegistro:
         """Clicar para modificar o rodapé
@@ -298,13 +300,13 @@ class ModificarRodapeRegistro:
 
         try:
             # checar se continou na tela do rodapé
-            self.navegador.alterar_timeout(2).encontrar(self.SELECAO_TIPO_FRETE)
+            with self.navegador.com_timeout(2) as n:
+                n.encontrar(self.SELECAO_TIPO_FRETE)
             # fechar tela rodapé
             with self.navegador.encontrar(self.BOTAO_FECHAR).aguardar_invisibilidade() as botao:
                 botao.clicar()
         # tela rodapé fechada
         except ElementoNaoEncontrado: return
-        finally: self.navegador.alterar_timeout()
 
 class EditarItemRegistro:
     """Classe para tratar a edição de um item dentro do registro

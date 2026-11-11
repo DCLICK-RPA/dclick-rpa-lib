@@ -6,6 +6,7 @@ from dclick import dealernet
 # externo
 import bot
 from bot.estruturas import String
+from bot.tipagem import SupportsBool
 from bot.navegador import Navegador, ElementoNaoEncontrado
 
 NOME_MENU = "Título a Pagar"
@@ -64,23 +65,23 @@ class TabelaRegistro:
         """Tratar o `IFRAME_FILTRO_SELECAO` que aparece automaticamente quando não há nenhum filtro
         - Não tem efeito caso o iframe não esteja visível
         - Selecionado todas as empresas"""
-        self.navegador.encontrar(self.TABELA_FILTRO_REGISTROS).aguardar_visibilidade()
+        navegador = self.navegador
+        navegador.encontrar(self.TABELA_FILTRO_REGISTROS).aguardar_visibilidade()
         localizadores = (self.FILTRO_SELECAO_EMPRESAS,
                          self.FILTRO_SELECAO_MARCAR_TODOS,
                          self.FILTRO_SELECAO_CONFIRMAR)
 
         try:
-            with self.navegador.alterar_timeout(2)\
-                               .encontrar(self.IFRAME_FILTRO_SELECAO)\
-                               .aguardar_invisibilidade() as iframe:
-                self.navegador.alterar_frame(iframe)
+            with navegador.com_timeout(2),\
+                 navegador.encontrar(self.IFRAME_FILTRO_SELECAO).aguardar_invisibilidade() as iframe,\
+                 navegador.com_frame(iframe):
+
                 for localizador in localizadores:
-                    self.navegador.encontrar(localizador).clicar().sleep(0.5)
+                    navegador.encontrar(localizador).clicar().sleep(0.5)
 
         except ElementoNaoEncontrado: pass # iframe não visível
         finally:
-            self.navegador.alterar_timeout()
-            dealernet.menus.acessar_iframe_janela_menu(self.navegador, NOME_MENU)
+            dealernet.menus.acessar_iframe_janela_menu(navegador, NOME_MENU)
         return self
 
     def filtrar (
@@ -104,7 +105,7 @@ class TabelaRegistro:
         return self
 
     @bot.erro.retry(tentativas=2)
-    def obter (self, filtro: typing.Callable[[DadosRegistro], bot.tipagem.SupportsBool]) -> DadosRegistro:
+    def obter (self, filtro: typing.Callable[[DadosRegistro], SupportsBool]) -> DadosRegistro:
         """Obter o primeiro registro na tabela de acordo com o `filtro`
         - Retornado classe com os dados esperados da tabela dos registros
         - `ValueError` caso não encontre"""

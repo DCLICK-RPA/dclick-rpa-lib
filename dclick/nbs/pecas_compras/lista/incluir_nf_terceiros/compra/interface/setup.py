@@ -170,7 +170,7 @@ class AbaTributacaoCFOP:
         """Abrir a opção `Definir CFOP` de um registro no grid
         - `xy_offset_grid` para mover o mouse para o registro correto. Default primeiro"""
         posicao = self.grid.coordenada.transformar(*xy_offset_grid)
-        bot.mouse.mover(posicao).clicar(botao="right")
+        bot.mouse.mover(posicao).clicar_direito()
 
         assert (popup := self.janela.popup(aguardar=3)), "Popup para definir o CFOP não foi encontrado"
         popup.clicar("Definir CFOP")
@@ -181,7 +181,7 @@ class AbaTributacaoCFOP:
         """Clicar na opção `Calcular ICMS Antecipado (TODOS)` de um registro no grid
         - `xy_offset_grid` para mover o mouse para o registro correto. Default primeiro"""
         posicao = self.grid.coordenada.transformar(*xy_offset_grid)
-        bot.mouse.mover(posicao).clicar(botao="right")
+        bot.mouse.mover(posicao).clicar_direito()
 
         assert (popup := self.janela.popup(aguardar=3)), "Popup com a opção `Calcular ICMS Antecipado (TODOS)` não foi encontrado"
         popup.clicar("Calcular ICMS Antecipado (TODOS)")
