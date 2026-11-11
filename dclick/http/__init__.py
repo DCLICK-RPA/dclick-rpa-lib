@@ -1,4 +1,6 @@
-"""Pacote destinado ao protocolo http
-- Realizado logs de `erros.api` automaticamente para o `request e response` dos métodos novos/modificados"""
+"""Pacote destinado ao protocolo http"""
 
-from dclick.http.setup import *
+from bot.http import (
+    ClienteHttp, Url,
+    download, request
+)
